@@ -1,0 +1,2223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#6B8F71">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="StyleAI">
+<meta name="description" content="El outfit perfecto, con tu ropa y el tiempo de hoy.">
+<title>StyleAI — Tu estilista personal</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --beige: #FAF8F5;
+  --beige-mid: #F2EFE9;
+  --beige-dark: #E8E3DA;
+  --verde: #6B8F71;
+  --verde-dark: #4A6B50;
+  --verde-light: #EDF4EE;
+  --terracota: #C4714A;
+  --negro: #1A1A1A;
+  --gris: #6B6B6B;
+  --gris-claro: #D8D4CC;
+  --blanco: #FFFFFF;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--beige);
+  color: var(--negro);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════
+   PANTALLAS
+═══════════════════════════════════ */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ═══════════════════════════════════
+   LANDING PAGE
+═══════════════════════════════════ */
+#screen-landing {
+  background: var(--beige);
+}
+
+.landing-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  position: sticky;
+  top: 0;
+  background: rgba(250,248,245,0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  border-bottom: 1px solid var(--beige-dark);
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  letter-spacing: -0.5px;
+}
+.logo span { color: var(--verde); }
+
+.nav-btns { display: flex; gap: 10px; }
+
+.btn-ghost {
+  padding: 8px 18px;
+  border: 1.5px solid var(--negro);
+  border-radius: 30px;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-ghost:hover { background: var(--negro); color: var(--blanco); }
+
+.btn-primary {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 30px;
+  background: var(--verde);
+  color: var(--blanco);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--verde-dark); transform: translateY(-1px); }
+
+/* HERO */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  min-height: calc(100vh - 65px);
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 48px 60px 48px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--verde-light);
+  color: var(--verde-dark);
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 28px;
+  width: fit-content;
+}
+
+.clima-live {
+  width: 8px; height: 8px;
+  background: var(--verde);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+.hero-titulo {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(36px, 4vw, 56px);
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+.hero-titulo em { font-style: italic; color: var(--verde); }
+
+.hero-sub {
+  font-size: 16px;
+  color: var(--gris);
+  line-height: 1.65;
+  margin-bottom: 36px;
+  max-width: 420px;
+}
+
+.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.btn-hero {
+  padding: 14px 28px;
+  border-radius: 30px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+  border: none;
+}
+.btn-hero.solid { background: var(--negro); color: var(--blanco); }
+.btn-hero.solid:hover { background: var(--verde); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(107,143,113,0.3); }
+.btn-hero.outline { background: transparent; color: var(--negro); border: 1.5px solid var(--negro); }
+.btn-hero.outline:hover { background: var(--negro); color: var(--blanco); }
+
+.hero-stats {
+  display: flex;
+  gap: 32px;
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--beige-dark);
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 600;
+}
+.stat-label { font-size: 12px; color: var(--gris); margin-top: 2px; }
+
+.hero-visual {
+  position: relative;
+  overflow: hidden;
+  background: var(--beige-mid);
+}
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+.hero-clima-widget {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-md);
+  min-width: 180px;
+}
+.clima-ciudad { font-size: 12px; color: var(--gris); margin-bottom: 4px; }
+.clima-temp { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 500; }
+.clima-condicion { font-size: 12px; color: var(--gris); margin-top: 2px; }
+.clima-ok { font-size: 11px; color: var(--verde); font-weight: 500; margin-top: 6px; }
+
+/* PASOS */
+.section-pasos {
+  padding: 80px 48px;
+  background: var(--blanco);
+}
+.section-titulo {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.section-sub { text-align: center; color: var(--gris); margin-bottom: 56px; font-size: 15px; }
+
+.pasos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; max-width: 900px; margin: 0 auto; }
+.paso-card { text-align: center; }
+.paso-num {
+  width: 48px; height: 48px;
+  background: var(--verde-light);
+  color: var(--verde-dark);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 auto 16px;
+}
+.paso-titulo { font-weight: 600; margin-bottom: 8px; font-size: 16px; }
+.paso-desc { font-size: 14px; color: var(--gris); line-height: 1.6; }
+
+/* PRECIOS */
+.section-precios { padding: 80px 48px; background: var(--beige); }
+.precios-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 700px; margin: 0 auto; }
+
+.precio-card {
+  background: var(--blanco);
+  border-radius: var(--radius);
+  padding: 32px;
+  border: 1.5px solid var(--beige-dark);
+  position: relative;
+}
+.precio-card.popular {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 3px rgba(107,143,113,0.1);
+}
+.popular-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--verde);
+  color: var(--blanco);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 14px;
+  border-radius: 30px;
+  white-space: nowrap;
+}
+.precio-plan { font-size: 13px; font-weight: 600; color: var(--gris); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+.precio-num { font-family: 'Playfair Display', serif; font-size: 42px; margin-bottom: 4px; }
+.precio-num span { font-size: 16px; font-family: 'DM Sans', sans-serif; }
+.precio-periodo { font-size: 13px; color: var(--gris); margin-bottom: 24px; }
+.precio-features { list-style: none; margin-bottom: 28px; }
+.precio-features li { font-size: 14px; padding: 6px 0; border-bottom: 1px solid var(--beige-mid); color: var(--gris); }
+.precio-features li:last-child { border-bottom: none; }
+.precio-features li::before { content: "✓ "; color: var(--verde); font-weight: 600; }
+.btn-plan {
+  width: 100%;
+  padding: 13px;
+  border-radius: 30px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1.5px solid var(--negro);
+  background: transparent;
+}
+.btn-plan.filled { background: var(--verde); color: var(--blanco); border-color: var(--verde); }
+.btn-plan:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+/* ═══════════════════════════════════
+   ONBOARDING
+═══════════════════════════════════ */
+#screen-onboarding {
+  background: var(--beige);
+}
+
+.ob-header {
+  padding: 20px 24px 0;
+  position: sticky;
+  top: 0;
+  background: var(--beige);
+  z-index: 5;
+}
+.ob-logo-small {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+.ob-logo-small span { color: var(--verde); }
+
+.progress-bar {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 0;
+}
+.progress-step {
+  flex: 1;
+  height: 3px;
+  background: var(--beige-dark);
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+.progress-step.done { background: var(--verde); }
+
+.ob-content {
+  flex: 1;
+  padding: 28px 24px;
+  overflow-y: auto;
+}
+
+.ob-titulo {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.ob-sub { font-size: 14px; color: var(--gris); margin-bottom: 28px; line-height: 1.5; }
+
+/* Input nombre */
+.ob-input {
+  width: 100%;
+  padding: 16px 18px;
+  border: 1.5px solid var(--beige-dark);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  background: var(--blanco);
+  color: var(--negro);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.ob-input:focus { border-color: var(--verde); }
+.ob-input-hint { font-size: 12px; color: var(--gris); margin-top: 8px; }
+
+/* Grid estilos */
+.estilos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.estilo-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 2.5px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  aspect-ratio: 3/4;
+  background: var(--beige-mid);
+}
+.estilo-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.estilo-card.sel { border-color: var(--verde); box-shadow: 0 0 0 3px rgba(107,143,113,0.2); }
+.estilo-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.estilo-skeleton {
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, var(--beige-mid) 25%, var(--beige-dark) 50%, var(--beige-mid) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--gris);
+  font-size: 13px;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.estilo-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  padding: 14px 12px 12px;
+  color: white;
+}
+.estilo-nombre { font-size: 13px; font-weight: 600; font-family: 'Playfair Display', serif; }
+.estilo-marcas { font-size: 10px; opacity: 0.8; margin-top: 2px; }
+.estilo-check {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 24px; height: 24px;
+  background: var(--verde);
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+}
+.estilo-card.sel .estilo-check { display: flex; }
+
+/* Grid inspiración */
+.inspo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.inspo-item {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  border: 2.5px solid transparent;
+  transition: all 0.2s;
+}
+.inspo-item.sel { border-color: var(--verde); }
+.inspo-item img { width: 100%; height: 100%; object-fit: cover; }
+.inspo-check {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 20px; height: 20px;
+  background: var(--verde);
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+}
+.inspo-item.sel .inspo-check { display: flex; }
+
+/* Tono piel */
+.piel-grid { display: flex; gap: 10px; justify-content: space-between; }
+.piel-opcion {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  border: 1.5px solid var(--beige-dark);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--blanco);
+}
+.piel-opcion:hover { border-color: var(--verde); }
+.piel-opcion.sel { border-color: var(--verde); background: var(--verde-light); }
+.piel-circulo { width: 38px; height: 38px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+.piel-label { font-size: 10px; color: var(--gris); text-align: center; line-height: 1.3; }
+
+/* Color pelo */
+.pelo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.pelo-opcion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 6px;
+  border: 1.5px solid var(--beige-dark);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--blanco);
+}
+.pelo-opcion:hover { border-color: var(--verde); }
+.pelo-opcion.sel { border-color: var(--verde); background: var(--verde-light); }
+.pelo-circulo { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.pelo-label { font-size: 10px; color: var(--gris); text-align: center; }
+
+/* Footer onboarding */
+.ob-footer {
+  padding: 16px 24px;
+  background: var(--beige);
+  border-top: 1px solid var(--beige-dark);
+  flex-shrink: 0;
+}
+.btn-continuar {
+  width: 100%;
+  padding: 16px;
+  background: var(--verde);
+  color: var(--blanco);
+  border: none;
+  border-radius: 30px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.btn-continuar.activo { opacity: 1; pointer-events: all; }
+.btn-continuar.activo:hover { background: var(--verde-dark); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════
+   APP PRINCIPAL
+═══════════════════════════════════ */
+#screen-app {
+  background: var(--beige);
+}
+
+.app-header {
+  background: var(--blanco);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--beige-dark);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.app-logo { font-family: 'Playfair Display', serif; font-size: 20px; }
+.app-logo span { color: var(--verde); }
+
+.clima-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--beige-mid);
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--gris);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.clima-pill:hover { background: var(--beige-dark); }
+.clima-dot { width: 7px; height: 7px; background: var(--verde); border-radius: 50%; animation: pulse 2s infinite; flex-shrink: 0; }
+
+/* TABS */
+.app-tabs {
+  display: flex;
+  background: var(--blanco);
+  border-bottom: 1px solid var(--beige-dark);
+  flex-shrink: 0;
+}
+.app-tab {
+  flex: 1;
+  padding: 11px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--gris);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.app-tab.activo { color: var(--verde); border-bottom-color: var(--verde); font-weight: 500; }
+
+/* PANTALLAS APP */
+.app-pantalla { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+.app-pantalla.activa { display: flex; }
+
+/* ═══════════════════════════════════
+   CHAT
+═══════════════════════════════════ */
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--beige-dark) transparent;
+}
+
+.msg { display: flex; gap: 9px; max-width: 88%; animation: msgIn 0.3s ease; }
+@keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+
+.msg-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.msg-avatar.ai { background: var(--verde); }
+.msg-avatar.me { background: var(--terracota); }
+
+.msg-bubble {
+  padding: 11px 15px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 100%;
+}
+.msg.ai .msg-bubble {
+  background: var(--blanco);
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
+.msg.user .msg-bubble {
+  background: var(--verde);
+  color: var(--blanco);
+  border-bottom-right-radius: 4px;
+}
+
+/* OUTFIT CARD */
+.outfit-card {
+  background: var(--blanco);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 6px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--beige-dark);
+}
+.outfit-img-container {
+  width: 100%;
+  aspect-ratio: 4/5;
+  background: var(--beige-mid);
+  position: relative;
+  overflow: hidden;
+}
+.outfit-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.outfit-img-skeleton {
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, var(--beige-mid) 25%, var(--beige-dark) 50%, var(--beige-mid) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--gris);
+  font-size: 13px;
+}
+.outfit-img-badge {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--gris);
+}
+.outfit-body { padding: 16px; }
+.outfit-titulo { font-family: 'Playfair Display', serif; font-size: 17px; margin-bottom: 12px; }
+.outfit-prendas { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.outfit-prenda {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 8px 11px;
+  background: var(--beige-mid);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+.prenda-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; border: 1px solid rgba(0,0,0,0.08); }
+.prenda-nombre { font-weight: 500; }
+.prenda-razon { font-size: 12px; color: var(--gris); margin-top: 1px; }
+
+.outfit-info { display: flex; flex-direction: column; gap: 7px; }
+.info-pill {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.info-pill.verde { background: #F0F7F0; }
+.info-pill.azul { background: #F0F4FF; }
+.info-pill.naranja { background: #FFF5F0; }
+.info-pill.alerta { background: #FFF0E0; border: 1px solid #FFD4A8; }
+
+.outfit-armario-reminder {
+  margin: 12px 16px 0;
+  padding: 12px;
+  background: var(--verde-light);
+  border: 1px solid var(--verde);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.outfit-armario-reminder:hover { background: #daeeda; }
+.reminder-text { flex: 1; font-size: 12.5px; color: var(--verde-dark); line-height: 1.4; }
+.reminder-text strong { font-size: 13px; display: block; margin-bottom: 2px; }
+
+.outfit-feedback {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+}
+.btn-feedback {
+  flex: 1;
+  padding: 9px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--beige-dark);
+  background: var(--blanco);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-feedback:hover { transform: scale(1.02); }
+
+/* SUGERENCIAS */
+.sugs { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
+.sug-btn {
+  background: var(--blanco);
+  border: 1px solid var(--beige-dark);
+  border-radius: 20px;
+  padding: 7px 13px;
+  font-size: 12.5px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--negro);
+}
+.sug-btn:hover { border-color: var(--verde); color: var(--verde); background: var(--verde-light); }
+
+/* TYPING */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 11px 15px;
+  background: var(--blanco);
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  width: fit-content;
+  box-shadow: var(--shadow-sm);
+}
+.typing-dot-anim { width: 6px; height: 6px; background: var(--gris); border-radius: 50%; animation: typing 1.2s infinite; }
+.typing-dot-anim:nth-child(2){animation-delay:.2s}.typing-dot-anim:nth-child(3){animation-delay:.4s}
+@keyframes typing { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-5px);opacity:1} }
+
+/* INPUT */
+.chat-input-area {
+  background: var(--blanco);
+  border-top: 1px solid var(--beige-dark);
+  padding: 12px 18px;
+  flex-shrink: 0;
+}
+.voz-status { text-align: center; font-size: 11px; color: var(--gris); margin-bottom: 6px; min-height: 16px; }
+.voz-status.activo { color: #FF4444; }
+.input-row { display: flex; gap: 8px; align-items: flex-end; }
+.input-wrap {
+  flex: 1;
+  background: var(--beige-mid);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  padding: 9px 13px;
+  gap: 8px;
+  transition: border-color 0.2s;
+}
+.input-wrap:focus-within { border-color: var(--verde); }
+.input-wrap textarea {
+  flex: 1; border: none; background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; color: var(--negro);
+  resize: none; outline: none;
+  max-height: 80px; line-height: 1.4;
+}
+.input-wrap textarea::placeholder { color: var(--gris); }
+.btn-mic {
+  width: 40px; height: 40px;
+  background: var(--beige-mid);
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.btn-mic.activo { background: #FF4444; border-color: #FF4444; animation: micPulse 1s infinite; }
+@keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,.4)} 50%{box-shadow:0 0 0 8px rgba(255,68,68,0)} }
+.btn-send {
+  width: 40px; height: 40px;
+  background: var(--verde);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.btn-send:hover { background: var(--verde-dark); transform: scale(1.05); }
+.btn-send:disabled { background: var(--beige-dark); cursor: not-allowed; transform: none; }
+.btn-send svg { width: 17px; height: 17px; fill: white; }
+
+/* ═══════════════════════════════════
+   ARMARIO
+═══════════════════════════════════ */
+.armario-area { flex: 1; overflow-y: auto; padding: 16px 18px; }
+.armario-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.armario-titulo { font-family: 'Playfair Display', serif; font-size: 20px; }
+.btn-add-prenda {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--verde); color: var(--blanco);
+  border: none; border-radius: 20px;
+  padding: 9px 16px; font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-add-prenda:hover { background: var(--verde-dark); }
+
+.upload-zone {
+  border: 2px dashed var(--beige-dark);
+  border-radius: var(--radius);
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 20px;
+  background: var(--blanco);
+}
+.upload-zone:hover { border-color: var(--verde); background: var(--verde-light); }
+.upload-icon { font-size: 36px; margin-bottom: 10px; }
+.upload-text strong { display: block; margin-bottom: 4px; font-size: 14px; }
+.upload-text { font-size: 13px; color: var(--gris); line-height: 1.5; }
+
+.prendas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.prenda-card {
+  background: var(--blanco);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--beige-dark);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.prenda-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.prenda-card-img { width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--beige-mid); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+.prenda-card-info { padding: 10px 12px; }
+.prenda-card-tipo { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+.prenda-card-color { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gris); }
+.prenda-card-badge { display: inline-block; background: var(--beige-mid); border-radius: 6px; padding: 2px 8px; font-size: 11px; color: var(--gris); margin-top: 5px; }
+
+/* ANÁLISIS FOTO */
+.analizando-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.analizando-overlay.activo { opacity: 1; pointer-events: all; }
+.analizando-card {
+  background: var(--blanco);
+  border-radius: 20px;
+  padding: 28px;
+  width: 90%; max-width: 360px;
+}
+.spinner {
+  width: 44px; height: 44px;
+  border: 3px solid var(--beige-dark);
+  border-top-color: var(--verde);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+.analizando-titulo { font-family: 'Playfair Display', serif; font-size: 17px; text-align: center; margin-bottom: 8px; }
+.analizando-paso { font-size: 13px; color: var(--gris); text-align: center; }
+
+.conf-titulo { font-family: 'Playfair Display', serif; font-size: 17px; margin-bottom: 16px; }
+.conf-preview { display: flex; gap: 12px; margin-bottom: 18px; align-items: flex-start; }
+.conf-img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; background: var(--beige-mid); flex-shrink: 0; }
+.conf-campos { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.conf-campo { display: flex; flex-direction: column; gap: 3px; }
+.conf-label { font-size: 11px; text-transform: uppercase; letter-spacing: .7px; color: var(--gris); }
+.conf-select, .conf-input {
+  padding: 8px 10px;
+  border: 1.5px solid var(--beige-dark);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  outline: none;
+  background: var(--beige-mid);
+  color: var(--negro);
+}
+.conf-select:focus, .conf-input:focus { border-color: var(--verde); }
+.conf-acciones { display: flex; gap: 8px; margin-top: 14px; }
+.btn-conf {
+  flex: 1; padding: 11px; border-radius: 12px;
+  border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px; font-weight: 500;
+}
+.btn-conf.ok { background: var(--verde); color: white; }
+.btn-conf.cancel { background: var(--beige-mid); color: var(--negro); }
+
+/* ═══════════════════════════════════
+   PERFIL
+═══════════════════════════════════ */
+.perfil-area { flex: 1; overflow-y: auto; padding: 16px 18px; }
+.perfil-sec {
+  background: var(--blanco);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.perfil-sec-titulo { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--gris); margin-bottom: 14px; }
+.perfil-fila { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--beige-mid); }
+.perfil-fila:last-child { border-bottom: none; }
+.perfil-key { font-size: 13px; color: var(--gris); }
+.perfil-val { font-size: 13px; font-weight: 500; }
+.paleta-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.paleta-bola { width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.stat-box { background: var(--beige-mid); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+.stat-big { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--verde); }
+.stat-lbl { font-size: 11px; color: var(--gris); margin-top: 3px; }
+
+/* ═══════════════════════════════════
+   MODAL CIUDAD
+═══════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 300;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.activo { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--blanco);
+  border-radius: 20px;
+  padding: 24px;
+  width: 90%; max-width: 360px;
+  transform: translateY(20px);
+  transition: transform 0.2s;
+}
+.modal-overlay.activo .modal { transform: translateY(0); }
+.modal-titulo { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 16px; }
+.modal-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.modal-input {
+  flex: 1; padding: 10px 12px;
+  border: 1.5px solid var(--beige-dark);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; outline: none;
+  background: var(--beige-mid);
+}
+.modal-input:focus { border-color: var(--verde); }
+.btn-modal-ok {
+  padding: 10px 18px;
+  background: var(--verde); color: white;
+  border: none; border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; cursor: pointer;
+}
+.btn-modal-cancel {
+  width: 100%; padding: 11px;
+  border-radius: 12px; border: none;
+  background: var(--beige-mid); color: var(--negro);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; cursor: pointer; margin-top: 4px;
+}
+
+/* RESPONSIVE MOBILE */
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-visual { height: 50vh; order: -1; }
+  .hero-content { padding: 40px 24px; }
+  .hero-titulo { font-size: 32px; }
+  .hero-stats { gap: 20px; }
+  .pasos-grid { grid-template-columns: 1fr; gap: 24px; }
+  .precios-grid { grid-template-columns: 1fr; }
+  .section-pasos, .section-precios { padding: 60px 24px; }
+  .section-titulo { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ LANDING ═══════════ -->
+<div id="screen-landing" class="screen active">
+  <nav class="landing-nav">
+    <div class="logo">Style<span>AI</span></div>
+    <div class="nav-btns">
+      <button class="btn-ghost" onclick="mostrarLogin()">Iniciar sesión</button>
+      <button class="btn-primary" onclick="empezarOnboarding()">Empezar gratis</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <div class="clima-live"></div>
+        <span id="badge-clima">Detectando tu ciudad...</span>
+      </div>
+
+      <h1 class="hero-titulo">
+        El outfit perfecto,<br>
+        con <em>tu ropa</em> y el<br>
+        tiempo de hoy.
+      </h1>
+
+      <p class="hero-sub">
+        Sube tus prendas, dinos tu plan y StyleAI te propone el look ideal según el clima de tu ciudad. Tu armario, reinventado cada día.
+      </p>
+
+      <div class="hero-ctas">
+        <button class="btn-hero solid" onclick="empezarOnboarding()">Empezar gratis</button>
+        <button class="btn-hero outline" onclick="mostrarLogin()">Ya tengo cuenta</button>
+      </div>
+
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">0€</div>
+          <div class="stat-label">Para empezar</div>
+        </div>
+        <div>
+          <div class="stat-num">5 min</div>
+          <div class="stat-label">Para tu primer look</div>
+        </div>
+        <div>
+          <div class="stat-num">24/7</div>
+          <div class="stat-label">Tu estilista siempre</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <img class="hero-img" src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80" alt="StyleAI outfit" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'900\'><rect fill=\'%23F0EDE8\'/></svg>'">
+      <div class="hero-clima-widget">
+        <div class="clima-ciudad" id="widget-ciudad">Tu ciudad</div>
+        <div class="clima-temp" id="widget-temp">--°C</div>
+        <div class="clima-condicion" id="widget-cond">Detectando...</div>
+        <div class="clima-ok">✓ Outfit adaptado al clima</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pasos">
+    <h2 class="section-titulo">Así de fácil</h2>
+    <p class="section-sub">Tres pasos para el look perfecto de hoy</p>
+    <div class="pasos-grid">
+      <div class="paso-card">
+        <div class="paso-num">1</div>
+        <div class="paso-titulo">Sube tus prendas</div>
+        <div class="paso-desc">Hazte una foto con el outfit puesto o fotografía tus prendas una a una. StyleAI las analiza y crea tu armario digital.</div>
+      </div>
+      <div class="paso-card">
+        <div class="paso-num">2</div>
+        <div class="paso-titulo">Cuéntanos tu plan</div>
+        <div class="paso-desc">¿Trabajo, cena, ocio, evento? Habla con tu estilista personal como si fuera una amiga con mucho estilo.</div>
+      </div>
+      <div class="paso-card">
+        <div class="paso-num">3</div>
+        <div class="paso-titulo">Recibe tu outfit</div>
+        <div class="paso-desc">StyleAI combina tu ropa con el clima de hoy y te propone el look perfecto con foto de inspiración incluida.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-precios">
+    <h2 class="section-titulo">Elige tu plan</h2>
+    <p class="section-sub">Empieza gratis, escala cuando quieras</p>
+    <div class="precios-grid">
+      <div class="precio-card">
+        <div class="precio-plan">Gratis</div>
+        <div class="precio-num">0<span>€</span></div>
+        <div class="precio-periodo">para siempre</div>
+        <ul class="precio-features">
+          <li>3 outfits al mes</li>
+          <li>Armario hasta 20 prendas</li>
+          <li>Clima en tiempo real</li>
+          <li>Sugerencias básicas</li>
+        </ul>
+        <button class="btn-plan" onclick="empezarOnboarding()">Empezar gratis</button>
+      </div>
+      <div class="precio-card popular">
+        <div class="popular-badge">Más popular</div>
+        <div class="precio-plan">Premium</div>
+        <div class="precio-num">5,99<span>€</span></div>
+        <div class="precio-periodo">por mes</div>
+        <ul class="precio-features">
+          <li>Outfits ilimitados</li>
+          <li>Armario ilimitado</li>
+          <li>Imágenes generadas por IA</li>
+          <li>Historial completo</li>
+          <li>Análisis de colores</li>
+        </ul>
+        <button class="btn-plan filled" onclick="empezarOnboarding()">Hazte Premium</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════ ONBOARDING ═══════════ -->
+<div id="screen-onboarding" class="screen">
+  <div class="ob-header">
+    <div class="ob-logo-small">Style<span>AI</span></div>
+    <div class="progress-bar" id="ob-progress">
+      <div class="progress-step" id="ps-0"></div>
+      <div class="progress-step" id="ps-1"></div>
+      <div class="progress-step" id="ps-2"></div>
+      <div class="progress-step" id="ps-3"></div>
+      <div class="progress-step" id="ps-4"></div>
+    </div>
+  </div>
+  <div class="ob-content" id="ob-content"></div>
+  <div class="ob-footer">
+    <button class="btn-continuar" id="btn-continuar" onclick="siguientePaso()">Continuar →</button>
+  </div>
+</div>
+
+<!-- ═══════════ APP PRINCIPAL ═══════════ -->
+<div id="screen-app" class="screen">
+  <div class="app-header">
+    <div class="app-logo">Style<span>AI</span></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div id="perfil-badge" style="display:none;font-size:12px;color:var(--gris)"></div>
+      <div class="clima-pill" onclick="abrirModalClima()">
+        <div class="clima-dot"></div>
+        <span id="clima-pill-texto">Detectando...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-tabs" id="app-tabs">
+    <div class="app-tab activo" onclick="cambiarTab('chat',this)">💬 Estilista</div>
+    <div class="app-tab" onclick="cambiarTab('armario',this)">👗 Armario</div>
+    <div class="app-tab" onclick="cambiarTab('perfil',this)">✨ Perfil</div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="app-pantalla activa" id="tab-chat">
+    <div class="chat-area" id="chat"></div>
+    <div class="chat-input-area">
+      <div class="voz-status" id="voz-status"></div>
+      <div class="input-row">
+        <button class="btn-mic" id="btn-mic" onclick="toggleMic()">🎙️</button>
+        <div class="input-wrap">
+          <textarea id="chat-input" placeholder="Cuéntame tu plan de hoy..." rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMsg()}"
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        </div>
+        <button class="btn-send" id="btn-send" onclick="enviarMsg()">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARMARIO -->
+  <div class="app-pantalla" id="tab-armario">
+    <div class="armario-area">
+      <div class="armario-header">
+        <div class="armario-titulo">Mi armario</div>
+        <button class="btn-add-prenda" onclick="document.getElementById('file-input').click()">📸 Añadir</button>
+      </div>
+      <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none" onchange="procesarFoto(this)">
+      <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">📸</div>
+        <div class="upload-text">
+          <strong>Añade tus prendas</strong>
+          Foto de una prenda o foto en el espejo. StyleAI lo analiza automáticamente.
+        </div>
+      </div>
+      <div class="prendas-grid" id="prendas-grid"></div>
+    </div>
+  </div>
+
+  <!-- PERFIL -->
+  <div class="app-pantalla" id="tab-perfil">
+    <div class="perfil-area" id="perfil-contenido">
+      <div style="text-align:center;padding:40px 20px;color:var(--gris)">Completa el onboarding para ver tu perfil</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ANÁLISIS FOTO -->
+<div class="analizando-overlay" id="analizando-overlay">
+  <div class="analizando-card" id="analizando-card"></div>
+</div>
+
+<!-- MODAL CIUDAD -->
+<div class="modal-overlay" id="modal-ciudad">
+  <div class="modal">
+    <div class="modal-titulo">¿En qué ciudad estás?</div>
+    <div class="modal-row">
+      <input class="modal-input" type="text" id="ciudad-input" placeholder="Madrid, Barcelona..." onkeydown="if(event.key==='Enter')buscarClima()">
+      <button class="btn-modal-ok" onclick="buscarClima()">Buscar</button>
+    </div>
+    <button class="btn-modal-cancel" onclick="cerrarModalCiudad()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════════
+const GEMINI_KEY = 'AQ.Ab8RN6KkmmJjOfvYWKs_WWkczDJAHykWOBLvVp6-5GcJv_6rig';
+
+let clima = null;
+let armario = JSON.parse(localStorage.getItem('styleai_armario') || '[]');
+let perfil = JSON.parse(localStorage.getItem('styleai_perfil') || 'null');
+let pasoOb = 0;
+let esperando = false;
+let reconocimiento = null;
+let escuchando = false;
+let outfitAlt = null;
+let imgPendiente = null;
+
+// Ciudades demo con clima
+const climasDemo = {
+  'madrid':{ ciudad:'Madrid', temp:22, condicion:'despejado', icono:'☀️', lluvia:false },
+  'barcelona':{ ciudad:'Barcelona', temp:20, condicion:'parcialmente nublado', icono:'⛅', lluvia:false },
+  'sevilla':{ ciudad:'Sevilla', temp:30, condicion:'soleado', icono:'☀️', lluvia:false },
+  'bilbao':{ ciudad:'Bilbao', temp:15, condicion:'lluvia ligera', icono:'🌧️', lluvia:true },
+  'valencia':{ ciudad:'Valencia', temp:25, condicion:'soleado', icono:'☀️', lluvia:false },
+  'malaga':{ ciudad:'Málaga', temp:27, condicion:'despejado', icono:'☀️', lluvia:false },
+  'málaga':{ ciudad:'Málaga', temp:27, condicion:'despejado', icono:'☀️', lluvia:false },
+  'zaragoza':{ ciudad:'Zaragoza', temp:18, condicion:'viento', icono:'🌬️', lluvia:false },
+  'granada':{ ciudad:'Granada', temp:22, condicion:'despejado', icono:'☀️', lluvia:false },
+  'alicante':{ ciudad:'Alicante', temp:26, condicion:'soleado', icono:'☀️', lluvia:false },
+  'san sebastian':{ ciudad:'San Sebastián', temp:14, condicion:'lluvia', icono:'🌧️', lluvia:true },
+  'san sebastián':{ ciudad:'San Sebastián', temp:14, condicion:'lluvia', icono:'🌧️', lluvia:true },
+  'santander':{ ciudad:'Santander', temp:16, condicion:'nublado', icono:'☁️', lluvia:false },
+  'murcia':{ ciudad:'Murcia', temp:26, condicion:'soleado', icono:'☀️', lluvia:false },
+  'cordoba':{ ciudad:'Córdoba', temp:29, condicion:'caluroso', icono:'☀️', lluvia:false },
+  'córdoba':{ ciudad:'Córdoba', temp:29, condicion:'caluroso', icono:'☀️', lluvia:false },
+};
+
+// ════════════════════════════════════
+// CLIMA
+// ════════════════════════════════════
+function detectarClima() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      let ciudad = 'madrid';
+      if(lat>41.2&&lon>1.8) ciudad='barcelona';
+      else if(lat>43) ciudad='bilbao';
+      else if(lat<37.5&&lon>-6) ciudad='sevilla';
+      else if(lat>39.3&&lon>-1) ciudad='valencia';
+      else if(lat<37.5&&lon>-5) ciudad='malaga';
+      aplicarClima(climasDemo[ciudad]||climasDemo.madrid);
+    }, () => { aplicarClima(climasDemo.madrid); });
+  } else { aplicarClima(climasDemo.madrid); }
+}
+
+function aplicarClima(c) {
+  clima = c;
+  // Landing
+  const badge = document.getElementById('badge-clima');
+  if(badge) badge.textContent = `${c.icono} ${c.ciudad} · ${c.temp}°C · ${c.condicion}`;
+  const wc = document.getElementById('widget-ciudad');
+  const wt = document.getElementById('widget-temp');
+  const wcond = document.getElementById('widget-cond');
+  if(wc) wc.textContent = c.ciudad;
+  if(wt) wt.textContent = c.temp+'°C';
+  if(wcond) wcond.textContent = c.condicion;
+  // App
+  const pill = document.getElementById('clima-pill-texto');
+  if(pill) pill.innerHTML = `${c.icono} <strong style="color:var(--negro)">${c.ciudad} ${c.temp}°C</strong>`;
+}
+
+function buscarClima() {
+  const ciudad = document.getElementById('ciudad-input').value.trim().toLowerCase();
+  if(!ciudad) return;
+  const c = climasDemo[ciudad] || { ciudad:ciudad.charAt(0).toUpperCase()+ciudad.slice(1), temp:20, condicion:'parcialmente nublado', icono:'⛅', lluvia:false };
+  aplicarClima(c);
+  cerrarModalCiudad();
+  if(perfil && document.getElementById('screen-app').classList.contains('active')) {
+    const msg = `Actualizado. Estás en **${c.ciudad}** con **${c.temp}°C** y ${c.condicion}.`;
+    addMsg('ai', msg); hablar(msg);
+  }
+}
+
+function abrirModalClima() { document.getElementById('modal-ciudad').classList.add('activo'); setTimeout(()=>document.getElementById('ciudad-input').focus(),100); }
+function cerrarModalCiudad() { document.getElementById('modal-ciudad').classList.remove('activo'); }
+
+// ════════════════════════════════════
+// NAVEGACIÓN
+// ════════════════════════════════════
+function mostrarPantalla(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function mostrarLogin() { empezarOnboarding(); } // Por ahora va al onboarding
+
+function empezarOnboarding() {
+  if(perfil) { irAApp(); return; }
+  mostrarPantalla('onboarding');
+  renderPaso(0);
+}
+
+function irAApp() {
+  mostrarPantalla('app');
+  if(!clima) detectarClima();
+  actualizarPerfilBadge();
+  if(document.getElementById('chat').children.length === 0) {
+    setTimeout(()=>iniciarChat(), 500);
+  }
+}
+
+function cambiarTab(id, el) {
+  document.querySelectorAll('.app-pantalla').forEach(p=>p.classList.remove('activa'));
+  document.getElementById('tab-'+id).classList.add('activa');
+  document.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('activo'));
+  el.classList.add('activo');
+  if(id==='perfil') renderPerfil();
+  if(id==='armario') renderArmario();
+}
+
+// ════════════════════════════════════
+// ONBOARDING
+// ════════════════════════════════════
+const estilosData = {
+  sofisticada_moderna: {
+    nombre:'Sofisticada moderna', emoji:'🤍', marcas:'Toteme · The Row · Sandro',
+    pantalon:'wide leg o barrel', calzado:'mules o bailarinas de punta',
+    exterior:'blazer estructurado o trench',
+    colores:['beige','camel','blanco roto','negro','burdeos','verde botella','marrón chocolate'],
+    prompt:'Fashion photography, young Spanish woman 28-32 years, sitting at European café terrace, wearing navy fitted t-shirt tucked into white wide leg high-waisted trousers, brown block heel mules, small camel structured bag, gold jewelry, sunglasses, warm natural sunlight, editorial street style, photorealistic'
+  },
+  urbana: {
+    nombre:'Urbana cool', emoji:'🖤', marcas:'Zara · COS · Arket',
+    pantalon:'straight, barrel o baggy', calzado:'zapatillas chunky o botas',
+    exterior:'cazadora vaquera o bomber',
+    colores:['negro','blanco','gris','azul denim','verde caqui','rojo'],
+    prompt:'Fashion photography, young woman 22-28 years, standing in urban street, wearing black crop tank top, light wash baggy wide leg jeans, white sneakers, grey tote bag, small oval sunglasses, city background, natural light, street style photography, photorealistic'
+  },
+  clasica: {
+    nombre:'Clásica elegante', emoji:'👑', marcas:'Massimo Dutti · Ralph Lauren',
+    pantalon:'de pinzas o straight de tela', calzado:'tacón medio o mocasines',
+    exterior:'blazer clásico o abrigo de paño',
+    colores:['navy','blanco','negro','beige','rojo clásico','verde hunter'],
+    prompt:'Fashion photography, young woman 28-36 years, mirror selfie elegant interior, wearing light blue striped button-up shirt, black wide leg tailored trousers, brown leather belt, camel structured handbag, gold jewelry, photorealistic'
+  },
+  boho: {
+    nombre:'Boho chic', emoji:'🌿', marcas:'Free People · Isabel Marant',
+    pantalon:'palazzo o wide leg estampado', calzado:'sandalias planas o botines',
+    exterior:'cárdigan largo o kimono',
+    colores:['terracota','ocre','burdeos','verde salvia','blanco roto','mostaza'],
+    prompt:'Fashion photography, young woman 25-35 years, outdoor mediterranean street, wearing white blouse, paisley maxi skirt earth tones green and orange, brown suede cropped jacket, wide leather belt, gold pendant necklace, warm light, photorealistic'
+  }
+};
+
+const fotosInspo = {
+  sofisticada_moderna: [
+    'Fashion photography, young woman 28-34 years, minimal chic outfit, beige blazer, white wide leg pants, European street, natural light, photorealistic',
+    'Fashion photography, young woman 25-32 years, sophisticated look, camel trench coat, black wide leg trousers, loafers, city street, editorial, photorealistic',
+    'Fashion photography, young woman 28-35 years, minimal style, white oversized shirt, beige barrel leg jeans, mules, cafe terrace, photorealistic',
+    'Fashion photography, young woman 26-33 years, chic casual, navy blazer, cream wide leg pants, heels, European city, photorealistic',
+    'Fashion photography, young woman 28-35 years, elegant minimal, silk slip dress, camel coat, pointed flats, photorealistic',
+    'Fashion photography, young woman 25-32 years, sophisticated casual, striped shirt, high waist wide leg pants, loafers, photorealistic',
+    'Fashion photography, young woman 28-34 years, refined style, turtleneck, tailored wide leg pants, mules, photorealistic',
+    'Fashion photography, young woman 26-33 years, chic minimal, blazer dress, boots, European street, photorealistic',
+    'Fashion photography, young woman 25-32 years, elegant casual, linen wide leg suit, white tee, sandals, photorealistic',
+  ],
+  urbana: [
+    'Fashion photography, young woman 22-28 years, street style, oversized denim jacket, straight leg jeans, white sneakers, urban, photorealistic',
+    'Fashion photography, young woman 20-27 years, urban cool, black hoodie, baggy cargo pants, chunky sneakers, city, photorealistic',
+    'Fashion photography, young woman 22-29 years, edgy street style, leather jacket, wide leg jeans, boots, photorealistic',
+    'Fashion photography, young woman 20-27 years, casual cool, graphic tee, barrel leg jeans, platform sneakers, photorealistic',
+    'Fashion photography, young woman 22-28 years, urban chic, blazer, straight jeans, sneakers, city street, photorealistic',
+    'Fashion photography, young woman 21-27 years, street style, oversized shirt, baggy jeans, white sneakers, photorealistic',
+    'Fashion photography, young woman 22-28 years, cool urban, puffer jacket, wide leg pants, chunky boots, photorealistic',
+    'Fashion photography, young woman 20-26 years, casual street, crop top, high waist jeans, sneakers, photorealistic',
+    'Fashion photography, young woman 22-29 years, urban minimal, monochrome outfit, straight pants, white sneakers, photorealistic',
+  ],
+  clasica: [
+    'Fashion photography, young woman 28-36 years, classic elegant, blazer, tailored pants, heels, office building, photorealistic',
+    'Fashion photography, young woman 26-34 years, timeless style, silk blouse, wide leg trousers, pointed heels, photorealistic',
+    'Fashion photography, young woman 28-35 years, refined classic, camel coat, turtleneck, tailored pants, photorealistic',
+    'Fashion photography, young woman 27-34 years, polished look, blazer dress, belt, pumps, photorealistic',
+    'Fashion photography, young woman 28-36 years, elegant classic, wrap dress, heels, structured bag, photorealistic',
+    'Fashion photography, young woman 26-33 years, classic chic, plaid blazer, straight trousers, loafers, photorealistic',
+    'Fashion photography, young woman 28-35 years, sophisticated, cashmere sweater, tailored pants, heels, photorealistic',
+    'Fashion photography, young woman 27-34 years, timeless elegant, crisp shirt, wide leg pants, mules, photorealistic',
+    'Fashion photography, young woman 28-36 years, classic style, longline coat, straight pants, oxford shoes, photorealistic',
+  ],
+  boho: [
+    'Fashion photography, young woman 25-35 years, boho chic, floral maxi dress, sandals, field, photorealistic',
+    'Fashion photography, young woman 23-32 years, bohemian style, flowy wide leg pants, crochet top, outdoor, photorealistic',
+    'Fashion photography, young woman 25-34 years, boho fashion, printed maxi skirt, linen top, sandals, photorealistic',
+    'Fashion photography, young woman 24-33 years, free spirit, kimono jacket, flare jeans, boots, photorealistic',
+    'Fashion photography, young woman 25-35 years, bohemian chic, tiered dress, espadrilles, garden, photorealistic',
+    'Fashion photography, young woman 23-32 years, boho look, wrap skirt, peasant blouse, sandals, photorealistic',
+    'Fashion photography, young woman 25-34 years, earthy boho, linen wide pants, crop blouse, sandals, photorealistic',
+    'Fashion photography, young woman 24-33 years, bohemian, patchwork skirt, tucked shirt, cowboy boots, photorealistic',
+    'Fashion photography, young woman 25-35 years, boho minimal, palazzo pants, camisole, sandals, photorealistic',
+  ]
+};
+
+function calcularColores(tonoPiel, colorPelo) {
+  const paletas = {
+    muy_clara:{ rubio:{fav:['azul cielo','rosa palo','blanco roto','camel'],evita:['naranja intenso','amarillo neón']}, castaño:{fav:['azul marino','burdeos','verde bosque','beige'],evita:['naranja','amarillo']}, moreno:{fav:['negro','azul marino','burdeos','verde esmeralda'],evita:['beige pálido']}, pelirrojo:{fav:['verde bosque','azul marino','marrón chocolate','crema'],evita:['rojo','rosa chicle']}, canoso:{fav:['azul marino','burdeos','negro','blanco'],evita:['beige grisáceo']} },
+    clara:{ rubio:{fav:['azul pastel','rosa nude','beige','blanco roto','verde salvia'],evita:['amarillo puro','naranja']}, castaño:{fav:['terracota','verde salvia','camel','burdeos'],evita:['amarillo neón']}, moreno:{fav:['negro','blanco','azul marino','burdeos'],evita:['beige pálido']}, pelirrojo:{fav:['verde musgo','azul marino','crema','marrón'],evita:['rojo','naranja']}, canoso:{fav:['negro','azul marino','burdeos','blanco'],evita:['beige grisáceo']} },
+    media:{ castaño:{fav:['terracota','verde oliva','camel','dorado'],evita:['gris frío','rosa pálido']}, moreno:{fav:['blanco','azul cobalto','verde esmeralda','amarillo mostaza'],evita:['beige muy claro']}, rubio:{fav:['terracota','naranja','verde oliva','camel'],evita:['gris frío']}, canoso:{fav:['blanco','azul cobalto','terracota'],evita:['gris frío']}, pelirrojo:{fav:['verde botella','azul petróleo','marrón','crema'],evita:['rojo','naranja brillante']} },
+    morena:{ moreno:{fav:['blanco','naranja','amarillo mostaza','verde esmeralda','dorado'],evita:['marrón oscuro']}, castaño:{fav:['terracota','naranja','verde oliva','amarillo'],evita:['nude muy claro']}, canoso:{fav:['blanco','naranja vibrante','amarillo','verde'],evita:['marrón oscuro']}, rubio:{fav:['blanco','naranja','terracota','verde'],evita:['nude pálido']}, pelirrojo:{fav:['verde botella','terracota','blanco','ocre'],evita:['rojo','naranja']} },
+    muy_oscura:{ moreno:{fav:['blanco puro','naranja vibrante','amarillo','fucsia','verde'],evita:['negro total','marrón oscuro']}, canoso:{fav:['blanco','naranja','fucsia','verde esmeralda'],evita:['negro puro']}, castaño:{fav:['blanco','amarillo','naranja','verde'],evita:['marrón oscuro']}, rubio:{fav:['blanco','fucsia','amarillo','verde esmeralda'],evita:['marrón oscuro']}, pelirrojo:{fav:['blanco','verde esmeralda','amarillo','fucsia'],evita:['marrón oscuro']} }
+  };
+  const grupo = paletas[tonoPiel] || paletas.clara;
+  return grupo[colorPelo] || grupo[Object.keys(grupo)[0]] || { fav:['negro','blanco','beige'], evita:['neón'] };
+}
+
+// Generar imagen con Gemini
+async function generarImagenGemini(prompt) {
+  try {
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GEMINI_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        instances: [{ prompt }],
+        parameters: { sampleCount: 1, aspectRatio: '3:4' }
+      })
+    });
+    if(!resp.ok) throw new Error('API error');
+    const data = await resp.json();
+    const b64 = data?.predictions?.[0]?.bytesBase64Encoded;
+    if(b64) return `data:image/png;base64,${b64}`;
+    throw new Error('No image');
+  } catch(e) {
+    console.log('Gemini imagen error:', e);
+    return null;
+  }
+}
+
+// Cache de imágenes generadas
+const imgCache = {};
+
+async function obtenerImagenEstilo(estilo) {
+  if(imgCache[estilo]) return imgCache[estilo];
+  const prompt = estilosData[estilo]?.prompt;
+  if(!prompt) return null;
+  const img = await generarImagenGemini(prompt);
+  if(img) imgCache[estilo] = img;
+  return img;
+}
+
+function renderPaso(paso) {
+  pasoOb = paso;
+  const content = document.getElementById('ob-content');
+  const btn = document.getElementById('btn-continuar');
+  btn.classList.remove('activo');
+
+  // Actualizar progreso
+  for(let i=0;i<5;i++) {
+    const el = document.getElementById(`ps-${i}`);
+    if(el) el.classList.toggle('done', i<=paso);
+  }
+
+  if(paso===0) {
+    // Nombre
+    btn.style.display='block';
+    content.innerHTML=`
+      <div class="ob-titulo">¡Hola! Soy StyleAI ✨</div>
+      <div class="ob-sub">Tu estilista personal. Cuéntame sobre ti para que mis propuestas sean realmente para ti.</div>
+      <input class="ob-input" type="text" id="inp-nombre" placeholder="¿Cómo te llamas?" autocomplete="given-name"
+        oninput="checkNombre()" onkeydown="if(event.key==='Enter'&&this.value.trim().length>1)siguientePaso()">
+      <div class="ob-input-hint">Solo tu nombre 🤍</div>`;
+    setTimeout(()=>document.getElementById('inp-nombre')?.focus(),300);
+
+  } else if(paso===1) {
+    // Estilo — auto-avanza
+    btn.style.display='none';
+    content.innerHTML=`
+      <div class="ob-titulo">¿Con qué estilo te identificas?</div>
+      <div class="ob-sub">Toca el que más te represente.</div>
+      <div class="estilos-grid">
+        ${Object.entries(estilosData).map(([key,est])=>`
+          <div class="estilo-card" id="estilo-${key}" onclick="selEstilo('${key}')">
+            <div class="estilo-skeleton" id="skel-${key}">
+              <span style="font-size:28px">${est.emoji}</span>
+              <span>Cargando look...</span>
+            </div>
+            <div class="estilo-overlay">
+              <div class="estilo-nombre">${est.nombre}</div>
+              <div class="estilo-marcas">${est.marcas}</div>
+            </div>
+            <div class="estilo-check">✓</div>
+          </div>`).join('')}
+      </div>`;
+    // Cargar imágenes con Gemini
+    Object.keys(estilosData).forEach(async key => {
+      const img = await obtenerImagenEstilo(key);
+      const skel = document.getElementById(`skel-${key}`);
+      if(skel && img) {
+        const imgEl = document.createElement('img');
+        imgEl.src = img;
+        imgEl.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0';
+        skel.parentElement.insertBefore(imgEl, skel);
+        skel.remove();
+      }
+    });
+
+  } else if(paso===2) {
+    // Inspiración — multi-select
+    btn.style.display='block';
+    btn.classList.add('activo');
+    const estilo = window._obEstilo || 'sofisticada_moderna';
+    const prompts = fotosInspo[estilo] || fotosInspo.sofisticada_moderna;
+    content.innerHTML=`
+      <div class="ob-titulo">¿Qué looks te inspiran?</div>
+      <div class="ob-sub">Selecciona todos los que te gusten — cuantos más mejor.</div>
+      <div class="inspo-grid" id="inspo-grid">
+        ${prompts.map((_,i)=>`
+          <div class="inspo-item" id="inspo-${i}" onclick="toggleInspo(${i})">
+            <div class="estilo-skeleton" id="inskel-${i}" style="border-radius:8px">
+              <span style="font-size:20px">👗</span>
+            </div>
+            <div class="inspo-check">✓</div>
+          </div>`).join('')}
+      </div>`;
+    // Cargar imágenes
+    prompts.forEach(async (prompt, i) => {
+      const img = await generarImagenGemini(prompt);
+      const skel = document.getElementById(`inskel-${i}`);
+      const item = document.getElementById(`inspo-${i}`);
+      if(skel && img && item) {
+        const imgEl = document.createElement('img');
+        imgEl.src = img;
+        imgEl.style.cssText = 'width:100%;height:100%;object-fit:cover';
+        item.insertBefore(imgEl, skel);
+        skel.remove();
+      }
+    });
+
+  } else if(paso===3) {
+    // Tono de piel — auto-avanza
+    btn.style.display='none';
+    const pieles=[
+      {key:'muy_clara',color:'#FDDCB5',label:'Muy clara'},
+      {key:'clara',color:'#F5C89A',label:'Clara'},
+      {key:'media',color:'#D4956A',label:'Media'},
+      {key:'morena',color:'#A0522D',label:'Morena'},
+      {key:'muy_oscura',color:'#4A2410',label:'Muy oscura'},
+    ];
+    content.innerHTML=`
+      <div class="ob-titulo">¿Cuál es tu tono de piel?</div>
+      <div class="ob-sub">Lo uso para recomendarte los colores que más te favorecen.</div>
+      <div class="piel-grid">
+        ${pieles.map(p=>`
+          <div class="piel-opcion" id="piel-${p.key}" onclick="selPiel('${p.key}')">
+            <div class="piel-circulo" style="background:${p.color}"></div>
+            <div class="piel-label">${p.label}</div>
+          </div>`).join('')}
+      </div>`;
+
+  } else if(paso===4) {
+    // Color pelo — auto-avanza
+    btn.style.display='none';
+    const pelos=[
+      {key:'rubio',color:'#F4D03F',label:'Rubio'},
+      {key:'castaño',color:'#8B4513',label:'Castaño'},
+      {key:'moreno',color:'#1C0A00',label:'Moreno'},
+      {key:'pelirrojo',color:'#CC4400',label:'Pelirrojo'},
+      {key:'canoso',color:'#C0C0C0',label:'Canoso'},
+    ];
+    content.innerHTML=`
+      <div class="ob-titulo">¿Y tu color de pelo?</div>
+      <div class="ob-sub">Última pregunta — promesa 🤍</div>
+      <div class="pelo-grid">
+        ${pelos.map(p=>`
+          <div class="pelo-opcion" id="pelo-${p.key}" onclick="selPelo('${p.key}')">
+            <div class="pelo-circulo" style="background:${p.color}"></div>
+            <div class="pelo-label">${p.label}</div>
+          </div>`).join('')}
+      </div>`;
+  }
+}
+
+function checkNombre() {
+  const v = document.getElementById('inp-nombre')?.value.trim();
+  document.getElementById('btn-continuar').classList.toggle('activo', v && v.length>1);
+}
+
+function selEstilo(key) {
+  document.querySelectorAll('.estilo-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById(`estilo-${key}`)?.classList.add('sel');
+  window._obEstilo = key;
+  setTimeout(()=>siguientePaso(), 350);
+}
+
+function toggleInspo(i) {
+  document.getElementById(`inspo-${i}`)?.classList.toggle('sel');
+}
+
+function selPiel(key) {
+  document.querySelectorAll('.piel-opcion').forEach(c=>c.classList.remove('sel'));
+  document.getElementById(`piel-${key}`)?.classList.add('sel');
+  window._obPiel = key;
+  setTimeout(()=>siguientePaso(), 350);
+}
+
+function selPelo(key) {
+  document.querySelectorAll('.pelo-opcion').forEach(c=>c.classList.remove('sel'));
+  document.getElementById(`pelo-${key}`)?.classList.add('sel');
+  window._obPelo = key;
+  setTimeout(()=>siguientePaso(), 350);
+}
+
+function siguientePaso() {
+  if(pasoOb===0) {
+    const nombre = document.getElementById('inp-nombre')?.value.trim();
+    if(!nombre||nombre.length<2) return;
+    window._obNombre = nombre.split(' ')[0];
+  }
+  if(pasoOb<4) { renderPaso(pasoOb+1); }
+  else { finalizarOnboarding(); }
+}
+
+function finalizarOnboarding() {
+  const paleta = calcularColores(window._obPiel||'clara', window._obPelo||'castaño');
+  perfil = {
+    nombre: window._obNombre||'',
+    estilo: window._obEstilo||'sofisticada_moderna',
+    tonoPiel: window._obPiel||'clara',
+    colorPelo: window._obPelo||'castaño',
+    coloresFav: paleta.fav,
+    coloresEvita: paleta.evita,
+    outfitsLiked: [],
+    outfitsDisliked: []
+  };
+  localStorage.setItem('styleai_perfil', JSON.stringify(perfil));
+  detectarClima();
+  irAApp();
+}
+
+function actualizarPerfilBadge() {
+  if(!perfil) return;
+  const est = estilosData[perfil.estilo];
+  const badge = document.getElementById('perfil-badge');
+  if(badge) {
+    badge.innerHTML = `${est.emoji} <strong>${perfil.nombre}</strong>`;
+    badge.style.display='block';
+  }
+}
+
+// ════════════════════════════════════
+// CHAT
+// ════════════════════════════════════
+function addMsg(rol, contenido, esHTML=false) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = `msg ${rol}`;
+  const avClass = rol==='ai'?'ai':'me';
+  const em = rol==='ai'?'✨':'👤';
+  div.innerHTML = `<div class="msg-avatar ${avClass}">${em}</div><div class="msg-bubble">${esHTML?contenido:contenido.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function addTyping() {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className='msg ai'; div.id='typing';
+  div.innerHTML=`<div class="msg-avatar ai">✨</div><div class="typing-indicator"><div class="typing-dot-anim"></div><div class="typing-dot-anim"></div><div class="typing-dot-anim"></div></div>`;
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+function removeTyping() { const t=document.getElementById('typing'); if(t)t.remove(); }
+
+function addSugs(ops) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className='msg ai'; div.style.maxWidth='100%';
+  const sugs = document.createElement('div'); sugs.className='sugs';
+  ops.forEach(op=>{
+    const btn=document.createElement('button'); btn.className='sug-btn'; btn.textContent=op;
+    btn.onclick=()=>{ document.getElementById('chat-input').value=op; enviarMsg(); };
+    sugs.appendChild(btn);
+  });
+  div.innerHTML=`<div class="msg-avatar ai">✨</div>`; div.appendChild(sugs);
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+
+function iniciarChat() {
+  if(!clima) { setTimeout(iniciarChat, 500); return; }
+  const nombre = perfil?.nombre || '';
+  const est = estilosData[perfil?.estilo||'sofisticada_moderna'];
+  const lluviaAviso = clima.lluvia ? ` Y hoy llueve — lo tendré muy en cuenta.` : '';
+  const msg = `Hola${nombre?' **'+nombre+'**':''}! 🤍\n\nEstás en **${clima.ciudad}** — **${clima.temp}°C**, ${clima.condicion}.${lluviaAviso}\n\nYa sé que tu estilo es **${est.nombre}** y los colores que más te favorecen. ¿Cuál es tu plan de hoy?`;
+  addMsg('ai', msg);
+  hablar(`Hola${nombre?' '+nombre:''}. Estás en ${clima.ciudad} con ${clima.temp} grados y ${clima.condicion}.${lluviaAviso} ¿Cuál es tu plan de hoy?`);
+  setTimeout(()=>addSugs(['☀️ Ocio con amigas','🏢 Trabajo o reunión','🍽️ Cena esta noche','🌙 Salida nocturna','🎉 Evento especial','✈️ Viaje']),400);
+}
+
+// ════════════════════════════════════
+// GENERACIÓN DE OUTFITS
+// ════════════════════════════════════
+function detectarOcasion(t) {
+  t=t.toLowerCase();
+  if(['jefe','reunión','reunion','trabajo','oficina','presentación','entrevista','cliente','importante','formal','boda','gala','conferencia'].some(k=>t.includes(k))) return 'formal';
+  if(['noche','nocturna','discoteca','club','bar','fiesta','salida','copas'].some(k=>t.includes(k))) return 'noche';
+  if(t.includes('cena')||t.includes('cenar')||t.includes('restaurante')) {
+    if(['elegante','especial','romántica','romantica','aniversario','cumpleaños','lujo'].some(k=>t.includes(k))) return 'cena_elegante';
+    return 'cena_informal';
+  }
+  if(['gym','deporte','sport','entreno','running','yoga','pilates'].some(k=>t.includes(k))) return 'deporte';
+  if(['viaje','viajar','avión','avion','aeropuerto','vuelo','tren'].some(k=>t.includes(k))) return 'viaje';
+  if(['amigos','amigas','ocio','paseo','café','cafe','compras','shopping','universidad'].some(k=>t.includes(k))) return 'casual';
+  if(['casa','sofá','sofa','relax'].some(k=>t.includes(k))) return 'casa';
+  return 'casual';
+}
+
+function construirPromptImagen(ocasion, texto) {
+  const est = estilosData[perfil?.estilo||'sofisticada_moderna'];
+  const c = clima || {ciudad:'Madrid',temp:20,condicion:'templado',lluvia:false};
+  const frio=c.temp<12,fresco=c.temp>=12&&c.temp<18,calor=c.temp>24;
+
+  const entornos = {
+    formal: 'elegant office building or hotel lobby, professional setting',
+    casual: `${c.ciudad} street cafe terrace, sunny day, people in background`,
+    noche: 'evening city street, restaurant entrance, warm lights',
+    cena_elegante: 'elegant restaurant interior, candlelight, sophisticated',
+    cena_informal: 'casual restaurant terrace, relaxed atmosphere',
+    deporte: 'modern gym or park, natural light',
+    viaje: 'airport or train station, travel bags',
+    casa: 'modern apartment interior, natural light',
+  };
+
+  const capas = frio ? ', warm layers, coat' : fresco ? ', light jacket or blazer' : calor ? ', lightweight breathable fabric' : '';
+  const entorno = entornos[ocasion] || entornos.casual;
+
+  const prompts = {
+    formal: `Fashion photography, young woman 28-34 years, ${perfil?.tonoPiel||'clara'} skin, ${entorno}, wearing sophisticated professional outfit with ${est.pantalon} trousers, blazer, ${est.calzado}, structured bag, polished look${capas}, editorial style, photorealistic, high quality`,
+    casual: `Fashion photography, young woman 25-33 years, ${entorno}, wearing stylish casual ${est.nombre} style outfit, ${est.pantalon} pants, chic top, ${est.calzado}, relaxed confident pose${capas}, street style photography, photorealistic`,
+    noche: `Fashion photography, young woman 25-33 years, ${entorno}, wearing elegant evening outfit, ${est.pantalon} trousers or midi dress, heels, small bag, sophisticated ${est.nombre} style${capas}, photorealistic`,
+    cena_elegante: `Fashion photography, young woman 28-35 years, ${entorno}, wearing elegant dinner outfit, midi dress or ${est.pantalon} with silk blouse, heels, ${est.nombre} style, photorealistic`,
+    cena_informal: `Fashion photography, young woman 25-33 years, ${entorno}, wearing smart casual outfit, ${est.pantalon}, chic top, ${est.calzado}${capas}, ${est.nombre} style, photorealistic`,
+    deporte: `Fashion photography, young woman 24-32 years, ${entorno}, wearing stylish athletic outfit, leggings, sport top, sneakers, athleisure style, photorealistic`,
+    viaje: `Fashion photography, young woman 26-34 years, ${entorno}, wearing comfortable chic travel outfit, ${est.pantalon}, comfortable shoes, ${est.nombre} style, photorealistic`,
+    casa: `Fashion photography, young woman 25-33 years, cozy modern apartment, wearing chic loungewear, soft fabrics, comfortable yet stylish, ${est.nombre} aesthetic, photorealistic`,
+  };
+
+  return prompts[ocasion] || prompts.casual;
+}
+
+function generarOutfitData(texto) {
+  const c = clima||{ciudad:'Madrid',temp:20,condicion:'templado',lluvia:false};
+  const oc = detectarOcasion(texto);
+  const est = estilosData[perfil?.estilo||'sofisticada_moderna'];
+  const cf = perfil?.coloresFav||est.colores;
+  const c1=cf[0]||'beige',c2=cf[1]||'negro',c3=cf[2]||'camel';
+  const frio=c.temp<12,fresco=c.temp>=12&&c.temp<18,calor=c.temp>24;
+  const llueve=c.lluvia;
+
+  let alerta='';
+  if(llueve) alerta=`Llueve en ${c.ciudad} — evita telas delicadas y calzado abierto.`;
+  else if(calor) alerta=`Con ${c.temp}°C elige telas transpirables.`;
+  else if(frio) alerta=`Con ${c.temp}°C necesitas capas.`;
+
+  const prendasPorOcasion = {
+    formal: [
+      {nombre:`Blazer en ${c2}`, hex:'#1B2A4A', razon:`La pieza clave para cualquier reunión — formalidad sin esfuerzo`},
+      {nombre:`${est.pantalon} en ${c1}`, hex:'#C9B99A', razon:`El corte más actual — nunca pitillo`},
+      {nombre:`Blusa o camisa en blanco roto`, hex:'#FAF8F5', razon:`Base impecable que potencia tu tono de piel`},
+      {nombre:est.calzado, hex:'#2C1810', razon:`Tu calzado habitual que eleva el conjunto`},
+    ],
+    casual: [
+      {nombre:`${est.pantalon} en ${c1}`, hex:'#C9B99A', razon:`Corte favorecedor y actual`},
+      {nombre:`Top o blusa en ${c2}`, hex:'#FFFFFF', razon:`Color de tu paleta personal`},
+      ...(fresco||frio?[{nombre:est.exterior, hex:'#C9B99A', razon:`Con ${c.temp}°C imprescindible`}]:[]),
+      {nombre:est.calzado, hex:'#8B6914', razon:`Tu calzado habitual`},
+    ].filter(p=>p.nombre),
+    noche: [
+      {nombre:`${est.pantalon} fluido en ${c2} — amplio y elegante`, hex:'#1A1A1A', razon:`Wide leg o barrel de noche — lo más actual, nunca pitillo`},
+      {nombre:`Top o blusa en ${c1} o dorado`, hex:'#FAF8F5', razon:`Color que te favorece`},
+      {nombre:est.calzado, hex:'#C9A87C', razon:`El calzado que transforma el look`},
+      ...(frio||fresco?[{nombre:est.exterior, hex:'#1A1A1A', razon:`Con ${c.temp}°C de noche`}]:[]),
+    ],
+    cena_elegante: [
+      {nombre:`Vestido midi en ${c2} o color joya`, hex:'#1A1A1A', razon:`La opción más acertada para una cena especial`},
+      {nombre:est.calzado, hex:'#C9A87C', razon:`Eleva sin esfuerzo`},
+      {nombre:`Bolso pequeño estructurado`, hex:'#8B6914', razon:`El accesorio que completa`},
+      ...(c.temp<18?[{nombre:est.exterior, hex:'#1B2A4A', razon:`Con ${c.temp}°C`}]:[]),
+    ],
+    cena_informal: [
+      {nombre:fresco||frio?`Vaqueros o ${est.pantalon}`:`Vestido casual midi en ${c1}`, hex:'#4A6EA8', razon:`Smart casual perfecto`},
+      ...(fresco||frio?[{nombre:est.exterior, hex:'#1A1A1A', razon:`Con ${c.temp}°C eleva el look`}]:[]),
+      {nombre:est.calzado, hex:'#2C1810', razon:`Define el nivel del look`},
+    ],
+    deporte: [
+      {nombre:'Leggings en negro', hex:'#1A1A1A', razon:'Comodidad y movimiento'},
+      {nombre:'Camiseta técnica transpirable', hex:'#8FAF8F', razon:'Funcional y fresca'},
+      {nombre:'Zapatillas deportivas', hex:'#FFFFFF', razon:'Lo más importante en deporte'},
+    ],
+    viaje: [
+      {nombre:`${est.pantalon} de tela cómodo`, hex:'#4A4A4A', razon:'Comodidad para horas sentada'},
+      {nombre:'Camiseta básica en blanco', hex:'#FFFFFF', razon:'Neutra y versátil'},
+      {nombre:est.exterior, hex:'#C9B99A', razon:'Aire acondicionado en transportes'},
+    ],
+    casa: [
+      {nombre:'Jogger o pantalón cómodo en neutro', hex:'#4A4A4A', razon:'Comodidad sin descuido'},
+      {nombre:'Camiseta cómoda o top', hex:'#FFFFFF', razon:'Holgada y cómoda'},
+    ]
+  };
+
+  const ocTextos = {formal:'una reunión',casual:'un plan casual',noche:'una salida nocturna',cena_elegante:'una cena especial',cena_informal:'una cena',deporte:'hacer deporte',viaje:'un viaje',casa:'estar en casa'};
+
+  return {
+    titulo: `✨ ${ocTextos[oc]||'tu plan'} en ${c.ciudad}`,
+    prendas: prendasPorOcasion[oc]||prendasPorOcasion.casual,
+    colores: `Tu paleta personal: ${c1}, ${c2} y ${c3}. Calculada para tu tono de piel y pelo.`,
+    clima: frio?`Con ${c.temp}°C necesitas capas. El blazer o abrigo es imprescindible.`:fresco?`Con ${c.temp}°C el ${est.exterior} lo resuelve todo.`:calor?`Con ${c.temp}°C en ${c.ciudad}, prendas ligeras y transpirables.`:`${c.temp}°C en ${c.ciudad} — temperatura perfecta para este look.`,
+    ocasion: `Para ${ocTextos[oc]||'tu plan'} este look combina estilo con comodidad. ${est.nombre} en su mejor versión.`,
+    alerta,
+    ocasionKey: oc
+  };
+}
+
+async function mostrarOutfit(texto) {
+  const outfitData = generarOutfitData(texto);
+  const promptImg = construirPromptImagen(outfitData.ocasionKey, texto);
+
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className='msg ai'; div.style.maxWidth='92%';
+
+  // Crear card con skeleton
+  const cardId = `outfit-${Date.now()}`;
+  const prendasHTML = outfitData.prendas.filter(p=>p&&p.nombre).map(p=>`
+    <div class="outfit-prenda">
+      <div class="prenda-dot" style="background:${p.hex}"></div>
+      <div>
+        <div class="prenda-nombre">${p.nombre}</div>
+        <div class="prenda-razon">${p.razon}</div>
+      </div>
+    </div>`).join('');
+
+  const alertaHTML = outfitData.alerta ? `<div class="info-pill alerta"><span>⚠️</span><span>${outfitData.alerta}</span></div>` : '';
+  const fbId = `fb-${Date.now()}`;
+
+  div.innerHTML = `<div class="msg-avatar ai">✨</div><div style="width:100%">
+    <div class="outfit-card">
+      <div class="outfit-img-container" id="img-${cardId}">
+        <div class="outfit-img-skeleton">
+          <span style="font-size:28px">✨</span>
+          <span>Generando tu look...</span>
+        </div>
+      </div>
+      <div class="outfit-body">
+        <div class="outfit-titulo">${outfitData.titulo}</div>
+        <div class="outfit-prendas">${prendasHTML}</div>
+        <div class="outfit-info">
+          <div class="info-pill verde"><span>🎨</span><span>${outfitData.colores}</span></div>
+          <div class="info-pill azul"><span>🌤️</span><span>${outfitData.clima}</span></div>
+          <div class="info-pill naranja"><span>🎯</span><span>${outfitData.ocasion}</span></div>
+          ${alertaHTML}
+        </div>
+      </div>
+      <div class="outfit-armario-reminder" onclick="cambiarTab('armario',document.querySelectorAll('.app-tab')[1])">
+        <span style="font-size:20px">📸</span>
+        <div class="reminder-text">
+          <strong>Sube tus prendas</strong>
+          Así la próxima vez te propongo looks con tu ropa real.
+        </div>
+        <span style="color:var(--verde)">→</span>
+      </div>
+      <div class="outfit-feedback" id="${fbId}">
+        <button class="btn-feedback" onclick="feedback('${fbId}','like')">👍 Me encanta</button>
+        <button class="btn-feedback" onclick="feedback('${fbId}','dislike')">👎 No me convence</button>
+      </div>
+    </div>
+  </div>`;
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+
+  // Leer outfit en voz
+  hablar(`Para ${outfitData.ocasionKey==='formal'?'la reunión':outfitData.ocasionKey} con ${clima?.temp||20} grados en ${clima?.ciudad||'tu ciudad'}: ${outfitData.prendas.slice(0,3).map(p=>p.nombre).join(', ')}. ${outfitData.clima}`);
+
+  // Generar imagen con Gemini (async)
+  generarImagenGemini(promptImg).then(img => {
+    const container = document.getElementById(`img-${cardId}`);
+    if(container && img) {
+      container.innerHTML = `<img class="outfit-img" src="${img}" alt="Look del día"><div class="outfit-img-badge">✨ StyleAI</div>`;
+    }
+  });
+
+  setTimeout(()=>addSugs(['🔄 Ver alternativa','👗 Añadir prenda','💼 Más formal','👟 Más cómodo']),400);
+}
+
+function feedback(id, tipo) {
+  const row = document.getElementById(id);
+  if(!row) return;
+  if(tipo==='like') {
+    if(perfil) { perfil.outfitsLiked.push(Date.now()); localStorage.setItem('styleai_perfil',JSON.stringify(perfil)); }
+    row.innerHTML='<span style="font-size:13px;color:var(--verde)">✓ Guardado en favoritos</span>';
+    const msg='Me alegra que te guste. Lo anoto para futuras propuestas.';
+    addMsg('ai',msg); hablar(msg);
+  } else {
+    if(perfil) { perfil.outfitsDisliked.push(Date.now()); localStorage.setItem('styleai_perfil',JSON.stringify(perfil)); }
+    row.innerHTML='<span style="font-size:13px;color:var(--terracota)">✓ Anotado — lo tendré en cuenta</span>';
+    setTimeout(()=>{
+      const msg='Entendido. ¿Qué no te ha convencido? Así aprendo mejor tu estilo.';
+      addMsg('ai',msg); hablar(msg);
+      addSugs(['Demasiado formal','Demasiado informal','No me gustan los colores','Ver alternativa']);
+    },300);
+  }
+}
+
+// ════════════════════════════════════
+// ENVIAR MENSAJE
+// ════════════════════════════════════
+async function enviarMsg() {
+  if(esperando) return;
+  const input = document.getElementById('chat-input');
+  const texto = input.value.trim();
+  if(!texto) return;
+  input.value=''; input.style.height='auto';
+
+  addMsg('user', texto);
+  esperando=true;
+  document.getElementById('btn-send').disabled=true;
+  addTyping();
+  await new Promise(r=>setTimeout(r,900+Math.random()*500));
+  removeTyping();
+
+  procesarMsg(texto);
+  esperando=false;
+  document.getElementById('btn-send').disabled=false;
+}
+
+function procesarMsg(texto) {
+  const t = texto.toLowerCase();
+
+  if(!clima) {
+    const c = Object.keys(climasDemo).find(k=>t.includes(k));
+    if(c) { aplicarClima(climasDemo[c]); const msg=`Perfecto, veo que estás en **${climasDemo[c].ciudad}** con **${climasDemo[c].temp}°C**. ¿Cuál es tu plan?`; addMsg('ai',msg); hablar(limpiarVoz(msg)); addSugs(['☀️ Ocio','🏢 Trabajo','🍽️ Cena','🌙 Noche']); return; }
+    const msg='Para proponerte el look perfecto necesito saber tu ciudad. ¿Desde dónde me escribes?';
+    addMsg('ai',msg); hablar(msg); addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao']); return;
+  }
+
+  if(['alternativ','otra opcion','otra opción','otro look'].some(k=>t.includes(k))) {
+    const msg='Aquí tienes una alternativa.';
+    addMsg('ai',msg); hablar(msg);
+    setTimeout(()=>mostrarOutfit(texto+' alternativa'),200);
+    return;
+  }
+
+  if(['hola','buenas','hey','buenos dias','buenos días'].some(k=>t.includes(k))) {
+    const nombre=perfil?.nombre?` **${perfil.nombre}**`:'';
+    const msg=`¡Hola${nombre}! Hoy en **${clima.ciudad}** hay **${clima.temp}°C** con ${clima.condicion}. ¿Cuál es tu plan?`;
+    addMsg('ai',msg); hablar(limpiarVoz(msg));
+    addSugs(['🏢 Trabajo','☀️ Ocio','🍽️ Cena','🌙 Noche']); return;
+  }
+
+  const pidioOutfit=['outfit','ponerse','vestir','ropa','look','combinar','trabajo','jefe','reunion','reunión','cena','ocio','noche','salida','evento','fiesta','viaje','gym','deporte','casual','formal','hoy','mañana','plan','llevar','qué me pongo','que me pongo','qué llevar'].some(k=>t.includes(k));
+
+  if(pidioOutfit) {
+    const oc=detectarOcasion(texto);
+    const ocT={formal:'una reunión',casual:'un plan casual',noche:'una salida nocturna',cena_elegante:'una cena especial',cena_informal:'una cena',deporte:'deporte',viaje:'un viaje',casa:'estar en casa'}[oc]||'tu plan';
+    const nombre=perfil?.nombre?`, **${perfil.nombre}**`:'';
+    addMsg('ai',`Perfecto${nombre} ✨ Para **${ocT}** con **${clima.temp}°C** en ${clima.ciudad} yo apostaría por esto:`);
+    setTimeout(()=>mostrarOutfit(texto),200);
+    return;
+  }
+
+  const rs=[
+    `¿Para qué plan necesitas el look? Con ${clima.temp}°C en ${clima.ciudad} te propongo algo perfecto.`,
+    `Cuéntame adónde vas y me encargo del look.`,
+    `Dime la ocasión y con ${clima.temp}°C en ${clima.ciudad} te propongo algo que encaje con tu estilo.`
+  ];
+  const msg=rs[Math.floor(Math.random()*rs.length)];
+  addMsg('ai',msg); hablar(msg);
+  addSugs(['🏢 Reunión con mi jefe','☀️ Ocio con amigas','🍽️ Cena esta noche','🌙 Salida nocturna','🎉 Evento especial']);
+}
+
+// ════════════════════════════════════
+// VOZ
+// ════════════════════════════════════
+function limpiarVoz(t) {
+  return t.replace(/[✨👗🎨🌤️🎯🔄⚠️☀️🌧️❄️⛅☁️⛈️🌫️🏢🍽️🥂🎉🏋️✈️🏠🌙🎓💼📍🤍🖤👑🌿]/g,'').replace(/\*\*(.*?)\*\*/g,'$1').replace(/\*/g,'').replace(/\n+/g,'. ').replace(/\s+/g,' ').trim();
+}
+
+function elegirVoz() {
+  const vs=window.speechSynthesis?.getVoices()||[];
+  const p=[v=>v.name.includes('Mónica')&&v.lang.startsWith('es'),v=>v.name.includes('Monica')&&v.lang.startsWith('es'),v=>v.name.toLowerCase().includes('google')&&v.lang==='es-ES',v=>v.lang==='es-ES',v=>v.lang.startsWith('es')];
+  for(const test of p){const v=vs.find(test);if(v)return v;} return null;
+}
+
+function hablar(texto) {
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const limpio=limpiarVoz(texto);
+  const frases=limpio.match(/[^.!?]+[.!?]+/g)||[limpio];
+  let i=0;
+  function next() {
+    if(i>=frases.length){document.querySelector('.clima-dot')?.style.setProperty('background','var(--verde)');return;}
+    const u=new SpeechSynthesisUtterance(frases[i].trim());
+    const v=elegirVoz();if(v)u.voice=v;
+    u.lang='es-ES';u.rate=0.88;u.pitch=1.0;u.volume=1;
+    if(i===0)document.querySelector('.clima-dot')?.style.setProperty('background','var(--terracota)');
+    u.onend=()=>{i++;setTimeout(next,80);};
+    u.onerror=()=>{i++;next();};
+    window.speechSynthesis.speak(u);
+  }
+  next();
+}
+
+function iniciarRec() {
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Usa Chrome para la función de voz.');return null;}
+  const r=new SR();
+  r.lang='es-ES';r.continuous=false;r.interimResults=true;
+  r.onstart=()=>{
+    escuchando=true;
+    document.getElementById('btn-mic').classList.add('activo');
+    document.getElementById('btn-mic').textContent='⏹️';
+    document.getElementById('voz-status').textContent='🔴 Escuchándote...';
+    document.getElementById('voz-status').classList.add('activo');
+    window.speechSynthesis.cancel();
+  };
+  r.onresult=(e)=>{
+    const t=Array.from(e.results).map(r=>r[0].transcript).join('');
+    document.getElementById('chat-input').value=t;
+    if(e.results[e.results.length-1].isFinal){
+      document.getElementById('voz-status').textContent=`✓ "${t}"`;
+      setTimeout(()=>enviarMsg(),500);
+    }
+  };
+  r.onerror=()=>pararMic();
+  r.onend=()=>pararMic();
+  return r;
+}
+
+function toggleMic() {
+  if(escuchando){pararMic();return;}
+  window.speechSynthesis.cancel();
+  reconocimiento=iniciarRec();
+  if(reconocimiento)reconocimiento.start();
+}
+
+function pararMic() {
+  escuchando=false;
+  if(reconocimiento){try{reconocimiento.stop();}catch(e){}}
+  document.getElementById('btn-mic').classList.remove('activo');
+  document.getElementById('btn-mic').textContent='🎙️';
+  setTimeout(()=>{
+    document.getElementById('voz-status').textContent='';
+    document.getElementById('voz-status').classList.remove('activo');
+  },1500);
+}
+
+// ════════════════════════════════════
+// ARMARIO
+// ════════════════════════════════════
+async function procesarFoto(input) {
+  const file=input.files[0];if(!file)return;input.value='';
+  const overlay=document.getElementById('analizando-overlay');
+  const card=document.getElementById('analizando-card');
+  const pasos=['Detectando prendas...','Analizando colores...','Identificando estilo...','Casi lista...'];
+  let pi=0;
+  card.innerHTML=`<div class="spinner"></div><div class="analizando-titulo">Analizando tu foto</div><div class="analizando-paso" id="paso-txt">${pasos[0]}</div>`;
+  overlay.classList.add('activo');
+  const iv=setInterval(()=>{pi=(pi+1)%pasos.length;const el=document.getElementById('paso-txt');if(el)el.textContent=pasos[pi];},700);
+
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    imgPendiente=e.target.result;
+    await new Promise(r=>setTimeout(r,2200));
+    clearInterval(iv);
+
+    // Simular análisis (en producción aquí iría Claude Vision)
+    const est=estilosData[perfil?.estilo||'sofisticada_moderna'];
+    const tipos=['Blazer','Camisa','Blusa','Pantalón wide leg','Pantalón straight','Vaqueros','Falda midi','Vestido midi','Jersey','Abrigo','Chaqueta','Mono','Zapatos','Botas','Mules','Bolso'];
+    const colores=perfil?.coloresFav||est.colores;
+    const det={
+      tipo:tipos[Math.floor(Math.random()*tipos.length)],
+      color:colores[Math.floor(Math.random()*colores.length)],
+      estilo:perfil?.estilo==='clasica'?'Formal':'Casual'
+    };
+
+    card.innerHTML=`
+      <div class="conf-titulo">¿Es esto correcto?</div>
+      <div class="conf-preview">
+        <img class="conf-img" src="${imgPendiente}" onerror="this.style.display='none'">
+        <div class="conf-campos">
+          <div class="conf-campo">
+            <div class="conf-label">Tipo</div>
+            <select class="conf-select" id="c-tipo">
+              ${tipos.map(t=>`<option ${det.tipo===t?'selected':''}>${t}</option>`).join('')}
+            </select>
+          </div>
+          <div class="conf-campo">
+            <div class="conf-label">Color</div>
+            <input class="conf-input" id="c-color" type="text" value="${det.color}">
+          </div>
+          <div class="conf-campo">
+            <div class="conf-label">Estilo</div>
+            <select class="conf-select" id="c-estilo">
+              ${['Casual','Formal','Elegante','Sport'].map(s=>`<option ${det.estilo===s?'selected':''}>${s}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="conf-acciones">
+        <button class="btn-conf cancel" onclick="cerrarAnalizando()">Cancelar</button>
+        <button class="btn-conf ok" onclick="confirmarPrenda()">✓ Añadir</button>
+      </div>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function confirmarPrenda() {
+  const tipo=document.getElementById('c-tipo').value;
+  const color=document.getElementById('c-color').value;
+  const estilo=document.getElementById('c-estilo').value;
+  const hexMap={'negro':'#1A1A1A','blanco roto':'#FAF8F5','beige':'#C9B99A','camel':'#C9A87C','azul marino':'#1B2A4A','burdeos':'#6B1E2D','verde botella':'#2D5A27','gris':'#808080','marrón chocolate':'#4A2C17','terracota':'#C4714A','blanco':'#FFFFFF','rojo clásico':'#CC0000','verde salvia':'#8FAF8F','azul petróleo':'#005F6B','naranja quemado':'#CC5500','verde oliva':'#808000','dorado':'#FFD700','azul cobalto':'#0047AB','amarillo mostaza':'#FFDB58','verde esmeralda':'#50C878','verde bosque':'#228B22','crema':'#FFFDD0','marrón':'#8B4513','naranja':'#FF8C00','ocre':'#CC7722','mostaza':'#FFDB58'};
+  const hex=hexMap[color]||'#888888';
+  armario.push({id:Date.now(),tipo,color,hex,estilo,imgData:imgPendiente});
+  localStorage.setItem('styleai_armario',JSON.stringify(armario));
+  cerrarAnalizando();
+  renderArmario();
+  cambiarTab('chat',document.querySelector('.app-tab'));
+  setTimeout(()=>{
+    const msg=`Añadida tu ${tipo} ${color} al armario 👗 Ya tengo **${armario.length} prenda${armario.length>1?'s':''}** tuya${armario.length>1?'s':''}. ¡Cuantas más subas, más precisos serán los outfits!`;
+    addMsg('ai',msg); hablar(limpiarVoz(msg));
+  },300);
+}
+
+function cerrarAnalizando() { document.getElementById('analizando-overlay').classList.remove('activo'); imgPendiente=null; }
+
+function renderArmario() {
+  const grid=document.getElementById('prendas-grid');if(!grid)return;
+  grid.innerHTML='';
+  const emojis={'Blazer':'🧥','Camiseta':'👕','Camisa':'👔','Blusa':'👚','Jersey':'🧶','Chaqueta':'🧥','Abrigo':'🧥','Pantalón wide leg':'👖','Pantalón straight':'👖','Vaqueros':'👖','Falda midi':'👗','Vestido midi':'👗','Mono':'👗','Zapatos':'👠','Zapatillas':'👟','Botas':'👢','Mules':'👡','Bolso':'👜'};
+  armario.forEach(p=>{
+    const card=document.createElement('div');card.className='prenda-card';
+    const imgHTML=p.imgData?`<img class="prenda-card-img" src="${p.imgData}" style="display:block">`:`<div class="prenda-card-img">${emojis[p.tipo]||'👗'}</div>`;
+    card.innerHTML=`${imgHTML}<div class="prenda-card-info"><div class="prenda-card-tipo">${p.tipo}</div><div class="prenda-card-color"><div class="prenda-dot" style="background:${p.hex}"></div>${p.color}</div><span class="prenda-card-badge">${p.estilo}</span></div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ════════════════════════════════════
+// PERFIL
+// ════════════════════════════════════
+function renderPerfil() {
+  if(!perfil) return;
+  const est=estilosData[perfil.estilo];
+  const hexMap={'azul cielo':'#87CEEB','rosa palo':'#FFB6C1','lavanda':'#E6E6FA','blanco roto':'#FAF8F5','camel':'#C9A87C','azul marino':'#1B2A4A','burdeos':'#6B1E2D','verde bosque':'#228B22','beige':'#C9B99A','crema':'#FFFDD0','negro':'#1A1A1A','verde esmeralda':'#50C878','blanco':'#FFFFFF','terracota':'#C4714A','verde salvia':'#8FAF8F','azul petróleo':'#005F6B','verde oliva':'#808000','dorado':'#FFD700','rojo clásico':'#CC0000','verde hunter':'#355E3B','naranja':'#FF8C00','amarillo mostaza':'#FFDB58','verde musgo':'#8A9A5B','marrón chocolate':'#4A2C17','azul pastel':'#87CEEB','rosa nude':'#F0BEB4','azul cobalto':'#0047AB','naranja vibrante':'#FF5F00','fucsia':'#FF00FF','azul denim':'#4A6EA8','verde caqui':'#8B8B47','navy':'#000080','ocre':'#CC7722','mostaza':'#FFDB58','marrón':'#8B4513','verde bosque':'#228B22'};
+  const paletaHTML=(perfil.coloresFav||[]).map(c=>`<div class="paleta-bola" style="background:${hexMap[c]||'#888'}" title="${c}"></div>`).join('');
+
+  document.getElementById('perfil-contenido').innerHTML=`
+    <div class="perfil-sec">
+      <div class="perfil-sec-titulo">Tu perfil</div>
+      <div class="perfil-fila"><span class="perfil-key">Nombre</span><span class="perfil-val">${perfil.nombre}</span></div>
+      <div class="perfil-fila"><span class="perfil-key">Estilo</span><span class="perfil-val">${est.emoji} ${est.nombre}</span></div>
+      <div class="perfil-fila"><span class="perfil-key">Tono de piel</span><span class="perfil-val">${perfil.tonoPiel?.replace('_',' ')||'—'}</span></div>
+      <div class="perfil-fila"><span class="perfil-key">Color de pelo</span><span class="perfil-val">${perfil.colorPelo||'—'}</span></div>
+      <div class="perfil-fila"><span class="perfil-key">Ciudad</span><span class="perfil-val">${clima?.ciudad||'—'} ${clima?.icono||''}</span></div>
+    </div>
+    <div class="perfil-sec">
+      <div class="perfil-sec-titulo">Colores que te favorecen</div>
+      <div class="paleta-row">${paletaHTML}</div>
+      <div style="font-size:11px;color:var(--gris);margin-top:8px">Calculado según tu tono de piel y pelo</div>
+    </div>
+    <div class="perfil-sec">
+      <div class="perfil-sec-titulo">Mi armario</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-big">${armario.length}</div><div class="stat-lbl">prendas</div></div>
+        <div class="stat-box"><div class="stat-big">${perfil.outfitsLiked?.length||0}</div><div class="stat-lbl">looks guardados</div></div>
+      </div>
+    </div>
+    <div class="perfil-sec" style="text-align:center">
+      <button onclick="cerrarSesion()" style="background:none;border:1.5px solid var(--gris-claro);border-radius:20px;padding:10px 24px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;color:var(--gris)">Cerrar sesión</button>
+    </div>`;
+}
+
+function cerrarSesion() {
+  if(confirm('¿Cerrar sesión? Se borrarán tus datos locales.')) {
+    localStorage.removeItem('styleai_perfil');
+    localStorage.removeItem('styleai_armario');
+    perfil=null; armario=[];
+    mostrarPantalla('landing');
+  }
+}
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+window.addEventListener('load', ()=>{
+  if('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
+  }
+
+  // Detectar clima para landing
+  detectarClima();
+
+  // Si ya tiene perfil, ir a la app
+  if(perfil) {
+    irAApp();
+  }
+});
+
+// Service Worker para PWA
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
