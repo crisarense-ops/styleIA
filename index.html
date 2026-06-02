@@ -194,12 +194,13 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   border-radius:12px;overflow:hidden;
   border:2.5px solid transparent;cursor:pointer;
   transition:all .2s;position:relative;
+  /* Altura fija para que quepan 4 sin scroll */
   height:calc((100vh - 210px) / 2);
-  min-height:180px;
+  min-height:170px;
   background:var(--bg2);
 }
 .ec.on{border-color:var(--v);box-shadow:0 0 0 3px rgba(107,143,113,.18);}
-.ec img{width:100%;height:100%;object-fit:cover;object-position:center 20%;}
+.ec img{width:100%;height:100%;object-fit:cover;object-position:center 15%;}
 .ec-ov{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.72));padding:10px 9px 8px;color:#fff;}
 .ec-nom{font-size:12px;font-weight:600;font-family:"Playfair Display",serif;}
 .ec-mrc{font-size:9px;opacity:.8;margin-top:1px;}
@@ -283,7 +284,6 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .p-nom{font-weight:500;}.p-why{font-size:11px;color:var(--g);margin-top:1px;}
 .ips{display:flex;flex-direction:column;gap:4px;}
 .ip{display:flex;gap:6px;align-items:flex-start;padding:6px 9px;border-radius:8px;font-size:11px;line-height:1.5;}
-.ip>span:first-child{display:none;}
 .ip.g{background:#F0F7F0;}.ip.b{background:#F0F4FF;}.ip.o{background:#FFF5F0;}.ip.a{background:#FFF0E0;border:1px solid #FFD4A8;}
 .reminder{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--vl);border:1px solid var(--v);cursor:pointer;margin-top:8px;border-radius:9px;}
 .rem-txt{flex:1;font-size:11px;color:var(--vd);line-height:1.4;}
@@ -1015,22 +1015,22 @@ function buildPImg(oc){
   return `High-end fashion photography, young Spanish woman 26-34 years, ${ent}, wearing ${est.n} style: ${prendaTend} in ${colTend}, ${est.pan} cut trousers, ${est.cal}, confident natural pose${cap}, OI 2025 fashion trend, editorial quality, photorealistic, sharp focus, beautiful lighting`;
 }
 
-async function mostrarOutfit(txt){const od=outfitD(txt);const pH=od.prendas.filter(p=>p?.n).map(p=>`<div class="o-prenda"><div class="p-dot" style="background:${p.h}"></div><div><div class="p-nom">${p.n}</div><div class="p-why">${p.r}</div></div></div>`).join('');const alH=od.al?`<div class="ip a"><span>${od.al}</span></div>`:'';const fbId=`fb${Date.now()}`,imgId=`im${Date.now()}`;const chat=document.getElementById('chat');const d=document.createElement('div');d.className='msg ai';d.style.maxWidth='92%';d.innerHTML=`<div class="av ai"></div><div style="width:100%"><div class="ocard"><div class="o-imgbox" id="${imgId}"><div class="o-skel"><span style="font-size:13px;color:var(--g)">Generando tu look...</span></div></div><div class="o-body"><div class="o-tit">Tu look para ${od.OT}</div><div class="o-prendas">${pH}</div><div class="ips"><div class="ip g"><span>${od.colores}</span></div><div class="ip b"><span>${od.clima}</span></div><div class="ip o"><span>${od.ocasion}</span></div>${alH}</div></div><div class="reminder" onclick="tab('arm',document.querySelectorAll('.a-tab')[1])"><div class="rem-txt"><strong>Sube tus prendas</strong>La próxima vez propongo looks con tu ropa real.</div><span style="color:var(--v)">→</span></div><div class="fb-row" id="${fbId}"><button class="fb-btn" onclick="fb('${fbId}','l')">Me encanta</button><button class="fb-btn" onclick="fb('${fbId}','d')">No me convence</button></div></div></div>`;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;hablar(`Para ${od.OT}: ${od.prendas.slice(0,3).map(p=>p.n).join(', ')}.`);gImg(buildPImg(od.oc)).then(img=>{const box=document.getElementById(imgId);if(box&&img)box.innerHTML=`<img class="o-img" src="${img}"><div class="o-badge">StyleAI</div>`;});setTimeout(()=>addSugs(['Ver otra opción','Más formal','Más cómodo']),300);}
+async function mostrarOutfit(txt){const od=outfitD(txt);const pH=od.prendas.filter(p=>p?.n).map(p=>`<div class="o-prenda"><div class="p-dot" style="background:${p.h}"></div><div><div class="p-nom">${p.n}</div><div class="p-why">${p.r}</div></div></div>`).join('');const alH=od.al?`<div class="ip a"><span>${od.al}</span></div>`:'';const fbId=`fb${Date.now()}`,imgId=`im${Date.now()}`;const chat=document.getElementById('chat');const d=document.createElement('div');d.className='msg ai';d.style.maxWidth='92%';d.innerHTML=`<div class="av ai"></div><div style="width:100%"><div class="ocard"><div class="o-imgbox" id="${imgId}"><div class="o-skel"><span style="font-size:13px;color:var(--g)">Generando tu look...</span></div></div><div class="o-body"><div class="o-tit">Tu look para ${od.OT}</div><div class="o-prendas">${pH}</div><div class="ips"><div class="ip g"><span>${od.colores}</span></div><div class="ip b"><span>${od.clima}</span></div><div class="ip o"><span>${od.ocasion}</span></div>${alH}</div></div><div class="reminder" onclick="tab('arm',document.querySelectorAll('.a-tab')[1])"><span style="font-size:16px">📸</span><div class="rem-txt"><strong>Sube tus prendas</strong>La próxima vez propongo looks con tu ropa real.</div><span style="color:var(--v)">→</span></div><div class="fb-row" id="${fbId}"><button class="fb-btn" onclick="fb('${fbId}','l')">Me encanta</button><button class="fb-btn" onclick="fb('${fbId}','d')">No me convence</button></div></div></div>`;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;hablar(`Para ${od.OT}: ${od.prendas.slice(0,3).map(p=>p.n).join(', ')}.`);gImg(buildPImg(od.oc)).then(img=>{const box=document.getElementById(imgId);if(box&&img)box.innerHTML=`<img class="o-img" src="${img}"><div class="o-badge">StyleAI</div>`;});setTimeout(()=>addSugs(['Ver otra opción','Más formal','Más cómodo']),300);}
 
 function fb(id,t){const r=document.getElementById(id);if(!r)return;if(t==='l'){if(perfil){perfil.liked.push(Date.now());localStorage.setItem('sa_perf',JSON.stringify(perfil));}r.innerHTML='<span style="font-size:11.5px;color:var(--v)">✓ Guardado en favoritos</span>';addMsg('ai','Me alegra. Lo anoto para la próxima.');}else{if(perfil){perfil.disliked.push(Date.now());localStorage.setItem('sa_perf',JSON.stringify(perfil));}r.innerHTML='<span style="font-size:11.5px;color:var(--t)">✓ Anotado</span>';setTimeout(()=>{addMsg('ai','¿Qué no te ha convencido?');addSugs(['Demasiado formal','No me gustan los colores','Ver alternativa']);},250);}}
 
 async function send(){if(busy)return;const ci=document.getElementById('ci');const txt=ci.value.trim();if(!txt)return;ci.value='';ci.style.height='auto';addMsg('u',txt);busy=true;document.getElementById('sndb').disabled=true;addTyping();await new Promise(r=>setTimeout(r,600+Math.random()*300));rmTyping();proc(txt);busy=false;document.getElementById('sndb').disabled=false;}
-function proc(txt){const t=txt.toLowerCase();if(!clima){const k=Object.keys(CIUDADES).find(k=>t.includes(k));if(k)setClima(CIUDADES[k]);else{addMsg('ai','¿Desde qué ciudad me escribes?');addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao']);return;}}if(['alternativ','otra opcion','otra opción'].some(k=>t.includes(k))){addMsg('ai','Aquí tienes otra opción.');setTimeout(()=>mostrarOutfit(txt),150);return;}if(['hola','buenas','hey'].some(k=>t.includes(k))){const n=perfil?.nombre?` **${perfil.nombre}**`:'';const m=`¡Hola${n}! En **${clima.c}** hay **${clima.t}°C**. ¿Tu plan?`;addMsg('ai',m);hablar(limpiar(m));addSugs(['Trabajo','Ocio','Cena','Noche']);return;}if(['outfit','ponerse','vestir','ropa','look','trabajo','jefe','reunion','reunión','cena','ocio','noche','salida','evento','viaje','gym','deporte','formal','hoy','plan','pongo','llevar'].some(k=>t.includes(k))){
+function proc(txt){const t=txt.toLowerCase();if(!clima){const k=Object.keys(CIUDADES).find(k=>t.includes(k));if(k)setClima(CIUDADES[k]);else{addMsg('ai','¿Desde qué ciudad me escribes?');addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao']);return;}}if(['alternativ','otra opcion','otra opción'].some(k=>t.includes(k))){addMsg('ai','Aquí tienes otra opción.');setTimeout(()=>mostrarOutfit(txt),150);return;}if(['hola','buenas','hey'].some(k=>t.includes(k))){const n=perfil?.nombre?` **${perfil.nombre}**`:'';const m=`¡Hola${n}! En **${clima.c}** hay **${clima.t}°C**. ¿Tu plan?`;addMsg('ai',m);hablar(limpiar(m));addSugs(['🏢 Trabajo','☀️ Ocio','🍽️ Cena','🌙 Noche']);return;}if(['outfit','ponerse','vestir','ropa','look','trabajo','jefe','reunion','reunión','cena','ocio','noche','salida','evento','viaje','gym','deporte','formal','hoy','plan','pongo','llevar'].some(k=>t.includes(k))){
   const od=outfitD(txt);
   const n=perfil?.nombre?` **${perfil.nombre}**`:'';
   const est=ESTILOS[perfil?.estilo||'sofisticada'];
   // Mensaje personalizado basado en estilo e inspiración seleccionada
   const inspoN = perfil?.inspoSels?.length||0;
   const inspoMsg = inspoN>0 ? ` Basándome en los ${inspoN} looks que elegiste,` : '';
-  addMsg('ai',`${inspoMsg} para **${od.OT}** con **${clima.t}°C** en ${clima.c} y tu estilo ${est.n}:`);
+  addMsg('ai',`${inspoMsg?inspoMsg+' Para':'Para'} **${od.OT}** con **${clima.t}°C** en ${clima.c} y tu estilo ${est.n}:`);
   setTimeout(()=>mostrarOutfit(txt),150);
   return;
-}const rs=[`¿Para qué plan? Con ${clima.t}°C en ${clima.c} te propongo algo perfecto.`,`Cuéntame adónde vas.`];addMsg('ai',rs[Math.floor(Math.random()*rs.length)]);addSugs(['🏢 Reunión','Ocio','Cena','Noche','🎉 Evento']);}
+}const rs=[`¿Para qué plan? Con ${clima.t}°C en ${clima.c} te propongo algo perfecto.`,`Cuéntame adónde vas.`];addMsg('ai',rs[Math.floor(Math.random()*rs.length)]);addSugs(['🏢 Reunión','☀️ Ocio','🍽️ Cena','🌙 Noche','🎉 Evento']);}
 
 function limpiar(t){return t.replace(/[✨👗🎨🌤️🎯🔄⚠️☀️🌧️⛅☁️🏢🍽️🥂🎉✈️🌙🤍🖤👑🌿]/g,'').replace(/\*\*(.*?)\*\*/g,'$1').replace(/\n+/g,'. ').replace(/\s+/g,' ').trim();}
 function getVoz(){const vs=window.speechSynthesis?.getVoices()||[];const ps=[v=>v.name.includes('Mónica')&&v.lang.startsWith('es'),v=>v.name.includes('Monica')&&v.lang.startsWith('es'),v=>v.name.toLowerCase().includes('google')&&v.lang==='es-ES',v=>v.lang==='es-ES',v=>v.lang.startsWith('es')];for(const f of ps){const v=vs.find(f);if(v)return v;}return null;}
