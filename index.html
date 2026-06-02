@@ -194,13 +194,13 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   border-radius:12px;overflow:hidden;
   border:2.5px solid transparent;cursor:pointer;
   transition:all .2s;position:relative;
-  /* Altura fija para que quepan 4 sin scroll */
-  height:calc((100vh - 200px) / 2);
-  max-height:220px;
+  /* Altura dinámica para ver el outfit completo */
+  height:calc((100vh - 180px) / 2);
+  max-height:320px;
   background:var(--bg2);
 }
 .ec.on{border-color:var(--v);box-shadow:0 0 0 3px rgba(107,143,113,.18);}
-.ec img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.ec img{width:100%;height:100%;object-fit:cover;object-position:center center;}
 .ec-ov{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.72));padding:10px 9px 8px;color:#fff;}
 .ec-nom{font-size:12px;font-weight:600;font-family:"Playfair Display",serif;}
 .ec-mrc{font-size:9px;opacity:.8;margin-top:1px;}
