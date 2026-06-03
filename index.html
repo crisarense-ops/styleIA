@@ -201,7 +201,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   background:var(--bg2);
 }
 .ec.on{border-color:var(--v);box-shadow:0 0 0 3px rgba(107,143,113,.18);}
-.ec img{width:100%;height:100%;object-fit:cover;object-position:center center;}
+.ec img{width:100%;height:100%;object-fit:cover;object-position:top center;}
 .ec-ov{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.72));padding:10px 9px 8px;color:#fff;}
 .ec-nom{font-size:12px;font-weight:600;font-family:"Playfair Display",serif;}
 .ec-mrc{font-size:9px;opacity:.8;margin-top:1px;}
@@ -222,16 +222,16 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .ig-count{font-size:12px;color:var(--g);margin-bottom:10px;}
 
 /* Tono piel / pelo */
-.piel-g{display:flex;gap:7px;justify-content:space-between;}
-.piel-op{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 3px;border:1.5px solid var(--bg3);border-radius:11px;cursor:pointer;transition:all .2s;background:var(--w);}
+.piel-g{display:flex;gap:8px;justify-content:space-between;}
+.piel-op{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px;border:1.5px solid var(--bg3);border-radius:12px;cursor:pointer;transition:all .2s;background:var(--w);}
 .piel-op:hover,.piel-op.on{border-color:var(--v);background:var(--vl);}
-.piel-c{width:32px;height:32px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.13);}
-.piel-l{font-size:9.5px;color:var(--g);text-align:center;line-height:1.2;}
+.piel-c{width:44px;height:44px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.13);}
+.piel-l{font-size:13px;color:var(--n);text-align:center;line-height:1.3;font-weight:500;}
 .pelo-g{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
-.pelo-op{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 3px;border:1.5px solid var(--bg3);border-radius:11px;cursor:pointer;transition:all .2s;background:var(--w);}
+.pelo-op{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px;border:1.5px solid var(--bg3);border-radius:12px;cursor:pointer;transition:all .2s;background:var(--w);}
 .pelo-op:hover,.pelo-op.on{border-color:var(--v);background:var(--vl);}
-.pelo-c{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.12);}
-.pelo-l{font-size:9.5px;color:var(--g);text-align:center;}
+.pelo-c{width:40px;height:40px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.12);}
+.pelo-l{font-size:13px;color:var(--n);text-align:center;font-weight:500;}
 
 .ob-foot{padding:11px 18px;background:var(--bg);border-top:1px solid var(--bg3);flex-shrink:0;}
 .btn-sig{width:100%;padding:13px;background:var(--v);color:#fff;border:none;border-radius:28px;font-family:"Inter",sans-serif;font-size:14.5px;font-weight:500;cursor:pointer;opacity:.4;pointer-events:none;transition:all .2s;}
@@ -427,6 +427,12 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   .l-pasos{gap:6px;}
   .l-pt{font-size:10.5px;}
 }
+
+.loading-look{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;}
+.ll-spinner{width:36px;height:36px;border:3px solid var(--bg3);border-top-color:var(--v);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ll-text{font-size:12px;color:var(--g);font-family:'Inter',sans-serif;letter-spacing:.3px;}
+
 </style>
 </head>
 <body>
@@ -677,7 +683,8 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 <div class="a-ol" id="aol"><div class="a-card" id="acard"></div></div>
 
 <script>
-const GK='AQ.Ab8RN6KkmmJjOfvYWKs_WWkczDJAHykWOBLvVp6-5GcJv_6rig';
+const GK='AIzaSyBypx1hSZiRLXqmO96HGesznwGlRqCuY_4';
+const GCSE_ID='b4a332d49e5c14334';
 let clima=null,armario=[],perfil=null,planSel='gratis',obP=0,busy=false,rec=null,oesc=false,imgP=null;
 try{armario=JSON.parse(localStorage.getItem('sa_arm')||'[]');}catch(e){}
 try{perfil=JSON.parse(localStorage.getItem('sa_perf')||'null');}catch(e){}
@@ -844,20 +851,93 @@ function tab(id,el){['chat','arm','prf'].forEach(t=>document.getElementById('p'+
 function calcPal(piel,pelo){const m={muy_clara:{rubio:['azul cielo','rosa palo','blanco roto','camel'],castaño:['azul marino','burdeos','verde bosque','beige'],moreno:['negro','azul marino','burdeos','verde esmeralda'],pelirrojo:['verde bosque','azul marino','crema','marrón'],canoso:['azul marino','burdeos','negro','blanco']},clara:{rubio:['azul pastel','rosa nude','beige','verde salvia'],castaño:['terracota','verde salvia','camel','burdeos'],moreno:['negro','blanco','azul marino','burdeos'],pelirrojo:['verde musgo','azul marino','crema','marrón'],canoso:['negro','azul marino','burdeos','blanco']},media:{castaño:['terracota','verde oliva','camel','dorado'],moreno:['blanco','azul cobalto','verde esmeralda','amarillo mostaza'],rubio:['terracota','naranja','verde oliva','camel'],canoso:['blanco','azul cobalto','terracota'],pelirrojo:['verde botella','azul petróleo','crema','ocre']},morena:{moreno:['blanco','naranja','amarillo mostaza','verde esmeralda'],castaño:['terracota','naranja','verde oliva','amarillo'],rubio:['blanco','naranja','terracota','verde'],canoso:['blanco','naranja','amarillo','verde'],pelirrojo:['verde botella','terracota','blanco','ocre']},muy_oscura:{moreno:['blanco','naranja vibrante','amarillo','fucsia'],canoso:['blanco','naranja','fucsia','verde esmeralda'],castaño:['blanco','amarillo','naranja','verde'],rubio:['blanco','fucsia','amarillo','verde'],pelirrojo:['blanco','verde esmeralda','amarillo','fucsia']}};return(m[piel]||m.clara)[pelo]||['negro','blanco','beige','camel'];}
 
 // GEMINI solo para imágenes de outfits en el chat
-async function gImg(prompt){try{const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),8000);const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GK}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instances:[{prompt}],parameters:{sampleCount:1,aspectRatio:'3:4'}}),signal:ctrl.signal});clearTimeout(tid);if(!r.ok)throw new Error();const d=await r.json();const b=d?.predictions?.[0]?.bytesBase64Encoded;return b?`data:image/png;base64,${b}`:null;}catch(e){return null;}}
 
-// ONBOARDING
-function renderPaso(n){obP=n;const body=document.getElementById('obbody'),btn=document.getElementById('bsig'),bback=document.getElementById('bback');btn.classList.remove('on');if(bback)bback.style.display=n>0?'block':'none';for(let i=0;i<4;i++)document.getElementById('os'+i)?.classList.toggle('on',i<=n);[rNom,rEst,rInspo,rPiel,rPelo][n]?.call(null,body,btn);}
-function volverPaso(){if(obP>0)renderPaso(obP-1);}
+// ── BANCO DE IMÁGENES CURADAS POR ESTILO × OCASIÓN ──────────────────────────
+// Imágenes Unsplash de alta calidad, siempre disponibles, sin latencia
+const IMG_BANK = {
+  sofisticada: {
+    formal:   ['photo-1594938298603-c8148b2aee3e','photo-1573496359142-b8d87734a5a2','photo-1588776814546-1ffbb172d4b1'],
+    casual:   ['photo-1509631179647-0177331693ae','photo-1515886657613-9f3515b0c78f','photo-1469334031218-e382a71b716b'],
+    noche:    ['photo-1566479179817-c0b9b72e34a0','photo-1502716119720-b23a93e5fe1b','photo-1520975916090-f44b5c0c7896'],
+    cena_el:  ['photo-1520975916090-f44b5c0c7896','photo-1566479179817-c0b9b72e34a0','photo-1502716119720-b23a93e5fe1b'],
+    cena_in:  ['photo-1509631179647-0177331693ae','photo-1515886657613-9f3515b0c78f','photo-1469334031218-e382a71b716b'],
+    viaje:    ['photo-1476703993599-0035a21b17a9','photo-1504674900247-0877df9cc836','photo-1533105079780-92b9be482077'],
+    deporte:  ['photo-1571019613454-1cb2f99b2d8b','photo-1552674605-db6ffd4facb5','photo-1476480862126-209bfaa8edc8'],
+  },
+  urbana: {
+    formal:   ['photo-1588776814546-1ffbb172d4b1','photo-1573496359142-b8d87734a5a2','photo-1594938298603-c8148b2aee3e'],
+    casual:   ['photo-1490481651871-ab68de25d43d','photo-1523381210434-271e8be1f52b','photo-1445205170230-053b83016050'],
+    noche:    ['photo-1519999482648-25049ddd37b1','photo-1529626455594-4ff0802cfb7e','photo-1509631179647-0177331693ae'],
+    cena_el:  ['photo-1529626455594-4ff0802cfb7e','photo-1519999482648-25049ddd37b1','photo-1523381210434-271e8be1f52b'],
+    cena_in:  ['photo-1490481651871-ab68de25d43d','photo-1445205170230-053b83016050','photo-1523381210434-271e8be1f52b'],
+    viaje:    ['photo-1476703993599-0035a21b17a9','photo-1533105079780-92b9be482077','photo-1476480862126-209bfaa8edc8'],
+    deporte:  ['photo-1552674605-db6ffd4facb5','photo-1571019613454-1cb2f99b2d8b','photo-1476480862126-209bfaa8edc8'],
+  },
+  clasica: {
+    formal:   ['photo-1594938298603-c8148b2aee3e','photo-1573496359142-b8d87734a5a2','photo-1588776814546-1ffbb172d4b1'],
+    casual:   ['photo-1515886657613-9f3515b0c78f','photo-1509631179647-0177331693ae','photo-1469334031218-e382a71b716b'],
+    noche:    ['photo-1502716119720-b23a93e5fe1b','photo-1520975916090-f44b5c0c7896','photo-1566479179817-c0b9b72e34a0'],
+    cena_el:  ['photo-1566479179817-c0b9b72e34a0','photo-1502716119720-b23a93e5fe1b','photo-1520975916090-f44b5c0c7896'],
+    cena_in:  ['photo-1515886657613-9f3515b0c78f','photo-1509631179647-0177331693ae','photo-1469334031218-e382a71b716b'],
+    viaje:    ['photo-1504674900247-0877df9cc836','photo-1476703993599-0035a21b17a9','photo-1533105079780-92b9be482077'],
+    deporte:  ['photo-1476480862126-209bfaa8edc8','photo-1571019613454-1cb2f99b2d8b','photo-1552674605-db6ffd4facb5'],
+  },
+  boho: {
+    formal:   ['photo-1573496359142-b8d87734a5a2','photo-1594938298603-c8148b2aee3e','photo-1588776814546-1ffbb172d4b1'],
+    casual:   ['photo-1469334031218-e382a71b716b','photo-1515886657613-9f3515b0c78f','photo-1490481651871-ab68de25d43d'],
+    noche:    ['photo-1529626455594-4ff0802cfb7e','photo-1519999482648-25049ddd37b1','photo-1566479179817-c0b9b72e34a0'],
+    cena_el:  ['photo-1519999482648-25049ddd37b1','photo-1529626455594-4ff0802cfb7e','photo-1502716119720-b23a93e5fe1b'],
+    cena_in:  ['photo-1469334031218-e382a71b716b','photo-1490481651871-ab68de25d43d','photo-1515886657613-9f3515b0c78f'],
+    viaje:    ['photo-1533105079780-92b9be482077','photo-1476703993599-0035a21b17a9','photo-1504674900247-0877df9cc836'],
+    deporte:  ['photo-1571019613454-1cb2f99b2d8b','photo-1476480862126-209bfaa8edc8','photo-1552674605-db6ffd4facb5'],
+  }
+};
 
-// Nota: 5 pasos ahora (añadimos inspiración)
-function rNom(b,btn){b.innerHTML=`<div class="ob-tit">¡Hola${window._nom?' '+window._nom:''}!</div><div class="ob-sub">Tu estilista personal. Cuéntame sobre ti.</div><input class="ob-input" type="text" id="inpN" placeholder="¿Cómo te llamas?" value="${window._nom||''}" autocomplete="given-name" oninput="chkN()" onkeydown="if(event.key==='Enter'&&this.value.trim().length>1)sigPaso()"><div style="font-size:11px;color:var(--g);margin-top:5px"></div>`;btn.style.display='block';if(window._nom)btn.classList.add('on');setTimeout(()=>document.getElementById('inpN')?.focus(),200);}
-function chkN(){document.getElementById('bsig').classList.toggle('on',document.getElementById('inpN')?.value.trim().length>1);}
+async function getOutfitImg(estilo, oc) {
+  // Construir query específico por estilo y ocasión
+  const estiloQ = {
+    sofisticada: 'parisian chic outfit',
+    urbana: 'street style minimal outfit',
+    clasica: 'classic elegant feminine outfit',
+    boho: 'boho chic free spirit outfit'
+  }[estilo] || 'fashion outfit';
 
-function rEst(b,btn){
-  btn.style.display='none';
-  b.innerHTML=`<div class="ob-tit">¿Tu estilo?</div><div class="ob-sub">Toca el que más te represente.</div><div class="eg">${Object.entries(ESTILOS).map(([k,e])=>`<div class="ec" onclick="selEst('${k}')"><img src="${FOTOS_ESTILO[k]}" alt="${e.n}" loading="eager"><div class="ec-ov"><div class="ec-nom">${e.n}</div><div class="ec-mrc">${e.m}</div></div><div class="ec-chk">✓</div></div>`).join('')}</div>`;
+  const ocasionQ = {
+    formal: 'office work look',
+    casual: 'casual day look street style',
+    noche: 'night out look',
+    cena_el: 'dinner elegant look',
+    cena_in: 'casual dinner look',
+    viaje: 'travel outfit',
+    deporte: 'sporty casual look'
+  }[oc] || 'everyday look';
+
+  const query = encodeURIComponent(`${estiloQ} ${ocasionQ} woman fashion editorial`);
+  const url = `https://www.googleapis.com/customsearch/v1?key=${GK}&cx=${GCSE_ID}&q=${query}&searchType=image&num=5&imgSize=large&imgType=photo&safe=active`;
+
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 6000);
+    const r = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    const items = d.items?.filter(i => i.link && !i.link.includes('pinterest')) || [];
+    if (items.length > 0) {
+      // Elegir aleatoriamente entre los primeros resultados
+      const item = items[Math.floor(Math.random() * Math.min(items.length, 3))];
+      return item.link;
+    }
+    throw new Error('no results');
+  } catch(e) {
+    // Fallback: banco Unsplash curado
+    const bank = IMG_BANK[estilo] || IMG_BANK.sofisticada;
+    const imgs = bank[oc] || bank.casual;
+    const photo = imgs[Math.floor(Math.random() * imgs.length)];
+    return `https://images.unsplash.com/${photo}?w=600&h=750&fit=crop&crop=top`;
+  }
 }
+
 function selEst(k){document.querySelectorAll('.ec').forEach(c=>c.classList.remove('on'));event.currentTarget.classList.add('on');window._est=k;setTimeout(sigPaso,300);}
 
 function rInspo(b,btn){
@@ -1000,29 +1080,15 @@ function outfitD(txt){
   return{prendas:P[oc]||P.casual,colores:msgColores,clima:msgClima,ocasion:msgOcasion,al,oc,OT};
 }
 
-function buildPImg(oc){
-  const est=ESTILOS[perfil?.estilo||'sofisticada'];
-  const c=clima||{c:'Madrid',t:20};
-  const fr=c.t<12,fc=c.t>=12&&c.t<18,ca=c.t>24;
-  const cap=fr?', layered look with warm coat':fc?', with light jacket or blazer':ca?', lightweight breathable fabrics':'';
-  const ent={
-    formal:'elegant modern office lobby or hotel meeting room',
-    casual:`${c.c} sunny street café terrace with people in background`,
-    noche:'upscale evening city street, restaurant entrance, warm ambient lights',
-    cena_el:'elegant candlelit restaurant interior, sophisticated atmosphere',
-    cena_in:'trendy casual restaurant terrace, relaxed vibe',
-    deporte:'modern urban gym or city park',
-    viaje:'airport terminal or train station, travel aesthetic'
-  }[oc]||`${c.c} city street`;
-  
-  // Usar colores de tendencia 2025
-  const colTend = est.tendencia2025.colores[0];
-  const prendaTend = est.tendencia2025.prendas[0];
-  
-  return `High-end fashion photography, young Spanish woman 26-34 years, ${ent}, wearing ${est.n} style: ${prendaTend} in ${colTend}, ${est.pan} cut trousers, ${est.cal}, confident natural pose${cap}, OI 2025 fashion trend, editorial quality, photorealistic, sharp focus, beautiful lighting`;
-}
 
-async function mostrarOutfit(txt){const od=outfitD(txt);const pH=od.prendas.filter(p=>p?.n).map(p=>`<div class="o-prenda"><div class="p-dot" style="background:${p.h}"></div><div><div class="p-nom">${p.n}</div><div class="p-why">${p.r}</div></div></div>`).join('');const alH=od.al?`<div class="ip a"><span>${od.al}</span></div>`:'';const fbId=`fb${Date.now()}`,imgId=`im${Date.now()}`;const chat=document.getElementById('chat');const d=document.createElement('div');d.className='msg ai';d.style.maxWidth='92%';d.innerHTML=`<div class="av ai"></div><div style="width:100%"><div class="ocard"><div class="o-imgbox" id="${imgId}"><div class="o-skel"><span style="font-size:13px;color:var(--g)">Generando tu look...</span></div></div><div class="o-body"><div class="o-tit">Tu look para ${od.OT}</div><div class="o-prendas">${pH}</div><div class="ips"><div class="ip g"><span>${od.colores}</span></div><div class="ip b"><span>${od.clima}</span></div><div class="ip o"><span>${od.ocasion}</span></div>${alH}</div></div><div class="reminder" onclick="tab('arm',document.querySelectorAll('.a-tab')[1])"><span style="font-size:16px">📸</span><div class="rem-txt"><strong>¿Ya tienes el look puesto?</strong> Hazte una foto y empieza a construir tu armario digital.</div><span style="color:var(--v)">→</span></div><div class="fb-row" id="${fbId}"><button class="fb-btn" onclick="fb('${fbId}','l')">Me encanta</button><button class="fb-btn" onclick="fb('${fbId}','d')">No me convence</button></div></div></div>`;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;hablar(`Para ${od.OT}: ${od.prendas.slice(0,3).map(p=>p.n).join(', ')}.`);gImg(buildPImg(od.oc)).then(img=>{const box=document.getElementById(imgId);if(!box)return;if(img){box.innerHTML=`<img class="o-img" src="${img}"><div class="o-badge">StyleAI</div>`;}else{const est=ESTILOS[perfil?.estilo||'sofisticada'];const palC=est.col[0]||'beige';box.innerHTML=`<div class="o-noimg" style="background:linear-gradient(160deg,#F5F0E8,#E8E0D0);height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center"><div style="font-size:32px;margin-bottom:8px">👗</div><div style="font-size:12px;color:var(--g);line-height:1.5">Look <strong>${od.OT}</strong><br>${est.n}</div></div>`;}});setTimeout(()=>addSugs(['Ver otra opción','Más formal','Más cómodo']),300);}
+async function mostrarOutfit(txt){const od=outfitD(txt);const pH=od.prendas.filter(p=>p?.n).map(p=>`<div class="o-prenda"><div class="p-dot" style="background:${p.h}"></div><div><div class="p-nom">${p.n}</div><div class="p-why">${p.r}</div></div></div>`).join('');const alH=od.al?`<div class="ip a"><span>${od.al}</span></div>`:'';const fbId=`fb${Date.now()}`,imgId=`im${Date.now()}`;const chat=document.getElementById('chat');const d=document.createElement('div');d.className='msg ai';d.style.maxWidth='92%';d.innerHTML=`<div class="av ai"></div><div style="width:100%"><div class="ocard"><div class="o-imgbox" id="${imgId}"><div class="o-skel" style="opacity:0"></div></div><div class="o-body"><div class="o-tit">Tu look para ${od.OT}</div><div class="o-prendas">${pH}</div><div class="ips"><div class="ip g"><span>${od.colores}</span></div><div class="ip b"><span>${od.clima}</span></div><div class="ip o"><span>${od.ocasion}</span></div>${alH}</div></div><div class="reminder" onclick="tab('arm',document.querySelectorAll('.a-tab')[1])"><span style="font-size:16px">📸</span><div class="rem-txt"><strong>¿Ya tienes el look puesto?</strong> Hazte una foto y empieza a construir tu armario digital.</div><span style="color:var(--v)">→</span></div><div class="fb-row" id="${fbId}"><button class="fb-btn" onclick="fb('${fbId}','l')">Me encanta</button><button class="fb-btn" onclick="fb('${fbId}','d')">No me convence</button></div></div></div>`;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;hablar(`Para ${od.OT}: ${od.prendas.slice(0,3).map(p=>p.n).join(', ')}.`);// Buscar imagen editorial via Google Custom Search
+const estImg = perfil?.estilo || 'sofisticada';
+const box = document.getElementById(imgId);
+if(box) box.innerHTML = '<div class="loading-look"><div class="ll-spinner"></div><div class="ll-text">Buscando look...</div></div>';
+getOutfitImg(estImg, od.oc).then(imgUrl => {
+  const b = document.getElementById(imgId);
+  if(b) b.innerHTML = `<img class="o-img" src="${imgUrl}" onload="this.style.opacity=1" style="opacity:0;transition:opacity .5s"><div class="o-badge">StyleAI</div>`;
+});setTimeout(()=>addSugs(['Ver otra opción','Más formal','Más cómodo']),300);}
 
 function fb(id,t){const r=document.getElementById(id);if(!r)return;if(t==='l'){if(perfil){perfil.liked.push(Date.now());localStorage.setItem('sa_perf',JSON.stringify(perfil));}r.innerHTML='<span style="font-size:11.5px;color:var(--v)">✓ Guardado en favoritos</span>';addMsg('ai','Me alegra. Lo anoto para la próxima.');}else{if(perfil){perfil.disliked.push(Date.now());localStorage.setItem('sa_perf',JSON.stringify(perfil));}r.innerHTML='<span style="font-size:11.5px;color:var(--t)">✓ Anotado</span>';setTimeout(()=>{addMsg('ai','¿Qué no te ha convencido?');addSugs(['Demasiado formal','No me gustan los colores','Ver alternativa']);},250);}}
 
