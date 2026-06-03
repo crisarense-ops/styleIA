@@ -15,6 +15,7 @@
   --t:#C4714A;--n:#1A1A1A;--g:#6B6B6B;--gc:#D8D4CC;--w:#fff;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:var(--n);overflow:hidden;-webkit-font-smoothing:antialiased;letter-spacing:-0.01em;}
 .S{display:none;height:100vh;flex-direction:column;overflow:hidden;}
 .S.on{display:flex;}
@@ -200,7 +201,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   background:var(--bg2);
 }
 .ec.on{border-color:var(--v);box-shadow:0 0 0 3px rgba(107,143,113,.18);}
-.ec img{width:100%;height:100%;object-fit:cover;object-position:center 15%;}
+.ec img{width:100%;height:100%;object-fit:cover;object-position:center center;}
 .ec-ov{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.72));padding:10px 9px 8px;color:#fff;}
 .ec-nom{font-size:12px;font-weight:600;font-family:"Playfair Display",serif;}
 .ec-mrc{font-size:9px;opacity:.8;margin-top:1px;}
@@ -234,6 +235,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 
 .ob-foot{padding:11px 18px;background:var(--bg);border-top:1px solid var(--bg3);flex-shrink:0;}
 .btn-sig{width:100%;padding:13px;background:var(--v);color:#fff;border:none;border-radius:28px;font-family:"Inter",sans-serif;font-size:14.5px;font-weight:500;cursor:pointer;opacity:.4;pointer-events:none;transition:all .2s;}
+.btn-back{padding:10px 20px;background:none;border:none;color:var(--g);font-family:"Inter",sans-serif;font-size:14px;cursor:pointer;}
 .btn-sig.on{opacity:1;pointer-events:all;}
 
 /* ══ APP ══ */
@@ -618,7 +620,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
     <button class="ob-skip" onclick="irApp()">Saltar</button>
   </div>
   <div class="ob-body" id="obbody"></div>
-  <div class="ob-foot"><button class="btn-sig" id="bsig" onclick="sigPaso()">Continuar →</button></div>
+  <div class="ob-foot"><button class="btn-back" id="bback" onclick="volverPaso()" style="display:none">← Volver</button><button class="btn-sig" id="bsig" onclick="sigPaso()">Continuar →</button></div>
 </div>
 
 <!-- ══ APP ══ -->
@@ -815,12 +817,16 @@ function selPlan(p){planSel=p;document.getElementById('pGratis').classList.toggl
 
 function confirmarReg(){
   const n=document.getElementById('rNom').value.trim();
-  if(!n){document.getElementById('rNom').focus();return;}
+  const em=document.getElementById('rEmail').value.trim();
+  const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+  if(!n){document.getElementById('rNom').focus();shakeInput('rNom');return;}
+  if(!emailOk){document.getElementById('rEmail').focus();shakeInput('rEmail');return;}
   cerrarRegistro();
   window._nom=n.split(' ')[0];
   if(!clima)abrirCiudad();
   else{mostrar('sOb');renderPaso(0);}
 }
+function shakeInput(id){const el=document.getElementById(id);el.style.border='1.5px solid #C4714A';el.style.animation='shake .3s';setTimeout(()=>{el.style.border='';el.style.animation='';},600);}
 function confirmarLogin(){cerrarLogin();if(perfil)irApp();else{mostrar('sOb');renderPaso(0);}}
 
 // CLIMA
@@ -838,10 +844,11 @@ function tab(id,el){['chat','arm','prf'].forEach(t=>document.getElementById('p'+
 function calcPal(piel,pelo){const m={muy_clara:{rubio:['azul cielo','rosa palo','blanco roto','camel'],castaño:['azul marino','burdeos','verde bosque','beige'],moreno:['negro','azul marino','burdeos','verde esmeralda'],pelirrojo:['verde bosque','azul marino','crema','marrón'],canoso:['azul marino','burdeos','negro','blanco']},clara:{rubio:['azul pastel','rosa nude','beige','verde salvia'],castaño:['terracota','verde salvia','camel','burdeos'],moreno:['negro','blanco','azul marino','burdeos'],pelirrojo:['verde musgo','azul marino','crema','marrón'],canoso:['negro','azul marino','burdeos','blanco']},media:{castaño:['terracota','verde oliva','camel','dorado'],moreno:['blanco','azul cobalto','verde esmeralda','amarillo mostaza'],rubio:['terracota','naranja','verde oliva','camel'],canoso:['blanco','azul cobalto','terracota'],pelirrojo:['verde botella','azul petróleo','crema','ocre']},morena:{moreno:['blanco','naranja','amarillo mostaza','verde esmeralda'],castaño:['terracota','naranja','verde oliva','amarillo'],rubio:['blanco','naranja','terracota','verde'],canoso:['blanco','naranja','amarillo','verde'],pelirrojo:['verde botella','terracota','blanco','ocre']},muy_oscura:{moreno:['blanco','naranja vibrante','amarillo','fucsia'],canoso:['blanco','naranja','fucsia','verde esmeralda'],castaño:['blanco','amarillo','naranja','verde'],rubio:['blanco','fucsia','amarillo','verde'],pelirrojo:['blanco','verde esmeralda','amarillo','fucsia']}};return(m[piel]||m.clara)[pelo]||['negro','blanco','beige','camel'];}
 
 // GEMINI solo para imágenes de outfits en el chat
-async function gImg(prompt){try{const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GK}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instances:[{prompt}],parameters:{sampleCount:1,aspectRatio:'3:4'}})});if(!r.ok)throw new Error();const d=await r.json();const b=d?.predictions?.[0]?.bytesBase64Encoded;return b?`data:image/png;base64,${b}`:null;}catch(e){return null;}}
+async function gImg(prompt){try{const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),8000);const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GK}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instances:[{prompt}],parameters:{sampleCount:1,aspectRatio:'3:4'}}),signal:ctrl.signal});clearTimeout(tid);if(!r.ok)throw new Error();const d=await r.json();const b=d?.predictions?.[0]?.bytesBase64Encoded;return b?`data:image/png;base64,${b}`:null;}catch(e){return null;}}
 
 // ONBOARDING
-function renderPaso(n){obP=n;const body=document.getElementById('obbody'),btn=document.getElementById('bsig');btn.classList.remove('on');for(let i=0;i<4;i++)document.getElementById('os'+i)?.classList.toggle('on',i<=n);[rNom,rEst,rInspo,rPiel,rPelo][n]?.call(null,body,btn);}
+function renderPaso(n){obP=n;const body=document.getElementById('obbody'),btn=document.getElementById('bsig'),bback=document.getElementById('bback');btn.classList.remove('on');if(bback)bback.style.display=n>0?'block':'none';for(let i=0;i<4;i++)document.getElementById('os'+i)?.classList.toggle('on',i<=n);[rNom,rEst,rInspo,rPiel,rPelo][n]?.call(null,body,btn);}
+function volverPaso(){if(obP>0)renderPaso(obP-1);}
 
 // Nota: 5 pasos ahora (añadimos inspiración)
 function rNom(b,btn){b.innerHTML=`<div class="ob-tit">¡Hola${window._nom?' '+window._nom:''}!</div><div class="ob-sub">Tu estilista personal. Cuéntame sobre ti.</div><input class="ob-input" type="text" id="inpN" placeholder="¿Cómo te llamas?" value="${window._nom||''}" autocomplete="given-name" oninput="chkN()" onkeydown="if(event.key==='Enter'&&this.value.trim().length>1)sigPaso()"><div style="font-size:11px;color:var(--g);margin-top:5px"></div>`;btn.style.display='block';if(window._nom)btn.classList.add('on');setTimeout(()=>document.getElementById('inpN')?.focus(),200);}
@@ -898,7 +905,7 @@ function addTyping(){const c=document.getElementById('chat');const d=document.cr
 function rmTyping(){document.getElementById('ty')?.remove();}
 function addSugs(ops){const c=document.getElementById('chat');const d=document.createElement('div');d.className='msg ai';d.style.maxWidth='100%';const s=document.createElement('div');s.className='sugs';ops.forEach(o=>{const b=document.createElement('button');b.className='sug';b.textContent=o;b.onclick=()=>{document.getElementById('ci').value=o;send();};s.appendChild(b);});d.innerHTML=`<div class="av ai"></div>`;d.appendChild(s);c.appendChild(d);c.scrollTop=c.scrollHeight;}
 
-function initChat(){if(!clima){setTimeout(initChat,400);return;}const ll=clima.ll?` Hoy llueve — lo tendré muy en cuenta.`:'';const msg=`Hola${perfil?.nombre?' **'+perfil.nombre+'**':''}! Estás en **${clima.c}** — **${clima.t}°C**, ${clima.cond}.${ll} ¿Cuál es tu plan de hoy?`;addMsg('ai',msg);hablar(limpiar(msg));setTimeout(()=>addSugs(['☀️ Ocio con amigas','🏢 Trabajo o reunión','🍽️ Cena esta noche','🌙 Salida nocturna','🎉 Evento especial','✈️ Viaje']),300);}
+function initChat(){if(!clima){setTimeout(initChat,400);return;}const ll=clima.ll?` Hoy llueve — lo tendré muy en cuenta.`:'';const msg=`Hola${perfil?.nombre?' **'+perfil.nombre+'**':''}! Estás en **${clima.c}** — **${clima.t}°C**, ${clima.cond}.${ll} ¿Cuál es tu plan de hoy?`;addMsg('ai',msg);hablar(limpiar(msg));setTimeout(()=>addSugs(['Ocio con amigas','Trabajo o reunión','Cena esta noche','Salida nocturna','Evento especial','Viaje']),300);}
 
 // Detecta si el usuario tiene una prenda tipo en su armario
 function tieneEnArmario(tipo) {
@@ -1015,12 +1022,12 @@ function buildPImg(oc){
   return `High-end fashion photography, young Spanish woman 26-34 years, ${ent}, wearing ${est.n} style: ${prendaTend} in ${colTend}, ${est.pan} cut trousers, ${est.cal}, confident natural pose${cap}, OI 2025 fashion trend, editorial quality, photorealistic, sharp focus, beautiful lighting`;
 }
 
-async function mostrarOutfit(txt){const od=outfitD(txt);const pH=od.prendas.filter(p=>p?.n).map(p=>`<div class="o-prenda"><div class="p-dot" style="background:${p.h}"></div><div><div class="p-nom">${p.n}</div><div class="p-why">${p.r}</div></div></div>`).join('');const alH=od.al?`<div class="ip a"><span>${od.al}</span></div>`:'';const fbId=`fb${Date.now()}`,imgId=`im${Date.now()}`;const chat=document.getElementById('chat');const d=document.createElement('div');d.className='msg ai';d.style.maxWidth='92%';d.innerHTML=`<div class="av ai"></div><div style="width:100%"><div class="ocard"><div class="o-imgbox" id="${imgId}"><div class="o-skel"><span style="font-size:13px;color:var(--g)">Generando tu look...</span></div></div><div class="o-body"><div class="o-tit">Tu look para ${od.OT}</div><div class="o-prendas">${pH}</div><div class="ips"><div class="ip g"><span>${od.colores}</span></div><div class="ip b"><span>${od.clima}</span></div><div class="ip o"><span>${od.ocasion}</span></div>${alH}</div></div><div class="reminder" onclick="tab('arm',document.querySelectorAll('.a-tab')[1])"><span style="font-size:16px">📸</span><div class="rem-txt"><strong>Sube tus prendas</strong>La próxima vez propongo looks con tu ropa real.</div><span style="color:var(--v)">→</span></div><div class="fb-row" id="${fbId}"><button class="fb-btn" onclick="fb('${fbId}','l')">Me encanta</button><button class="fb-btn" onclick="fb('${fbId}','d')">No me convence</button></div></div></div>`;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;hablar(`Para ${od.OT}: ${od.prendas.slice(0,3).map(p=>p.n).join(', ')}.`);gImg(buildPImg(od.oc)).then(img=>{const box=document.getElementById(imgId);if(box&&img)box.innerHTML=`<img class="o-img" src="${img}"><div class="o-badge">StyleAI</div>`;});setTimeout(()=>addSugs(['Ver otra opción','Más formal','Más cómodo']),300);}
+async function mostrarOutfit(txt){const od=outfitD(txt);const pH=od.prendas.filter(p=>p?.n).map(p=>`<div class="o-prenda"><div class="p-dot" style="background:${p.h}"></div><div><div class="p-nom">${p.n}</div><div class="p-why">${p.r}</div></div></div>`).join('');const alH=od.al?`<div class="ip a"><span>${od.al}</span></div>`:'';const fbId=`fb${Date.now()}`,imgId=`im${Date.now()}`;const chat=document.getElementById('chat');const d=document.createElement('div');d.className='msg ai';d.style.maxWidth='92%';d.innerHTML=`<div class="av ai"></div><div style="width:100%"><div class="ocard"><div class="o-imgbox" id="${imgId}"><div class="o-skel"><span style="font-size:13px;color:var(--g)">Generando tu look...</span></div></div><div class="o-body"><div class="o-tit">Tu look para ${od.OT}</div><div class="o-prendas">${pH}</div><div class="ips"><div class="ip g"><span>${od.colores}</span></div><div class="ip b"><span>${od.clima}</span></div><div class="ip o"><span>${od.ocasion}</span></div>${alH}</div></div><div class="reminder" onclick="tab('arm',document.querySelectorAll('.a-tab')[1])"><span style="font-size:16px">📸</span><div class="rem-txt"><strong>¿Ya tienes el look puesto?</strong> Hazte una foto y empieza a construir tu armario digital.</div><span style="color:var(--v)">→</span></div><div class="fb-row" id="${fbId}"><button class="fb-btn" onclick="fb('${fbId}','l')">Me encanta</button><button class="fb-btn" onclick="fb('${fbId}','d')">No me convence</button></div></div></div>`;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;hablar(`Para ${od.OT}: ${od.prendas.slice(0,3).map(p=>p.n).join(', ')}.`);gImg(buildPImg(od.oc)).then(img=>{const box=document.getElementById(imgId);if(!box)return;if(img){box.innerHTML=`<img class="o-img" src="${img}"><div class="o-badge">StyleAI</div>`;}else{const est=ESTILOS[perfil?.estilo||'sofisticada'];const palC=est.col[0]||'beige';box.innerHTML=`<div class="o-noimg" style="background:linear-gradient(160deg,#F5F0E8,#E8E0D0);height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center"><div style="font-size:32px;margin-bottom:8px">👗</div><div style="font-size:12px;color:var(--g);line-height:1.5">Look <strong>${od.OT}</strong><br>${est.n}</div></div>`;}});setTimeout(()=>addSugs(['Ver otra opción','Más formal','Más cómodo']),300);}
 
 function fb(id,t){const r=document.getElementById(id);if(!r)return;if(t==='l'){if(perfil){perfil.liked.push(Date.now());localStorage.setItem('sa_perf',JSON.stringify(perfil));}r.innerHTML='<span style="font-size:11.5px;color:var(--v)">✓ Guardado en favoritos</span>';addMsg('ai','Me alegra. Lo anoto para la próxima.');}else{if(perfil){perfil.disliked.push(Date.now());localStorage.setItem('sa_perf',JSON.stringify(perfil));}r.innerHTML='<span style="font-size:11.5px;color:var(--t)">✓ Anotado</span>';setTimeout(()=>{addMsg('ai','¿Qué no te ha convencido?');addSugs(['Demasiado formal','No me gustan los colores','Ver alternativa']);},250);}}
 
-async function send(){if(busy)return;const ci=document.getElementById('ci');const txt=ci.value.trim();if(!txt)return;ci.value='';ci.style.height='auto';addMsg('u',txt);busy=true;document.getElementById('sndb').disabled=true;addTyping();await new Promise(r=>setTimeout(r,600+Math.random()*300));rmTyping();proc(txt);busy=false;document.getElementById('sndb').disabled=false;}
-function proc(txt){const t=txt.toLowerCase();if(!clima){const k=Object.keys(CIUDADES).find(k=>t.includes(k));if(k)setClima(CIUDADES[k]);else{addMsg('ai','¿Desde qué ciudad me escribes?');addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao']);return;}}if(['alternativ','otra opcion','otra opción'].some(k=>t.includes(k))){addMsg('ai','Aquí tienes otra opción.');setTimeout(()=>mostrarOutfit(txt),150);return;}if(['hola','buenas','hey'].some(k=>t.includes(k))){const n=perfil?.nombre?` **${perfil.nombre}**`:'';const m=`¡Hola${n}! En **${clima.c}** hay **${clima.t}°C**. ¿Tu plan?`;addMsg('ai',m);hablar(limpiar(m));addSugs(['🏢 Trabajo','☀️ Ocio','🍽️ Cena','🌙 Noche']);return;}if(['outfit','ponerse','vestir','ropa','look','trabajo','jefe','reunion','reunión','cena','ocio','noche','salida','evento','viaje','gym','deporte','formal','hoy','plan','pongo','llevar'].some(k=>t.includes(k))){
+async function send(){if(busy)return;const ci=document.getElementById('ci');const txt=ci.value.trim();if(!txt)return;ci.value='';ci.style.height='auto';addMsg('u',txt);busy=true;document.getElementById('sndb').disabled=true;addTyping();await new Promise(r=>setTimeout(r,200));rmTyping();proc(txt);busy=false;document.getElementById('sndb').disabled=false;}
+function proc(txt){const t=txt.toLowerCase();if(!clima){const k=Object.keys(CIUDADES).find(k=>t.includes(k));if(k)setClima(CIUDADES[k]);else{addMsg('ai','¿Desde qué ciudad me escribes?');addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao']);return;}}if(['alternativ','otra opcion','otra opción'].some(k=>t.includes(k))){addMsg('ai','Aquí tienes otra opción.');setTimeout(()=>mostrarOutfit(txt),150);return;}if(['hola','buenas','hey'].some(k=>t.includes(k))){const n=perfil?.nombre?` **${perfil.nombre}**`:'';const m=`¡Hola${n}! En **${clima.c}** hay **${clima.t}°C**. ¿Tu plan?`;addMsg('ai',m);hablar(limpiar(m));addSugs(['Trabajo o reunión','Ocio','Cena','Salida nocturna']);return;}if(['outfit','ponerse','vestir','ropa','look','trabajo','jefe','reunion','reunión','cena','ocio','noche','salida','evento','viaje','gym','deporte','formal','hoy','plan','pongo','llevar'].some(k=>t.includes(k))){
   const od=outfitD(txt);
   const n=perfil?.nombre?` **${perfil.nombre}**`:'';
   const est=ESTILOS[perfil?.estilo||'sofisticada'];
@@ -1030,7 +1037,7 @@ function proc(txt){const t=txt.toLowerCase();if(!clima){const k=Object.keys(CIUD
   addMsg('ai',`${inspoMsg?inspoMsg+' Para':'Para'} **${od.OT}** con **${clima.t}°C** en ${clima.c} y tu estilo ${est.n}:`);
   setTimeout(()=>mostrarOutfit(txt),150);
   return;
-}const rs=[`¿Para qué plan? Con ${clima.t}°C en ${clima.c} te propongo algo perfecto.`,`Cuéntame adónde vas.`];addMsg('ai',rs[Math.floor(Math.random()*rs.length)]);addSugs(['🏢 Reunión','☀️ Ocio','🍽️ Cena','🌙 Noche','🎉 Evento']);}
+}const rs=[`¿Para qué plan? Con ${clima.t}°C en ${clima.c} te propongo algo perfecto.`,`Cuéntame adónde vas.`];addMsg('ai',rs[Math.floor(Math.random()*rs.length)]);addSugs(['Trabajo o reunión','Ocio','Cena','Salida nocturna','Evento especial']);}
 
 function limpiar(t){return t.replace(/[✨👗🎨🌤️🎯🔄⚠️☀️🌧️⛅☁️🏢🍽️🥂🎉✈️🌙🤍🖤👑🌿]/g,'').replace(/\*\*(.*?)\*\*/g,'$1').replace(/\n+/g,'. ').replace(/\s+/g,' ').trim();}
 function getVoz(){const vs=window.speechSynthesis?.getVoices()||[];const ps=[v=>v.name.includes('Mónica')&&v.lang.startsWith('es'),v=>v.name.includes('Monica')&&v.lang.startsWith('es'),v=>v.name.toLowerCase().includes('google')&&v.lang==='es-ES',v=>v.lang==='es-ES',v=>v.lang.startsWith('es')];for(const f of ps){const v=vs.find(f);if(v)return v;}return null;}
