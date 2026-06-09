@@ -919,6 +919,13 @@ function selPiel(k){document.querySelectorAll('.piel-op').forEach(c=>c.classList
 function rPelo(b,btn){btn.style.display='none';const p=[{k:'rubio',c:'#F4D03F',l:'Rubio'},{k:'castaño',c:'#8B4513',l:'Castaño'},{k:'moreno',c:'#1C0A00',l:'Moreno'},{k:'pelirrojo',c:'#CC4400',l:'Pelirrojo'},{k:'canoso',c:'#C0C0C0',l:'Canoso'}];b.innerHTML=`<div class="ob-tit">¿Color de pelo?</div><div class="ob-sub"></div><div class="pelo-g">${p.map(x=>`<div class="pelo-op" onclick="selPelo('${x.k}')"><div class="pelo-c" style="background:${x.c}"></div><div class="pelo-l">${x.l}</div></div>`).join('')}</div>`;}
 function selPelo(k){document.querySelectorAll('.pelo-op').forEach(c=>c.classList.remove('on'));event.currentTarget.classList.add('on');window._pelo=k;setTimeout(finOb,300);}
 
+
+function rNom(b,btn){b.innerHTML=`<div class="ob-tit">¡Hola${window._nom?' '+window._nom:''}! ✨</div><div class="ob-sub">Tu estilista personal. Cuéntame sobre ti.</div><input class="ob-input" type="text" id="inpN" placeholder="¿Cómo te llamas?" value="${window._nom||''}" autocomplete="given-name" oninput="chkN()" onkeydown="if(event.key==='Enter'&&this.value.trim().length>1)sigPaso()"><div style="font-size:11px;color:var(--g);margin-top:5px">Solo tu nombre 🤍</div>`;btn.style.display='block';if(window._nom)btn.classList.add('on');setTimeout(()=>document.getElementById('inpN')?.focus(),200);}
+function chkN(){document.getElementById('bsig').classList.toggle('on',document.getElementById('inpN')?.value.trim().length>1);}
+function rEst(b,btn){
+  btn.style.display='none';
+  b.innerHTML=`<div class="ob-tit">¿Tu estilo?</div><div class="ob-sub">Toca el que más te represente.</div><div class="eg">${Object.entries(ESTILOS).map(([k,e])=>`<div class="ec" onclick="selEst('${k}')"><img src="${FOTOS_ESTILO[k]}" alt="${e.n}" loading="eager"><div class="ec-ov"><div class="ec-nom">${e.n}</div><div class="ec-mrc">${e.m}</div></div><div class="ec-chk">✓</div></div>`).join('')}</div>`;
+}
 function renderPaso(n){obP=n;const body=document.getElementById('obbody'),btn=document.getElementById('bsig'),bback=document.getElementById('bback');btn.classList.remove('on');if(bback)bback.style.display=n>0?'block':'none';for(let i=0;i<4;i++)document.getElementById('os'+i)?.classList.toggle('on',i<=n);[rNom,rEst,rInspo,rPiel,rPelo][n]?.call(null,body,btn);}
 function volverPaso(){if(obP>0)renderPaso(obP-1);}
 function sigPaso(){
