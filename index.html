@@ -862,10 +862,10 @@ function noImgCard(estilo,oc){
     <div style="font-size:11px;color:var(--g);line-height:1.6;max-width:180px">Imagen no disponible en este momento</div>
   </div>`;
 }
-async function getOutfitImg(estilo,oc){
+async function getOutfitImg(estilo,oc,customPrompt=null){
   const estiloQ={sofisticada:'parisian chic elegant',urbana:'street style minimal casual',clasica:'classic feminine power',boho:'boho free spirit mediterranean'}[estilo]||'fashion';
   const ocasionQ={formal:'professional office meeting',casual:'casual day out',noche:'night out bar',cena_el:'elegant dinner restaurant',cena_in:'casual dinner friends',viaje:'travel airport',deporte:'sporty active'}[oc]||'everyday';
-  const prompt=`${estiloQ} woman outfit ${ocasionQ}, full body, fashion editorial photo, white background, high quality, photorealistic`;
+  const prompt=customPrompt||`${estiloQ} woman outfit ${ocasionQ}, full body, fashion editorial photo, white background, high quality, photorealistic`;
 
   // 1. Intentar Gemini Imagen 3
   try{
@@ -904,8 +904,59 @@ function selEst(k){document.querySelectorAll('.ec').forEach(c=>c.classList.remov
 
 function rInspo(b,btn){
   btn.style.display='block';btn.classList.add('on');
-  const fotos=FOTOS_INSPO[window._est||'sofisticada'];
-  b.innerHTML=`<div class="ob-tit">¿Qué looks te inspiran?</div><div class="ig-count" id="igCount">Toca todos los que te gusten</div><div class="ig">${fotos.map((f,i)=>`<div class="ii" data-idx="${i}" onclick="toggleInspo(this)"><img src="${f}" alt="look ${i+1}" loading="eager"><div class="ii-chk">✓</div></div>`).join('')}</div>`;
+  const est=window._est||'sofisticada';
+  const prompts={
+    sofisticada:[
+      'parisian chic woman outfit, navy blazer white trousers, street style editorial',
+      'french minimalist woman, beige coat, wide leg pants, coffee shop',
+      'soft luxury woman outfit, camel trench coat, loafers, city walk',
+      'parisian woman, striped top, high waist jeans, silk scarf, editorial',
+      'elegant minimal woman, cream suit, pointed heels, clean background',
+      'chic woman, black turtleneck, tailored trousers, gold jewelry'
+    ],
+    urbana:[
+      'street style woman, oversized white shirt, barrel jeans, sneakers',
+      'cool girl outfit, crop top, wide leg jeans, cap, urban street',
+      'minimal street style, neutral tones, baggy jeans, white tee',
+      'urban woman, leather jacket, straight jeans, ankle boots',
+      'effortless cool woman, linen shirt, mom jeans, tote bag',
+      'street minimal woman, grey set, chunky sneakers, sunglasses'
+    ],
+    clasica:[
+      'classic elegant woman, navy blazer, white shirt, tailored trousers',
+      'timeless feminine outfit, midi skirt, silk blouse, heels, office',
+      'sophisticated woman, camel coat, pearl jewelry, clean editorial',
+      'power feminine woman, structured blazer, pencil skirt, heels',
+      'elegant office woman, cream blouse, wide leg trousers, loafers',
+      'classic chic woman, monochrome outfit, minimal accessories'
+    ],
+    boho:[
+      'boho chic woman, floral maxi dress, suede jacket, sandals',
+      'free spirit woman, paisley skirt, linen top, layered necklaces',
+      'mediterranean style woman, woven bag, espadrilles, flowy dress',
+      'boho editorial, earthy tones, maxi skirt, boots, golden hour',
+      'natural woman, linen wide pants, crop top, raffia bag, summer',
+      'free spirit outfit, embroidered blouse, denim, leather sandals'
+    ]
+  };
+  const ps=prompts[est]||prompts.sofisticada;
+  // Render grid con skeletons
+  b.innerHTML=`<div class="ob-tit">¿Qué looks te inspiran?</div><div class="ig-count" id="igCount">Toca todos los que te gusten</div><div class="ig">${ps.map((_,i)=>`<div class="ii" data-idx="${i}" onclick="toggleInspo(this)"><div class="ii-skel" id="iis${i}" style="width:100%;height:100%;background:#f0ebe4;display:flex;align-items:center;justify-content:center"><div style="width:24px;height:24px;border:2.5px solid #ddd;border-top-color:var(--v);border-radius:50%;animation:spin .8s linear infinite"></div></div><div class="ii-chk">✓</div></div>`).join('')}</div>`;
+  // Generate with Gemini
+  ps.forEach((prompt,i)=>{
+    getOutfitImg(est,'casual',prompt).then(url=>{
+      const skel=document.getElementById('iis'+i);
+      if(!skel)return;
+      if(url){
+        const img=new Image();
+        img.onload=()=>{skel.outerHTML=`<img src="${url}" alt="look ${i+1}" loading="eager" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s" onload="this.style.opacity=1">`;};
+        img.onerror=()=>{skel.style.background='#e8e4de';skel.innerHTML='';};
+        img.src=url;
+      } else {
+        skel.style.background='#e8e4de';skel.innerHTML='';
+      }
+    });
+  });
 }
 function toggleInspo(el){
   el.classList.toggle('on');
