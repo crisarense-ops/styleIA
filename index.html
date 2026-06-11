@@ -439,6 +439,49 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   .l-pasos{gap:6px;}
   .l-pt{font-size:10.5px;}
 }
+
+/* ── ADMIN ─────────────────────────────────────────── */
+#sAdmin{display:none;position:fixed;inset:0;background:#0f0f0f;z-index:9999;overflow-y:auto;font-family:'Inter',sans-serif;}
+#sAdmin.on{display:block;}
+.adm-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid #1e1e1e;}
+.adm-logo{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.3px;}
+.adm-logo span{color:#6B8F71;}
+.adm-close{background:#1e1e1e;border:none;color:#999;font-size:13px;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;}
+.adm-close:hover{color:#fff;}
+.adm-body{padding:24px;max-width:960px;margin:0 auto;}
+.adm-section{margin-bottom:32px;}
+.adm-sec-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#555;margin-bottom:14px;font-weight:600;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:8px;}
+.kpi-card{background:#161616;border:1px solid #222;border-radius:12px;padding:18px 20px;}
+.kpi-val{font-size:32px;font-weight:700;color:#fff;line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums;}
+.kpi-val.green{color:#6B8F71;}
+.kpi-val.amber{color:#E0A96D;}
+.kpi-val.blue{color:#6B8FD4;}
+.kpi-label{font-size:12px;color:#555;}
+.adm-table{width:100%;border-collapse:collapse;}
+.adm-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#444;padding:8px 12px;border-bottom:1px solid #1e1e1e;font-weight:600;}
+.adm-table td{padding:12px 12px;border-bottom:1px solid #181818;font-size:13px;color:#ccc;vertical-align:middle;}
+.adm-table tr:last-child td{border:none;}
+.adm-table tr:hover td{background:#131313;}
+.badge-plan{display:inline-block;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;}
+.badge-gratis{background:#1e1e1e;color:#666;}
+.badge-premium{background:#1a2e1c;color:#6B8F71;}
+.adm-empty{text-align:center;padding:48px 20px;color:#444;font-size:14px;}
+.adm-bar-wrap{background:#161616;border:1px solid #222;border-radius:12px;padding:20px;}
+.adm-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.adm-bar-row:last-child{margin-bottom:0;}
+.adm-bar-label{font-size:12px;color:#666;width:80px;flex-shrink:0;}
+.adm-bar-track{flex:1;background:#1e1e1e;border-radius:4px;height:8px;overflow:hidden;}
+.adm-bar-fill{height:100%;border-radius:4px;background:#6B8F71;transition:width .6s ease;}
+.adm-bar-count{font-size:12px;color:#555;width:30px;text-align:right;flex-shrink:0;}
+.adm-login{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px;}
+.adm-login-box{background:#161616;border:1px solid #222;border-radius:16px;padding:32px;width:320px;}
+.adm-login-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;}
+.adm-login-sub{font-size:13px;color:#555;margin-bottom:20px;}
+.adm-input{width:100%;background:#0f0f0f;border:1px solid #222;border-radius:8px;padding:10px 14px;font-size:14px;color:#fff;font-family:'Inter',sans-serif;box-sizing:border-box;outline:none;margin-bottom:10px;}
+.adm-input:focus{border-color:#6B8F71;}
+.adm-btn{width:100%;background:#6B8F71;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+.adm-refresh{background:#1e1e1e;border:none;color:#6B8F71;font-size:12px;padding:6px 12px;border-radius:7px;cursor:pointer;font-family:'Inter',sans-serif;}
 </style>
 </head>
 <body>
@@ -1296,6 +1339,204 @@ window.addEventListener('load',()=>{
   if(perfil)irApp();
   if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 });
+
+
+// ── ADMIN PANEL ─────────────────────────────────────────────
+const ADM_PASS = 'styleai2025';
+const PREMIUM_PRICE = 5.99;
+
+function admLogin(){
+  const p=document.getElementById('admPass').value;
+  const err=document.getElementById('admLoginErr');
+  if(p===ADM_PASS){
+    document.getElementById('admLoginWrap').style.display='none';
+    document.getElementById('admDashboard').style.display='block';
+    renderAdmin();
+    err.style.display='none';
+  } else {
+    err.style.display='block';
+    document.getElementById('admPass').value='';
+    document.getElementById('admPass').focus();
+  }
+}
+
+// Acceso oculto: triple tap en logo StyleAI de la landing
+let _admTaps=0,_admTimer=null;
+function admTap(){
+  _admTaps++;
+  clearTimeout(_admTimer);
+  _admTimer=setTimeout(()=>{_admTaps=0;},1200);
+  if(_admTaps>=5){
+    _admTaps=0;
+    document.getElementById('sAdmin').classList.add('on');
+    document.getElementById('admPass').focus();
+  }
+}
+
+function renderAdmin(){
+  const users=getUsuarios();
+  const emails=Object.keys(users);
+  const now=Date.now();
+  const DAY=86400000;
+
+  // Calcular métricas
+  const total=emails.length;
+  const premium=emails.filter(e=>users[e].plan==='premium').length;
+  const gratis=total-premium;
+  const mrr=premium*PREMIUM_PRICE;
+  const arr=mrr*12;
+
+  const hoy=emails.filter(e=>(now-users[e].createdAt)<DAY).length;
+  const semana=emails.filter(e=>(now-users[e].createdAt)<7*DAY).length;
+  const mes=emails.filter(e=>(now-users[e].createdAt)<30*DAY).length;
+
+  // Usuarios con armario
+  const conArmario=emails.filter(e=>{
+    try{const a=JSON.parse(localStorage.getItem('sa_arm_'+e)||'[]');return a.length>0;}catch{return false;}
+  }).length;
+  const conPerfil=emails.filter(e=>!!localStorage.getItem('sa_perf_'+e)).length;
+
+  // Conversion rate
+  const convRate=total>0?((premium/total)*100).toFixed(1):0;
+
+  // Armario stats
+  let totalPrendas=0;
+  emails.forEach(e=>{
+    try{const a=JSON.parse(localStorage.getItem('sa_arm_'+e)||'[]');totalPrendas+=a.length;}catch{}
+  });
+  const avgPrendas=total>0?(totalPrendas/total).toFixed(1):0;
+
+  // Lista usuarios ordenada por fecha
+  const userList=emails.map(e=>({
+    email:e,
+    nombre:users[e].nombre||'-',
+    plan:users[e].plan||'gratis',
+    fecha:users[e].createdAt,
+    prendas:(()=>{try{return JSON.parse(localStorage.getItem('sa_arm_'+e)||'[]').length;}catch{return 0;}})(),
+    perfil:!!localStorage.getItem('sa_perf_'+e)
+  })).sort((a,b)=>b.fecha-a.fecha);
+
+  // Estilos más elegidos
+  const estiloCount={};
+  emails.forEach(e=>{
+    try{const p=JSON.parse(localStorage.getItem('sa_perf_'+e)||'null');if(p?.estilo)estiloCount[p.estilo]=(estiloCount[p.estilo]||0)+1;}catch{}
+  });
+  const estilosArr=Object.entries(estiloCount).sort((a,b)=>b[1]-a[1]);
+  const maxEst=estilosArr[0]?.[1]||1;
+
+  const fmt=n=>n.toLocaleString('es-ES');
+  const fmtDate=ts=>{const d=new Date(ts);return d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'2-digit'});};
+  const fmtTime=ts=>{const d=new Date(ts);const diff=now-ts;if(diff<3600000)return Math.floor(diff/60000)+'m';if(diff<DAY)return Math.floor(diff/3600000)+'h';return fmtDate(ts);};
+
+  document.getElementById('admBody').innerHTML=`
+    <!-- KPIs principales -->
+    <div class="adm-section">
+      <div class="adm-sec-title">Resumen</div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-val">${fmt(total)}</div><div class="kpi-label">Usuarios totales</div></div>
+        <div class="kpi-card"><div class="kpi-val green">${fmt(premium)}</div><div class="kpi-label">Premium activos</div></div>
+        <div class="kpi-card"><div class="kpi-val amber">€${mrr.toFixed(2)}</div><div class="kpi-label">MRR</div></div>
+        <div class="kpi-card"><div class="kpi-val amber">€${arr.toFixed(0)}</div><div class="kpi-label">ARR proyectado</div></div>
+        <div class="kpi-card"><div class="kpi-val blue">${convRate}%</div><div class="kpi-label">Conversión Free→Premium</div></div>
+        <div class="kpi-card"><div class="kpi-val">${conArmario}</div><div class="kpi-label">Con armario activo</div></div>
+      </div>
+    </div>
+
+    <!-- Adquisición -->
+    <div class="adm-section">
+      <div class="adm-sec-title">Adquisición</div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-val green">${hoy}</div><div class="kpi-label">Nuevos hoy</div></div>
+        <div class="kpi-card"><div class="kpi-val">${semana}</div><div class="kpi-label">Últimos 7 días</div></div>
+        <div class="kpi-card"><div class="kpi-val">${mes}</div><div class="kpi-label">Últimos 30 días</div></div>
+        <div class="kpi-card"><div class="kpi-val">${conPerfil}</div><div class="kpi-label">Onboarding completado</div></div>
+        <div class="kpi-card"><div class="kpi-val">${avgPrendas}</div><div class="kpi-label">Prendas/usuario (media)</div></div>
+        <div class="kpi-card"><div class="kpi-val">${fmt(totalPrendas)}</div><div class="kpi-label">Prendas en total</div></div>
+      </div>
+    </div>
+
+    <!-- Estilos -->
+    ${estilosArr.length>0?`
+    <div class="adm-section">
+      <div class="adm-sec-title">Estilos más elegidos</div>
+      <div class="adm-bar-wrap">
+        ${estilosArr.map(([est,n])=>`
+        <div class="adm-bar-row">
+          <div class="adm-bar-label" style="text-transform:capitalize">${est}</div>
+          <div class="adm-bar-track"><div class="adm-bar-fill" style="width:${(n/maxEst*100).toFixed(0)}%"></div></div>
+          <div class="adm-bar-count">${n}</div>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
+
+    <!-- Tabla usuarios -->
+    <div class="adm-section">
+      <div class="adm-sec-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Usuarios (${total})</span>
+        ${total>0?`<button class="adm-refresh" onclick="admExport()">⬇ Exportar CSV</button>`:''}
+      </div>
+      ${total===0?`<div class="adm-empty">Sin usuarios registrados todavía.</div>`:`
+      <div style="overflow-x:auto;background:#161616;border:1px solid #222;border-radius:12px">
+        <table class="adm-table">
+          <thead><tr>
+            <th>Usuario</th><th>Email</th><th>Plan</th><th>Prendas</th><th>Perfil</th><th>Registro</th>
+          </tr></thead>
+          <tbody>
+            ${userList.map(u=>`<tr>
+              <td style="color:#fff;font-weight:500">${u.nombre}</td>
+              <td style="color:#666">${u.email}</td>
+              <td><span class="badge-plan badge-${u.plan}">${u.plan==='premium'?'⭐ Premium':'Gratis'}</span></td>
+              <td style="color:${u.prendas>0?'#6B8F71':'#444'}">${u.prendas}</td>
+              <td>${u.perfil?'<span style="color:#6B8F71">✓</span>':'<span style="color:#333">—</span>'}</td>
+              <td style="color:#555">${fmtTime(u.fecha)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`}
+    </div>
+  `;
+}
+
+function admExport(){
+  const users=getUsuarios();
+  const emails=Object.keys(users);
+  const rows=[['Nombre','Email','Plan','Prendas','Perfil','Fecha registro']];
+  emails.forEach(e=>{
+    const u=users[e];
+    const prendas=(()=>{try{return JSON.parse(localStorage.getItem('sa_arm_'+e)||'[]').length;}catch{return 0;}})();
+    rows.push([u.nombre,e,u.plan||'gratis',prendas,!!localStorage.getItem('sa_perf_'+e)?'Sí':'No',new Date(u.createdAt).toLocaleDateString('es-ES')]);
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='styleai_usuarios_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
 </script>
+
+<!-- ══ ADMIN PANEL ══ -->
+<div id="sAdmin">
+  <div id="admLoginWrap" class="adm-login">
+    <div style="font-size:13px;color:#6B8F71;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">StyleAI</div>
+    <div class="adm-login-box">
+      <div class="adm-login-title">Admin</div>
+      <div class="adm-login-sub">Acceso restringido</div>
+      <input class="adm-input" type="password" id="admPass" placeholder="Contraseña admin" onkeydown="if(event.key==='Enter')admLogin()">
+      <div id="admLoginErr" style="font-size:12px;color:#c0392b;margin-bottom:10px;display:none">Contraseña incorrecta</div>
+      <button class="adm-btn" onclick="admLogin()">Entrar</button>
+    </div>
+  </div>
+  <div id="admDashboard" style="display:none">
+    <div class="adm-header">
+      <div class="adm-logo">Style<span>AI</span> <span style="color:#444;font-weight:400;font-size:13px">· Admin</span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="adm-refresh" onclick="renderAdmin()">↻ Actualizar</button>
+        <button class="adm-close" onclick="document.getElementById('sAdmin').classList.remove('on')">Salir</button>
+      </div>
+    </div>
+    <div class="adm-body" id="admBody"></div>
+  </div>
+</div>
 </body>
 </html>
