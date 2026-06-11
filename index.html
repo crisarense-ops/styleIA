@@ -1086,27 +1086,38 @@ function mostrarOutfit(txt){
   const od=outfitD(txt);
   const pH=od.prendas.filter(p=>p?.n).map(p=>`<div class="o-prenda"><div class="p-dot" style="background:${p.h}"></div><div><div class="p-nom">${p.n}</div><div class="p-why">${p.r}</div></div></div>`).join('');
   const alH=od.al?`<div class="ip a"><span>⚠️</span><span>${od.al}</span></div>`:'';
-  const fbId=`fb${Date.now()}`,imgId=`im${Date.now()}`;
+  const fbId=`fb${Date.now()}`;
   const chat=document.getElementById('chat');
   const d=document.createElement('div');
   d.className='msg ai';d.style.maxWidth='92%';
 
   // Collage con fotos reales del armario
   const collage=generarCollageArmario(od.prendas);
-  const tieneArmario=armario.filter(p=>p.imgData).length>=1;
+  const nFotos=armario.filter(p=>p.imgData).length;
+  const nPrendas=armario.length;
 
+  // Zona visual — siempre presente, cambia según estado del armario
   let visualHTML='';
   if(collage){
-    visualHTML='<div class="o-imgbox" id="'+imgId+'">'+collage+'</div>';
-  } else if(tieneArmario){
-    visualHTML='<div class="o-imgbox" id="'+imgId+'" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--bg2)"><span style="font-size:28px">👗</span><div style="font-size:13px;color:var(--g);text-align:center;padding:0 16px">Añade fotos a tus prendas para ver el look</div></div>';
+    // Tiene fotos: mostrar collage
+    visualHTML='<div class="o-imgbox">'+collage+'</div>';
+  } else if(nPrendas>0 && nFotos===0){
+    // Tiene prendas pero sin foto: animar a fotografiarlas
+    visualHTML='<div class="o-imgbox" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(135deg,var(--bg2),var(--vl));cursor:pointer;border:2px dashed var(--v)" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><span style="font-size:36px">📷</span><div style="font-size:14px;color:var(--vd);text-align:center;padding:0 20px;line-height:1.5;font-weight:600">¡Fotografía tus prendas!</div><div style="font-size:13px;color:var(--g);text-align:center;padding:0 20px;line-height:1.4">Añade fotos y veré el look con tu ropa real</div><div style="background:var(--v);color:#fff;padding:9px 20px;border-radius:20px;font-size:13px;font-weight:600">Añadir fotos →</div></div>';
   } else {
-    visualHTML='<div class="o-imgbox" id="'+imgId+'" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--bg2);cursor:pointer" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><span style="font-size:32px">📸</span><div style="font-size:14px;color:var(--vd);text-align:center;padding:0 16px;line-height:1.5"><strong>Añade tu ropa</strong><br>y veré tu look real</div><div style="background:var(--v);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:500">Subir prendas →</div></div>';
+    // Sin armario: CTA fuerte para empezar a subir ropa
+    visualHTML='<div class="o-imgbox" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(135deg,var(--bg2),var(--vl));cursor:pointer;border:2px dashed var(--v)" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><span style="font-size:36px">👗</span><div style="font-size:14px;color:var(--vd);text-align:center;padding:0 20px;line-height:1.5;font-weight:600">Sube tu ropa y veré el look con tus prendas reales</div><div style="font-size:13px;color:var(--g);text-align:center;padding:0 20px;line-height:1.4">Hazte una foto con el look puesto o sube cada prenda</div><div style="background:var(--v);color:#fff;padding:9px 20px;border-radius:20px;font-size:13px;font-weight:600">📷 Subir mi ropa</div></div>';
   }
 
-  const reminderHTML=collage?'<div class="reminder" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><span style="font-size:16px">📸</span><div class="rem-txt"><strong>¿Ya tienes el look puesto?</strong> Hazte una foto para actualizar tu armario.</div><span style="color:var(--v)">→</span></div>':'';
+  // Banner recordatorio — siempre visible debajo del outfit
+  const ctaColor = collage ? 'var(--vl)' : '#FFF8E7';
+  const ctaIcon = collage ? '📸' : '✨';
+  const ctaText = collage
+    ? '¿Ya tienes el look puesto? Hazte una foto para guardarla en tu armario.'
+    : 'Cuanto más ropa subas, más personalizadas serán mis propuestas.';
+  const ctaBanner='<div class="reminder" style="background:'+ctaColor+'" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><span style="font-size:18px">'+ctaIcon+'</span><div class="rem-txt"><strong>'+(collage?'¿Ya tienes el look puesto?':'¡Sube tu ropa!')+'</strong><br><span style="font-size:13px">'+ctaText+'</span></div><span style="color:var(--v);font-size:18px">→</span></div>';
 
-  d.innerHTML='<div class="av ai"></div><div style="width:100%"><div class="ocard">'+visualHTML+'<div class="o-body"><div class="o-tit">Tu look para '+od.OT+'</div><div class="o-prendas">'+pH+'</div><div class="ips"><div class="ip g"><span>🎨</span><span>'+od.colores+'</span></div><div class="ip b"><span>🌤️</span><span>'+od.clima+'</span></div><div class="ip o"><span>🎯</span><span>'+od.ocasion+'</span></div>'+alH+'</div></div>'+reminderHTML+'<div class="fb-row" id="'+fbId+'"><button class="fb-btn" onclick="fb(\''+fbId+'\',\'l\')">Me encanta</button><button class="fb-btn" onclick="fb(\''+fbId+'\',\'d\')">No me convence</button></div></div></div>';
+  d.innerHTML='<div class="av ai"></div><div style="width:100%"><div class="ocard">'+visualHTML+'<div class="o-body"><div class="o-tit">Tu look para '+od.OT+'</div><div class="o-prendas">'+pH+'</div><div class="ips"><div class="ip g"><span>🎨</span><span>'+od.colores+'</span></div><div class="ip b"><span>🌤️</span><span>'+od.clima+'</span></div><div class="ip o"><span>🎯</span><span>'+od.ocasion+'</span></div>'+alH+'</div></div>'+ctaBanner+'<div class="fb-row" id="'+fbId+'"><button class="fb-btn" onclick="fb(\''+fbId+'\',\'l\')">Me encanta</button><button class="fb-btn" onclick="fb(\''+fbId+'\',\'d\')">No me convence</button></div></div></div>';
   chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
   hablar(`Para ${od.OT}: ${od.prendas.slice(0,3).map(p=>p.n).join(', ')}.`);
   setTimeout(()=>addSugs(['Ver otra opción','Más formal','Más cómodo']),300);
