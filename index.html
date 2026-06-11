@@ -342,18 +342,18 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 
 /* PERFIL */
 .pr-area{flex:1;overflow-y:auto;padding:12px 14px;}
-.pr-sec{background:var(--w);border-radius:12px;padding:13px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
-.pr-tit{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--g);margin-bottom:10px;}
-.pr-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg2);}
+.pr-sec{background:var(--w);border-radius:16px;padding:20px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.pr-tit{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--g);margin-bottom:14px;font-weight:600;}
+.pr-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--bg2);}
 .pr-row:last-child{border:none;}
-.pr-k{font-size:12px;color:var(--g);}.pr-v{font-size:12px;font-weight:500;}
-.pal-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
-.pal-b{width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.pr-k{font-size:15px;color:var(--g);}.pr-v{font-size:15px;font-weight:600;color:var(--n);}
+.pal-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.pal-b{width:32px;height:32px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);}
 .stats-g{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:2px;}
-.stat-b{background:var(--bg2);border-radius:9px;padding:11px;text-align:center;}
-.stat-n{font-family:"Playfair Display",serif;font-size:22px;color:var(--v);}
-.stat-l{font-size:10px;color:var(--g);margin-top:2px;}
-.btn-out2{width:100%;padding:9px;border-radius:16px;border:1.5px solid var(--bg3);background:none;font-family:"Inter",sans-serif;font-size:12.5px;cursor:pointer;color:var(--g);}
+.stat-b{background:var(--bg2);border-radius:14px;padding:20px 16px;text-align:center;}
+.stat-n{font-family:"Playfair Display",serif;font-size:36px;font-weight:600;color:var(--v);line-height:1;}
+.stat-l{font-size:13px;color:var(--g);margin-top:6px;}
+.btn-out2{width:100%;padding:14px;border-radius:16px;border:1.5px solid var(--bg3);background:none;font-family:"Inter",sans-serif;font-size:15px;cursor:pointer;color:var(--g);font-weight:500;}
 
 /* ANÁLISIS */
 .a-ol{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:700;opacity:0;pointer-events:none;transition:opacity .25s;}
@@ -1165,7 +1165,40 @@ async function procesarFoto(inp){const f=inp.files[0];if(!f)return;inp.value='';
 function confirmar(){const tipo=document.getElementById('ct').value,color=document.getElementById('cc').value;const hm={'negro':'#1A1A1A','blanco roto':'#FAF8F5','beige':'#C9B99A','camel':'#C9A87C','azul marino':'#1B2A4A','burdeos':'#6B1E2D','verde botella':'#2D5A27','gris':'#808080','terracota':'#C4714A','blanco':'#FFFFFF','verde salvia':'#8FAF8F','verde oliva':'#808000','dorado':'#FFD700','amarillo mostaza':'#FFDB58','verde esmeralda':'#50C878','naranja':'#FF8C00','ocre':'#CC7722','marrón':'#8B4513'};armario.push({id:Date.now(),tipo,color,hex:hm[color]||'#888',estilo:document.getElementById('ce').value,imgData:imgP});localStorage.setItem('sa_arm',JSON.stringify(armario));cerrarAnal();renderArm();tab('chat',document.querySelector('.a-tab'));setTimeout(()=>{addMsg('ai',`Añadida tu ${tipo} ${color} 👗 Ya tengo **${armario.length} prenda${armario.length>1?'s':''}** tuya${armario.length>1?'s':''}. ¡Sigue añadiendo!`);},250);}
 function cerrarAnal(){document.getElementById('aol').classList.remove('on');imgP=null;}
 function renderArm(){const g=document.getElementById('pgrid');if(!g)return;g.innerHTML='';const em={'Blazer':'🧥','Camiseta':'👕','Camisa':'👔','Blusa':'👚','Jersey':'🧶','Chaqueta':'🧥','Abrigo':'🧥','Pantalón wide leg':'👖','Pantalón straight':'👖','Vaqueros':'👖','Falda midi':'👗','Vestido midi':'👗','Zapatos':'👠','Zapatillas':'👟','Botas':'👢','Mules':'👡','Bolso':'👜'};armario.forEach(p=>{const c=document.createElement('div');c.className='p-card';const img=p.imgData?`<img class="pc-img" src="${p.imgData}" style="display:block">`:`<div class="pc-img">${em[p.tipo]||'👗'}</div>`;c.innerHTML=`${img}<div class="pc-info"><div class="pc-tipo">${p.tipo}</div><div class="pc-col"><div class="cc-dot" style="background:${p.hex}"></div>${p.color}</div><span class="pc-bdg">${p.estilo}</span></div>`;g.appendChild(c);});}
-function renderPrf(){if(!perfil)return;const est=ESTILOS[perfil.estilo];const hm={'azul cielo':'#87CEEB','rosa palo':'#FFB6C1','blanco roto':'#FAF8F5','camel':'#C9A87C','azul marino':'#1B2A4A','burdeos':'#6B1E2D','verde bosque':'#228B22','beige':'#C9B99A','negro':'#1A1A1A','verde esmeralda':'#50C878','blanco':'#FFFFFF','terracota':'#C4714A','verde salvia':'#8FAF8F','verde oliva':'#808000','dorado':'#FFD700','amarillo mostaza':'#FFDB58','naranja':'#FF8C00','fucsia':'#FF00FF','ocre':'#CC7722','naranja vibrante':'#FF5F00','azul cobalto':'#0047AB','azul pastel':'#87CEEB','rosa nude':'#F0BEB4','verde botella':'#2D5A27','marrón':'#8B4513','verde musgo':'#8A9A5B','crema':'#FFFDD0'};const pal=(perfil.colores||[]).map(c=>`<div class="pal-b" style="background:${hm[c]||'#888'}" title="${c}"></div>`).join('');document.getElementById('prfcont').innerHTML=`<div class="pr-sec"><div class="pr-tit">Tu perfil</div><div class="pr-row"><span class="pr-k">Nombre</span><span class="pr-v">${perfil.nombre}</span></div><div class="pr-row"><span class="pr-k">Estilo</span><span class="pr-v">${est?.e} ${est?.n}</span></div><div class="pr-row"><span class="pr-k">Tono de piel</span><span class="pr-v">${(perfil.piel||'').replace('_',' ')}</span></div><div class="pr-row"><span class="pr-k">Color de pelo</span><span class="pr-v">${perfil.pelo||'—'}</span></div><div class="pr-row"><span class="pr-k">Ciudad</span><span class="pr-v">${clima?.c||'—'} ${clima?.i||''}</span></div></div><div class="pr-sec"><div class="pr-tit">Colores que te favorecen</div><div class="pal-row">${pal}</div><div style="font-size:10.5px;color:var(--g);margin-top:6px">Calculado según tu tono de piel y pelo</div></div><div class="pr-sec"><div class="pr-tit">Mi armario</div><div class="stats-g"><div class="stat-b"><div class="stat-n">${armario.length}</div><div class="stat-l">prendas</div></div><div class="stat-b"><div class="stat-n">${perfil.liked?.length||0}</div><div class="stat-l">looks guardados</div></div></div></div><div class="pr-sec"><button class="btn-out2" onclick="logout()">Cerrar sesión</button></div>`;}
+function renderPrf(){
+  if(!perfil)return;
+  const est=ESTILOS[perfil.estilo];
+  const hm={'azul cielo':'#87CEEB','rosa palo':'#FFB6C1','blanco roto':'#FAF8F5','camel':'#C9A87C','azul marino':'#1B2A4A','burdeos':'#6B1E2D','verde bosque':'#228B22','beige':'#C9B99A','negro':'#1A1A1A','verde esmeralda':'#50C878','blanco':'#FFFFFF','terracota':'#C4714A','verde salvia':'#8FAF8F','verde oliva':'#808000','dorado':'#FFD700','amarillo mostaza':'#FFDB58','naranja':'#FF8C00','fucsia':'#FF00FF','ocre':'#CC7722','naranja vibrante':'#FF5F00','azul cobalto':'#0047AB','azul pastel':'#87CEEB','rosa nude':'#F0BEB4','verde botella':'#2D5A27','marrón':'#8B4513','verde musgo':'#8A9A5B','crema':'#FFFDD0'};
+  const pal=(perfil.colores||[]).map(c=>`<div class="pal-b" style="background:${hm[c]||'#888'}" title="${c}"></div>`).join('');
+  // Capitalizar nombre
+  const nom=perfil.nombre?perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase():'-';
+  const piel=(perfil.piel||'').replace('_',' ');
+  const pielCap=piel?piel.charAt(0).toUpperCase()+piel.slice(1):'-';
+  const peloCap=perfil.pelo?perfil.pelo.charAt(0).toUpperCase()+perfil.pelo.slice(1):'-';
+  document.getElementById('prfcont').innerHTML=`
+    <div class="pr-sec">
+      <div class="pr-tit">Tu perfil</div>
+      <div class="pr-row"><span class="pr-k">Nombre</span><span class="pr-v">${nom}</span></div>
+      <div class="pr-row"><span class="pr-k">Estilo</span><span class="pr-v">${est?.e||''} ${est?.n||''}</span></div>
+      <div class="pr-row"><span class="pr-k">Tono de piel</span><span class="pr-v">${pielCap}</span></div>
+      <div class="pr-row"><span class="pr-k">Color de pelo</span><span class="pr-v">${peloCap}</span></div>
+      <div class="pr-row"><span class="pr-k">Ciudad</span><span class="pr-v">${clima?.c||'—'} ${clima?.i||''}</span></div>
+    </div>
+    <div class="pr-sec">
+      <div class="pr-tit">Colores que te favorecen</div>
+      <div class="pal-row">${pal}</div>
+      <div style="font-size:13px;color:var(--g);margin-top:10px;line-height:1.5">Calculado según tu tono de piel y pelo</div>
+    </div>
+    <div class="pr-sec">
+      <div class="pr-tit">Mi armario</div>
+      <div class="stats-g">
+        <div class="stat-b"><div class="stat-n">${armario.length}</div><div class="stat-l">prendas</div></div>
+        <div class="stat-b"><div class="stat-n">${perfil.liked?.length||0}</div><div class="stat-l">looks guardados</div></div>
+      </div>
+    </div>
+    <div class="pr-sec"><button class="btn-out2" onclick="logout()">Cerrar sesión</button></div>
+  `;
+}
 function logout(){if(confirm('¿Cerrar sesión?')){localStorage.removeItem('sa_perf');localStorage.removeItem('sa_arm');perfil=null;armario=[];mostrar('sL');}}
 
 window.addEventListener('load',()=>{
