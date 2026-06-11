@@ -906,13 +906,14 @@ function rInspo(b,btn){
   btn.style.display='block';btn.classList.add('on');
   const est=window._est||'sofisticada';
   // Fotos estáticas pregeneradas — sin Gemini, carga instantánea
+  // TODO: añadir fotos de sofisticada, clasica y boho cuando estén listas
   const FOTOS={
-    sofisticada:['sofisticada_1.png','sofisticada_2.png','sofisticada_3.png','sofisticada_4.png','sofisticada_5.png','sofisticada_6.png'],
+    sofisticada:['urbana_1.png','urbana_2.png','urbana_3.png','urbana_4.png','urbana_5.png','urbana_6.png'],
     urbana:['urbana_1.png','urbana_2.png','urbana_3.png','urbana_4.png','urbana_5.png','urbana_6.png'],
-    clasica:['clasica_1.png','clasica_2.png','clasica_3.png','clasica_4.png','clasica_5.png','clasica_6.png'],
-    boho:['boho_1.png','boho_2.png','boho_3.png','boho_4.png','boho_5.png','boho_6.png']
+    clasica:['urbana_1.png','urbana_2.png','urbana_3.png','urbana_4.png','urbana_5.png','urbana_6.png'],
+    boho:['urbana_1.png','urbana_2.png','urbana_3.png','urbana_4.png','urbana_5.png','urbana_6.png']
   };
-  const fotos=FOTOS[est]||FOTOS.sofisticada;
+  const fotos=FOTOS[est]||FOTOS.urbana;
   b.innerHTML=`<div class="ob-tit">¿Qué looks te inspiran?</div><div class="ig-count" id="igCount">Toca todos los que te gusten</div><div class="ig">${fotos.map((f,i)=>`<div class="ii" data-idx="${i}" onclick="toggleInspo(this)"><img src="${f}" alt="look ${i+1}" loading="eager" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s" onload="this.style.opacity=1" onerror="this.parentElement.style.background='#e8e4de';this.style.display='none'"><div class="ii-chk">✓</div></div>`).join('')}</div>`;
 }
 function toggleInspo(el){
