@@ -292,7 +292,12 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .p-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:2px;border:1px solid rgba(0,0,0,.07);}
 .p-nom{font-weight:600;font-size:16px;}.p-why{font-size:14px;color:var(--g);margin-top:3px;line-height:1.4;}
 .ips{display:flex;flex-direction:column;gap:4px;}
-.ip{display:flex;gap:8px;align-items:flex-start;padding:10px 13px;border-radius:10px;font-size:14px;line-height:1.5;}
+.ip{display:flex;gap:9px;align-items:center;padding:10px 13px;border-radius:10px;font-size:14px;line-height:1.5;}
+.pill-icon{width:16px;height:16px;flex-shrink:0;display:inline-block;opacity:.65;background-size:contain;background-repeat:no-repeat;background-position:center;}
+.pi-pal{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A6B50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='1' x2='12' y2='3'/%3E%3Cline x1='12' y1='21' x2='12' y2='23'/%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'/%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'/%3E%3Cline x1='1' y1='12' x2='3' y2='12'/%3E%3Cline x1='21' y1='12' x2='23' y2='12'/%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'/%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'/%3E%3C/svg%3E");}
+.pi-sun{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23C4714A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z'/%3E%3C/svg%3E");}
+.pi-tag{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231A1A1A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z'/%3E%3Cline x1='7' y1='7' x2='7.01' y2='7'/%3E%3C/svg%3E");}
+.pi-alert{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23C4714A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='8' x2='12' y2='12'/%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'/%3E%3C/svg%3E");}
 .ip.g{background:#F0F7F0;}.ip.b{background:#F0F4FF;}.ip.o{background:#FFF5F0;}.ip.a{background:#FFF0E0;border:1px solid #FFD4A8;}
 .reminder{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--vl);border:1px solid var(--v);cursor:pointer;margin-top:8px;border-radius:9px;}
 .rem-txt{flex:1;font-size:13px;color:var(--vd);line-height:1.4;}
@@ -1093,7 +1098,7 @@ function outfitD(txt){
 function mostrarOutfit(txt){
   const od=outfitD(txt);
   const pH=od.prendas.filter(p=>p?.n).map(p=>`<div class="o-prenda"><div class="p-dot" style="background:${p.h}"></div><div><div class="p-nom">${p.n}</div><div class="p-why">${p.r}</div></div></div>`).join('');
-  const alH=od.al?`<div class="ip a"><span>⚠️</span><span>${od.al}</span></div>`:'';
+  const alH=od.al?`<div class="ip a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>${od.al}</span></div>`:'';
   const fbId=`fb${Date.now()}`;
   const chat=document.getElementById('chat');
   const d=document.createElement('div');
@@ -1133,7 +1138,7 @@ function mostrarOutfit(txt){
     ? '<div class="reminder" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="rem-txt"><strong>¿Ya tienes el look?</strong> Hazte una foto y actualiza tu armario.</div><span style="color:var(--v)">→</span></div>'
     : '<div class="reminder" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="rem-txt"><strong>Sube tu ropa</strong> y veré el outfit exacto con tus prendas.</div><span style="color:var(--v)">→</span></div>';
 
-  d.innerHTML='<div class="av ai"></div><div style="width:100%"><div class="ocard">'+visualHTML+'<div class="o-body"><div class="o-tit">Tu look para '+od.OT+'</div><div class="o-prendas">'+pH+'</div><div class="ips"><div class="ip g"><span>🎨</span><span>'+od.colores+'</span></div><div class="ip b"><span>🌤️</span><span>'+od.clima+'</span></div><div class="ip o"><span>🎯</span><span>'+od.ocasion+'</span></div>'+alH+'</div></div>'+bannerHTML+'<div class="fb-row" id="'+fbId+'"><button class="fb-btn" onclick="fb(\''+fbId+'\',\'l\')">Me encanta</button><button class="fb-btn" onclick="fb(\''+fbId+'\',\'d\')">No me convence</button></div></div></div>';
+  d.innerHTML='<div class="av ai"></div><div style="width:100%"><div class="ocard">'+visualHTML+'<div class="o-body"><div class="o-tit">Tu look para '+od.OT+'</div><div class="o-prendas">'+pH+'</div><div class="ips"><div class="ip g"><span class="pill-icon pi-pal"></span><span>'+od.colores+'</span></div><div class="ip b"><span class="pill-icon pi-sun"></span><span>'+od.clima+'</span></div><div class="ip o"><span class="pill-icon pi-tag"></span><span>'+od.ocasion+'</span></div>'+alH+'</div></div>'+bannerHTML+'<div class="fb-row" id="'+fbId+'"><button class="fb-btn" onclick="fb(\''+fbId+'\',\'l\')">Me encanta</button><button class="fb-btn" onclick="fb(\''+fbId+'\',\'d\')">No me convence</button></div></div></div>';
   chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
   hablar(`Para ${od.OT}: ${od.prendas.slice(0,3).map(p=>p.n).join(', ')}.`);
   setTimeout(()=>addSugs(['Ver otra opción','Más formal','Más cómodo']),300);
