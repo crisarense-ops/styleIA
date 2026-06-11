@@ -981,7 +981,75 @@ function irApp(){['mReg','mLogin','mCiudad'].forEach(cerrarOverlay);mostrar('sAp
 function pfBadge(){if(!perfil)return;const b=document.getElementById('pfbdg');const nom=perfil.nombre?perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase():window._nom||'';b.innerHTML=nom;b.style.display='block';}
 function tab(id,el){['chat','arm','prf'].forEach(t=>document.getElementById('p'+t).classList.remove('on'));document.getElementById('p'+id).classList.add('on');document.querySelectorAll('.a-tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');if(id==='arm')renderArm();if(id==='prf')renderPrf();}
 
-function calcPal(piel,pelo){const m={muy_clara:{rubio:['azul cielo','rosa palo','blanco roto','camel'],castaño:['azul marino','burdeos','verde bosque','beige'],moreno:['negro','azul marino','burdeos','verde esmeralda'],pelirrojo:['verde bosque','azul marino','crema','marrón'],canoso:['azul marino','burdeos','negro','blanco']},clara:{rubio:['azul pastel','rosa nude','beige','verde salvia'],castaño:['terracota','verde salvia','camel','burdeos'],moreno:['negro','blanco','azul marino','burdeos'],pelirrojo:['verde musgo','azul marino','crema','marrón'],canoso:['negro','azul marino','burdeos','blanco']},media:{castaño:['terracota','verde oliva','camel','dorado'],moreno:['blanco','azul cobalto','verde esmeralda','amarillo mostaza'],rubio:['terracota','naranja','verde oliva','camel'],canoso:['blanco','azul cobalto','terracota'],pelirrojo:['verde botella','azul petróleo','crema','ocre']},morena:{moreno:['blanco','naranja','amarillo mostaza','verde esmeralda'],castaño:['terracota','naranja','verde oliva','amarillo'],rubio:['blanco','naranja','terracota','verde'],canoso:['blanco','naranja','amarillo','verde'],pelirrojo:['verde botella','terracota','blanco','ocre']},muy_oscura:{moreno:['blanco','naranja vibrante','amarillo','fucsia'],canoso:['blanco','naranja','fucsia','verde esmeralda'],castaño:['blanco','amarillo','naranja','verde'],rubio:['blanco','fucsia','amarillo','verde'],pelirrojo:['blanco','verde esmeralda','amarillo','fucsia']}};return(m[piel]||m.clara)[pelo]||['negro','blanco','beige','camel'];}
+function calcPal(piel,pelo){
+  // ── Teoría estacional del color (Itten / análisis cromático profesional)
+  // Determina la estación cromática según undertone (cálido/frío) + valor (claro/oscuro)
+  // Primavera: cálido + claro | Verano: frío + claro | Otoño: cálido + oscuro | Invierno: frío + oscuro
+
+  // Undertone por piel
+  const undertone={
+    muy_clara:'frio',   // porcelana — predominan venas azules/púrpura
+    clara:'mixto',      // puede ser cálida o fría según pelo
+    media:'calido',     // tono dorado/melocotón
+    morena:'calido',    // undertone amarillo/dorado
+    muy_oscura:'calido' // ébano — undertone naranja/rojo
+  }[piel]||'mixto';
+
+  // Refinar undertone con pelo (el pelo ajusta el tono base)
+  const esCalido = undertone==='calido' || (undertone==='mixto' && ['rubio','pelirrojo','castaño'].includes(pelo));
+  const esFrio   = undertone==='frio'   || (undertone==='mixto' && ['moreno','canoso'].includes(pelo));
+
+  // Valor (claridad) por piel
+  const valor={muy_clara:'claro',clara:'claro',media:'medio',morena:'oscuro',muy_oscura:'oscuro'}[piel];
+
+  // ── Asignar estación cromática ──────────────────────────────────────────
+  let estacion;
+  if(esCalido && (valor==='claro'||valor==='medio') && pelo==='rubio')       estacion='primavera';
+  else if(esCalido && (valor==='medio'||valor==='oscuro'))                    estacion='otono';
+  else if(esFrio  && (valor==='claro'||valor==='medio'))                     estacion='verano';
+  else if(esFrio  && valor==='oscuro')                                       estacion='invierno';
+  else if(esCalido)                                                           estacion='otono';
+  else                                                                        estacion='invierno';
+
+  // Ajustes especiales
+  if(pelo==='pelirrojo') estacion='otono';           // pelirrojo = siempre otoño
+  if(pelo==='canoso' && piel==='muy_clara') estacion='verano'; // platino/hielo
+
+  // ── Paletas por estación (colores que armonizan con undertone) ──────────
+  const paletas={
+    primavera:[
+      'melocotón','coral suave','camel','verde menta','azul cielo',
+      'amarillo mantequilla','salmón','beis cálido','turquesa claro','dorado suave'
+    ],
+    verano:[
+      'malva','rosa palo','azul lavanda','gris perla','verde salvia',
+      'azul pizarra','rosa nude','topo','azul niebla','burdeos rosado'
+    ],
+    otono:[
+      'terracota','verde oliva','camel','burdeos','ocre',
+      'marrón espresso','verde musgo','naranja quemado','mostaza','cobrizo'
+    ],
+    invierno:[
+      'negro','blanco puro','azul cobalto','burdeos','fucsia',
+      'verde esmeralda','gris antracita','azul marino','rojo verdadero','ciruela'
+    ]
+  };
+
+  // Devolver los 4-5 colores más favorecedores de su estación
+  const base = paletas[estacion];
+  // Personalizar según pelo (añadir matices)
+  const extra={
+    rubio:    {primavera:['melocotón','camel'],verano:['malva','rosa palo'],otono:['camel','mostaza'],invierno:['gris perla','azul marino']},
+    castaño:  {primavera:['coral suave','beis cálido'],verano:['gris perla','azul pizarra'],otono:['terracota','verde musgo'],invierno:['burdeos','azul marino']},
+    moreno:   {primavera:['azul cielo','verde menta'],verano:['azul lavanda','rosa nude'],otono:['verde oliva','ocre'],invierno:['negro','azul cobalto']},
+    pelirrojo:{primavera:['melocotón','azul cielo'],verano:['malva','verde salvia'],otono:['terracota','verde musgo'],invierno:['azul marino','verde esmeralda']},
+    canoso:   {primavera:['azul cielo','rosa palo'],verano:['gris perla','malva'],otono:['camel','burdeos'],invierno:['negro','azul cobalto']}
+  }[pelo]?.[estacion]||[];
+
+  // Combinar y devolver 4 colores prioritarios
+  const combinado=[...new Set([...extra,...base])];
+  return combinado.slice(0,4);
+}
 
 // GEMINI solo para imágenes de outfits en el chat
 
@@ -1297,7 +1365,30 @@ function renderArm(){const g=document.getElementById('pgrid');if(!g)return;g.inn
 function renderPrf(){
   if(!perfil)return;
   const est=ESTILOS[perfil.estilo];
-  const hm={'azul cielo':'#87CEEB','rosa palo':'#FFB6C1','blanco roto':'#FAF8F5','camel':'#C9A87C','azul marino':'#1B2A4A','burdeos':'#6B1E2D','verde bosque':'#228B22','beige':'#C9B99A','negro':'#1A1A1A','verde esmeralda':'#50C878','blanco':'#FFFFFF','terracota':'#C4714A','verde salvia':'#8FAF8F','verde oliva':'#808000','dorado':'#FFD700','amarillo mostaza':'#FFDB58','naranja':'#FF8C00','fucsia':'#FF00FF','ocre':'#CC7722','naranja vibrante':'#FF5F00','azul cobalto':'#0047AB','azul pastel':'#87CEEB','rosa nude':'#F0BEB4','verde botella':'#2D5A27','marrón':'#8B4513','verde musgo':'#8A9A5B','crema':'#FFFDD0'};
+  const hm={
+  // Primavera
+  'melocotón':'#FFBA94','coral suave':'#E8856A','verde menta':'#A8D8B9',
+  'azul cielo':'#87CEEB','amarillo mantequilla':'#FFF3A3','salmón':'#FA8072',
+  'beis cálido':'#E8D5B7','turquesa claro':'#7FFFD4','dorado suave':'#D4AF6A',
+  // Verano
+  'malva':'#C8A2C8','rosa palo':'#FFB6C1','azul lavanda':'#B8B8D4',
+  'gris perla':'#D4D4D4','verde salvia':'#8FAF8F','azul pizarra':'#6A7FA8',
+  'rosa nude':'#E8C4B8','topo':'#B5A49A','azul niebla':'#A8C4D4','burdeos rosado':'#A05070',
+  // Otoño
+  'terracota':'#C4714A','verde oliva':'#808040','camel':'#C9A87C',
+  'burdeos':'#6B1E2D','ocre':'#CC7722','marrón espresso':'#3D1C02',
+  'verde musgo':'#6B7C45','naranja quemado':'#CC5500','mostaza':'#CFAD00','cobrizo':'#B87333',
+  // Invierno
+  'negro':'#1A1A1A','blanco puro':'#FAFAFA','azul cobalto':'#0047AB',
+  'fucsia':'#C8206A','verde esmeralda':'#50C878','gris antracita':'#3A3A3A',
+  'azul marino':'#1B2A4A','rojo verdadero':'#CC2222','ciruela':'#6A1040',
+  // Extras
+  'blanco roto':'#FAF8F5','beige':'#C9B99A','verde bosque':'#228B22',
+  'blanco':'#FFFFFF','dorado':'#FFD700','amarillo mostaza':'#FFDB58',
+  'naranja':'#FF8C00','naranja vibrante':'#FF5F00','azul pastel':'#87CEEB',
+  'verde botella':'#2D5A27','marrón':'#8B4513','crema':'#FFFDD0',
+  'azul petróleo':'#1B6B7B'
+};
   const pal=(perfil.colores||[]).map(c=>`<div class="pal-b" style="background:${hm[c]||'#888'}" title="${c}"></div>`).join('');
   // Capitalizar nombre
   const nom=perfil.nombre?perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase():'-';
