@@ -226,10 +226,12 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .piel-op:hover,.piel-op.on{border-color:var(--v);background:var(--vl);}
 .piel-c{width:44px;height:44px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.13);}
 .piel-l{font-size:13px;color:var(--n);text-align:center;line-height:1.3;font-weight:500;}
-.pelo-g{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
-.pelo-op{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px;border:1.5px solid var(--bg3);border-radius:11px;cursor:pointer;transition:all .2s;background:var(--w);}
-.pelo-op:hover,.pelo-op.on{border-color:var(--v);background:var(--vl);}
-.pelo-c{width:40px;height:40px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.12);}
+.pelo-g{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.pelo-op{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 6px 12px;border:1.5px solid var(--bg3);border-radius:14px;cursor:pointer;transition:all .2s;background:var(--w);}
+.pelo-op:hover{border-color:var(--v);background:var(--vl);}
+.pelo-op.on{border-color:var(--v);background:var(--vl);box-shadow:0 0 0 3px var(--vl);}
+.pelo-swatch{width:48px;height:48px;border-radius:50%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.18);border:2.5px solid #fff;flex-shrink:0;}
+.pelo-swatch svg{width:100%;height:100%;}
 .pelo-l{font-size:13px;color:var(--n);text-align:center;font-weight:500;}
 
 .ob-foot{padding:11px 18px;background:var(--bg);border-top:1px solid var(--bg3);flex-shrink:0;}
@@ -1151,7 +1153,36 @@ function toggleInspo(el){
 function rPiel(b,btn){btn.style.display='none';const p=[{k:'muy_clara',c:'#FDDCB5',l:'Muy clara'},{k:'clara',c:'#F5C89A',l:'Clara'},{k:'media',c:'#D4956A',l:'Media'},{k:'morena',c:'#A0522D',l:'Morena'},{k:'muy_oscura',c:'#4A2410',l:'Muy oscura'}];b.innerHTML=`<div class="ob-tit">¿Tu tono de piel?</div><div class="ob-sub">Calculo los colores que más te favorecen.</div><div class="piel-g">${p.map(x=>`<div class="piel-op" onclick="selPiel('${x.k}')"><div class="piel-c" style="background:${x.c}"></div><div class="piel-l">${x.l}</div></div>`).join('')}</div>`;}
 function selPiel(k){document.querySelectorAll('.piel-op').forEach(c=>c.classList.remove('on'));event.currentTarget.classList.add('on');window._piel=k;setTimeout(sigPaso,300);}
 
-function rPelo(b,btn){btn.style.display='none';const p=[{k:'rubio',c:'#F4D03F',l:'Rubio'},{k:'castaño',c:'#8B4513',l:'Castaño'},{k:'moreno',c:'#1C0A00',l:'Moreno'},{k:'pelirrojo',c:'#CC4400',l:'Pelirrojo'},{k:'canoso',c:'#C0C0C0',l:'Canoso'}];b.innerHTML=`<div class="ob-tit">¿Color de pelo?</div><div class="ob-sub"></div><div class="pelo-g">${p.map(x=>`<div class="pelo-op" onclick="selPelo('${x.k}')"><div class="pelo-c" style="background:${x.c}"></div><div class="pelo-l">${x.l}</div></div>`).join('')}</div>`;}
+function peloSVG(c1,c2,c3){
+  // SVG con mechones — simula textura real de cabello
+  return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="bg${c1.slice(1)}" cx="50%" cy="40%" r="60%">
+        <stop offset="0%" stop-color="${c2}"/>
+        <stop offset="100%" stop-color="${c1}"/>
+      </radialGradient>
+    </defs>
+    <circle cx="24" cy="24" r="24" fill="url(#bg${c1.slice(1)})"/>
+    <path d="M8 48 Q10 28 14 18 Q16 12 18 6 Q20 14 19 26 Q18 36 20 48" fill="${c2}" opacity=".55"/>
+    <path d="M12 48 Q15 30 17 20 Q19 13 20 5 Q23 14 22 28 Q21 38 23 48" fill="${c3}" opacity=".4"/>
+    <path d="M18 48 Q20 32 22 22 Q23 15 25 7 Q27 16 26 30 Q25 40 28 48" fill="${c2}" opacity=".5"/>
+    <path d="M24 48 Q26 33 28 23 Q30 16 31 8 Q33 17 32 31 Q31 41 34 48" fill="${c3}" opacity=".35"/>
+    <path d="M30 48 Q32 34 34 24 Q35 17 37 10 Q38 19 37 32 Q36 42 39 48" fill="${c2}" opacity=".45"/>
+    <path d="M36 48 Q37 35 39 26 Q40 19 42 12 Q43 21 42 34 Q41 43 44 48" fill="${c1}" opacity=".3"/>
+    <ellipse cx="24" cy="18" rx="14" ry="10" fill="rgba(255,255,255,.07)"/>
+  </svg>`;
+}
+function rPelo(b,btn){
+  btn.style.display='none';
+  const p=[
+    {k:'rubio',    l:'Rubio',    c1:'#8B6914',c2:'#C9A84C',c3:'#F0D060'},
+    {k:'castaño',  l:'Castaño',  c1:'#3D1C02',c2:'#6B3A1F',c3:'#9B6040'},
+    {k:'moreno',   l:'Moreno',   c1:'#0A0500',c2:'#1C0A00',c3:'#2E1505'},
+    {k:'pelirrojo',l:'Pelirrojo',c1:'#7A2200',c2:'#B83A00',c3:'#D4622A'},
+    {k:'canoso',   l:'Canoso',   c1:'#7A7A7A',c2:'#B0B0B0',c3:'#E0E0E0'}
+  ];
+  b.innerHTML=`<div class="ob-tit">¿Color de pelo?</div><div class="ob-sub">Elige el más parecido al tuyo</div><div class="pelo-g">${p.map(x=>`<div class="pelo-op" onclick="selPelo('${x.k}')"><div class="pelo-swatch">${peloSVG(x.c1,x.c2,x.c3)}</div><div class="pelo-l">${x.l}</div></div>`).join('')}</div>`;
+}
 function selPelo(k){document.querySelectorAll('.pelo-op').forEach(c=>c.classList.remove('on'));event.currentTarget.classList.add('on');window._pelo=k;setTimeout(finOb,300);}
 
 
