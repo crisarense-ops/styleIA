@@ -1091,23 +1091,22 @@ function mostrarOutfit(txt){
   const d=document.createElement('div');
   d.className='msg ai';d.style.maxWidth='92%';
 
-  // Collage con fotos del armario (instantáneo, sin Gemini)
+  // Collage con fotos reales del armario
   const collage=generarCollageArmario(od.prendas);
   const tieneArmario=armario.filter(p=>p.imgData).length>=1;
 
   let visualHTML='';
   if(collage){
-    // Tiene fotos en el armario — mostrar collage real
-    visualHTML=`<div class="o-imgbox" id="${imgId}">${collage}</div>`;
+    visualHTML='<div class="o-imgbox" id="'+imgId+'">'+collage+'</div>';
   } else if(tieneArmario){
-    // Tiene armario pero sin fotos
-    visualHTML=`<div class="o-imgbox" id="${imgId}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--bg2)"><span style="font-size:28px">👗</span><div style="font-size:13px;color:var(--g);text-align:center;padding:0 16px">Añade fotos a tus prendas para ver el look</div></div>`;
+    visualHTML='<div class="o-imgbox" id="'+imgId+'" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--bg2)"><span style="font-size:28px">👗</span><div style="font-size:13px;color:var(--g);text-align:center;padding:0 16px">Añade fotos a tus prendas para ver el look</div></div>';
   } else {
-    // Sin armario — invitar a subir fotos
-    visualHTML=`<div class="o-imgbox" id="${imgId}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--bg2);cursor:pointer" onclick="tab('arm',document.querySelectorAll('.a-tab')[1])"><span style="font-size:32px">📸</span><div style="font-size:13px;color:var(--vd);text-align:center;padding:0 16px;line-height:1.5"><strong>Añade tu ropa</strong><br>y veré tu look real</div><div style="background:var(--v);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:500">Subir prendas →</div></div>`;
+    visualHTML='<div class="o-imgbox" id="'+imgId+'" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--bg2);cursor:pointer" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><span style="font-size:32px">📸</span><div style="font-size:14px;color:var(--vd);text-align:center;padding:0 16px;line-height:1.5"><strong>Añade tu ropa</strong><br>y veré tu look real</div><div style="background:var(--v);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:500">Subir prendas →</div></div>';
   }
 
-  d.innerHTML=`<div class="av ai"></div><div style="width:100%"><div class="ocard">${visualHTML}<div class="o-body"><div class="o-tit">Tu look para ${od.OT}</div><div class="o-prendas">${pH}</div><div class="ips"><div class="ip g"><span>🎨</span><span>${od.colores}</span></div><div class="ip b"><span>🌤️</span><span>${od.clima}</span></div><div class="ip o"><span>🎯</span><span>${od.ocasion}</span></div>${alH}</div></div>${!collage?'':'<div class="reminder" onclick="tab('arm',document.querySelectorAll('.a-tab')[1])"><span style="font-size:16px">📸</span><div class="rem-txt"><strong>¿Ya tienes el look puesto?</strong> Hazte una foto para actualizar tu armario.</div><span style="color:var(--v)">→</span></div>'}<div class="fb-row" id="${fbId}"><button class="fb-btn" onclick="fb('${fbId}','l')">Me encanta</button><button class="fb-btn" onclick="fb('${fbId}','d')">No me convence</button></div></div></div>`;
+  const reminderHTML=collage?'<div class="reminder" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><span style="font-size:16px">📸</span><div class="rem-txt"><strong>¿Ya tienes el look puesto?</strong> Hazte una foto para actualizar tu armario.</div><span style="color:var(--v)">→</span></div>':'';
+
+  d.innerHTML='<div class="av ai"></div><div style="width:100%"><div class="ocard">'+visualHTML+'<div class="o-body"><div class="o-tit">Tu look para '+od.OT+'</div><div class="o-prendas">'+pH+'</div><div class="ips"><div class="ip g"><span>🎨</span><span>'+od.colores+'</span></div><div class="ip b"><span>🌤️</span><span>'+od.clima+'</span></div><div class="ip o"><span>🎯</span><span>'+od.ocasion+'</span></div>'+alH+'</div></div>'+reminderHTML+'<div class="fb-row" id="'+fbId+'"><button class="fb-btn" onclick="fb(\''+fbId+'\',\'l\')">Me encanta</button><button class="fb-btn" onclick="fb(\''+fbId+'\',\'d\')">No me convence</button></div></div></div>';
   chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
   hablar(`Para ${od.OT}: ${od.prendas.slice(0,3).map(p=>p.n).join(', ')}.`);
   setTimeout(()=>addSugs(['Ver otra opción','Más formal','Más cómodo']),300);
