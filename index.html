@@ -273,6 +273,14 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 }
 .ocard{background:var(--w);border-radius:13px;overflow:hidden;margin-top:3px;box-shadow:0 2px 10px rgba(0,0,0,.07);border:1px solid var(--bg3);}
 .o-imgbox{width:100%;aspect-ratio:4/5;background:var(--bg2);position:relative;overflow:hidden;}
+.o-empty{background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.o-empty:active{background:var(--bg3);}
+.o-empty-inner{display:flex;flex-direction:column;align-items:center;gap:14px;padding:24px;}
+.o-cam-ring{width:64px;height:64px;border-radius:50%;background:var(--w);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+.o-cam-icon{display:flex;}
+.o-empty-title{font-size:15px;font-weight:600;color:var(--n);text-align:center;letter-spacing:-.2px;}
+.o-empty-sub{font-size:13px;color:var(--g);text-align:center;line-height:1.5;margin-top:-6px;}
+.o-add-btn{display:flex;align-items:center;gap:6px;background:var(--n);color:#fff;padding:10px 20px;border-radius:24px;font-size:13px;font-weight:600;letter-spacing:-.1px;margin-top:4px;}
 .o-img{width:100%;height:100%;object-fit:cover;}
 .o-skel{width:100%;height:100%;background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200% 100%;animation:sh 1.5s infinite;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:var(--g);font-size:12px;}
 @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -1091,33 +1099,41 @@ function mostrarOutfit(txt){
   const d=document.createElement('div');
   d.className='msg ai';d.style.maxWidth='92%';
 
-  // Collage con fotos reales del armario
   const collage=generarCollageArmario(od.prendas);
   const nFotos=armario.filter(p=>p.imgData).length;
   const nPrendas=armario.length;
 
-  // Zona visual — siempre presente, cambia según estado del armario
+  // SVG cámara — limpio, sin emojis
+  const camSVG='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+  const plusSVG='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+
   let visualHTML='';
   if(collage){
-    // Tiene fotos: mostrar collage
     visualHTML='<div class="o-imgbox">'+collage+'</div>';
-  } else if(nPrendas>0 && nFotos===0){
-    // Tiene prendas pero sin foto: animar a fotografiarlas
-    visualHTML='<div class="o-imgbox" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(135deg,var(--bg2),var(--vl));cursor:pointer;border:2px dashed var(--v)" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><span style="font-size:36px">📷</span><div style="font-size:14px;color:var(--vd);text-align:center;padding:0 20px;line-height:1.5;font-weight:600">¡Fotografía tus prendas!</div><div style="font-size:13px;color:var(--g);text-align:center;padding:0 20px;line-height:1.4">Añade fotos y veré el look con tu ropa real</div><div style="background:var(--v);color:#fff;padding:9px 20px;border-radius:20px;font-size:13px;font-weight:600">Añadir fotos →</div></div>';
   } else {
-    // Sin armario: CTA fuerte para empezar a subir ropa
-    visualHTML='<div class="o-imgbox" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(135deg,var(--bg2),var(--vl));cursor:pointer;border:2px dashed var(--v)" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><span style="font-size:36px">👗</span><div style="font-size:14px;color:var(--vd);text-align:center;padding:0 20px;line-height:1.5;font-weight:600">Sube tu ropa y veré el look con tus prendas reales</div><div style="font-size:13px;color:var(--g);text-align:center;padding:0 20px;line-height:1.4">Hazte una foto con el look puesto o sube cada prenda</div><div style="background:var(--v);color:#fff;padding:9px 20px;border-radius:20px;font-size:13px;font-weight:600">📷 Subir mi ropa</div></div>';
+    // Estado vacío — diseño tipo Locket/BeReal, limpio
+    const msg = nPrendas>0
+      ? 'Añade una foto a cada prenda'
+      : 'Fotografía tu ropa';
+    const sub = nPrendas>0
+      ? 'Veré el look exacto con tus prendas'
+      : 'Cuanto más subas, más personalizado';
+    visualHTML='<div class="o-imgbox o-empty" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])">'+
+      '<div class="o-empty-inner">'+
+        '<div class="o-cam-ring"><div class="o-cam-icon" style="color:var(--v)">'+camSVG+'</div></div>'+
+        '<div class="o-empty-title">'+msg+'</div>'+
+        '<div class="o-empty-sub">'+sub+'</div>'+
+        '<div class="o-add-btn">'+plusSVG+'<span>Añadir ropa</span></div>'+
+      '</div>'+
+    '</div>';
   }
 
-  // Banner recordatorio — siempre visible debajo del outfit
-  const ctaColor = collage ? 'var(--vl)' : '#FFF8E7';
-  const ctaIcon = collage ? '📸' : '✨';
-  const ctaText = collage
-    ? '¿Ya tienes el look puesto? Hazte una foto para guardarla en tu armario.'
-    : 'Cuanto más ropa subas, más personalizadas serán mis propuestas.';
-  const ctaBanner='<div class="reminder" style="background:'+ctaColor+'" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><span style="font-size:18px">'+ctaIcon+'</span><div class="rem-txt"><strong>'+(collage?'¿Ya tienes el look puesto?':'¡Sube tu ropa!')+'</strong><br><span style="font-size:13px">'+ctaText+'</span></div><span style="color:var(--v);font-size:18px">→</span></div>';
+  // Banner inferior — solo si tiene collage, discreto
+  const bannerHTML = collage
+    ? '<div class="reminder" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="rem-txt"><strong>¿Ya tienes el look?</strong> Hazte una foto y actualiza tu armario.</div><span style="color:var(--v)">→</span></div>'
+    : '<div class="reminder" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="rem-txt"><strong>Sube tu ropa</strong> y veré el outfit exacto con tus prendas.</div><span style="color:var(--v)">→</span></div>';
 
-  d.innerHTML='<div class="av ai"></div><div style="width:100%"><div class="ocard">'+visualHTML+'<div class="o-body"><div class="o-tit">Tu look para '+od.OT+'</div><div class="o-prendas">'+pH+'</div><div class="ips"><div class="ip g"><span>🎨</span><span>'+od.colores+'</span></div><div class="ip b"><span>🌤️</span><span>'+od.clima+'</span></div><div class="ip o"><span>🎯</span><span>'+od.ocasion+'</span></div>'+alH+'</div></div>'+ctaBanner+'<div class="fb-row" id="'+fbId+'"><button class="fb-btn" onclick="fb(\''+fbId+'\',\'l\')">Me encanta</button><button class="fb-btn" onclick="fb(\''+fbId+'\',\'d\')">No me convence</button></div></div></div>';
+  d.innerHTML='<div class="av ai"></div><div style="width:100%"><div class="ocard">'+visualHTML+'<div class="o-body"><div class="o-tit">Tu look para '+od.OT+'</div><div class="o-prendas">'+pH+'</div><div class="ips"><div class="ip g"><span>🎨</span><span>'+od.colores+'</span></div><div class="ip b"><span>🌤️</span><span>'+od.clima+'</span></div><div class="ip o"><span>🎯</span><span>'+od.ocasion+'</span></div>'+alH+'</div></div>'+bannerHTML+'<div class="fb-row" id="'+fbId+'"><button class="fb-btn" onclick="fb(\''+fbId+'\',\'l\')">Me encanta</button><button class="fb-btn" onclick="fb(\''+fbId+'\',\'d\')">No me convence</button></div></div></div>';
   chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
   hablar(`Para ${od.OT}: ${od.prendas.slice(0,3).map(p=>p.n).join(', ')}.`);
   setTimeout(()=>addSugs(['Ver otra opción','Más formal','Más cómodo']),300);
