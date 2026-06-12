@@ -484,6 +484,36 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .adm-input:focus{border-color:#6B8F71;}
 .adm-btn{width:100%;background:#6B8F71;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
 .adm-refresh{background:#1e1e1e;border:none;color:#6B8F71;font-size:12px;padding:6px 12px;border-radius:7px;cursor:pointer;font-family:'Inter',sans-serif;}
+
+/* ── EDITOR PERFIL ─────────────────────────────────────── */
+.pr-edit-btn{display:flex;align-items:center;gap:6px;background:none;border:1.5px solid var(--bg3);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--g);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;}
+.pr-edit-btn:hover{border-color:var(--v);color:var(--v);}
+.pr-edit-btn svg{opacity:.6;}
+.edit-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;}
+.edit-modal.on{display:flex;}
+.edit-sheet{background:var(--w);border-radius:20px 20px 0 0;width:100%;max-width:520px;padding:24px 20px 36px;max-height:90vh;overflow-y:auto;}
+.edit-handle{width:36px;height:4px;background:var(--bg3);border-radius:2px;margin:0 auto 20px;}
+.edit-title{font-size:17px;font-weight:700;margin-bottom:20px;color:var(--n);}
+.edit-field{margin-bottom:18px;}
+.edit-label{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--g);font-weight:600;margin-bottom:10px;display:block;}
+.edit-opts{display:flex;gap:8px;flex-wrap:wrap;}
+.edit-opt{padding:9px 16px;border-radius:20px;border:1.5px solid var(--bg3);background:var(--w);font-size:14px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;color:var(--n);}
+.edit-opt:hover{border-color:var(--v);}
+.edit-opt.on{border-color:var(--v);background:var(--vl);font-weight:500;}
+.edit-piel-opts{display:flex;gap:8px;flex-wrap:wrap;}
+.edit-piel-opt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 12px;border:1.5px solid var(--bg3);border-radius:12px;cursor:pointer;transition:all .15s;background:var(--w);}
+.edit-piel-opt.on{border-color:var(--v);background:var(--vl);}
+.edit-piel-dot{width:32px;height:32px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15);}
+.edit-piel-lbl{font-size:12px;color:var(--n);font-weight:500;}
+.edit-pelo-opts{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.edit-pelo-opt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border:1.5px solid var(--bg3);border-radius:12px;cursor:pointer;transition:all .15s;background:var(--w);}
+.edit-pelo-opt.on{border-color:var(--v);background:var(--vl);}
+.edit-pelo-swatch{width:40px;height:40px;border-radius:50%;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.15);border:2px solid #fff;}
+.edit-pelo-swatch svg{width:100%;height:100%;}
+.edit-pelo-lbl{font-size:12px;color:var(--n);font-weight:500;text-align:center;}
+.edit-save{width:100%;padding:14px;background:var(--v);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px;}
+.edit-save:hover{background:var(--vd);}
+.edit-cancel{width:100%;padding:12px;background:none;color:var(--g);border:none;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;margin-top:4px;}
 </style>
 </head>
 <body>
@@ -1428,7 +1458,13 @@ function renderPrf(){
   const peloCap=perfil.pelo?perfil.pelo.charAt(0).toUpperCase()+perfil.pelo.slice(1):'-';
   document.getElementById('prfcont').innerHTML=`
     <div class="pr-sec">
-      <div class="pr-tit">Tu perfil</div>
+      <div class="pr-tit" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Tu perfil</span>
+        <button class="pr-edit-btn" onclick="abrirEdit()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Editar
+        </button>
+      </div>
       <div class="pr-row"><span class="pr-k">Nombre</span><span class="pr-v">${nom}</span></div>
       <div class="pr-row"><span class="pr-k">Estilo</span><span class="pr-v">${est?.e||''} ${est?.n||''}</span></div>
       <div class="pr-row"><span class="pr-k">Tono de piel</span><span class="pr-v">${pielCap}</span></div>
@@ -1636,6 +1672,104 @@ function admExport(){
   a.click();
 }
 
+
+// ── EDITOR DE PERFIL ────────────────────────────────────────
+let _editTmp = {};
+
+function abrirEdit(){
+  _editTmp = {
+    estilo: perfil?.estilo || 'sofisticada',
+    piel:   perfil?.piel   || 'clara',
+    pelo:   perfil?.pelo   || 'castaño'
+  };
+  renderEditBody();
+  document.getElementById('editModal').classList.add('on');
+}
+
+function cerrarEdit(){
+  document.getElementById('editModal').classList.remove('on');
+}
+
+function renderEditBody(){
+  const estilos=[
+    {k:'sofisticada',l:'Sofisticada'},
+    {k:'urbana',l:'Street minimal'},
+    {k:'clasica',l:'Clásica'},
+    {k:'boho',l:'Boho'}
+  ];
+  const pieles=[
+    {k:'muy_clara',c:'#FDDCB5',l:'Muy clara'},
+    {k:'clara',c:'#F5C89A',l:'Clara'},
+    {k:'media',c:'#D4956A',l:'Media'},
+    {k:'morena',c:'#A0522D',l:'Morena'},
+    {k:'muy_oscura',c:'#4A2410',l:'Muy oscura'}
+  ];
+  const pelos=[
+    {k:'rubio',    l:'Rubio',    c1:'#8B6914',c2:'#C9A84C',c3:'#F0D060'},
+    {k:'castaño',  l:'Castaño',  c1:'#3D1C02',c2:'#6B3A1F',c3:'#9B6040'},
+    {k:'moreno',   l:'Moreno',   c1:'#0A0500',c2:'#1C0A00',c3:'#2E1505'},
+    {k:'pelirrojo',l:'Pelirrojo',c1:'#7A2200',c2:'#B83A00',c3:'#D4622A'},
+    {k:'canoso',   l:'Canoso',   c1:'#7A7A7A',c2:'#B0B0B0',c3:'#E0E0E0'}
+  ];
+
+  document.getElementById('editBody').innerHTML = `
+    <div class="edit-field">
+      <span class="edit-label">Estilo</span>
+      <div class="edit-opts">
+        ${estilos.map(e=>`<button class="edit-opt${_editTmp.estilo===e.k?' on':''}" onclick="setEditVal('estilo','${e.k}',this)">${e.l}</button>`).join('')}
+      </div>
+    </div>
+    <div class="edit-field">
+      <span class="edit-label">Tono de piel</span>
+      <div class="edit-piel-opts">
+        ${pieles.map(p=>`<div class="edit-piel-opt${_editTmp.piel===p.k?' on':''}" onclick="setEditVal('piel','${p.k}',this)">
+          <div class="edit-piel-dot" style="background:${p.c}"></div>
+          <span class="edit-piel-lbl">${p.l}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="edit-field">
+      <span class="edit-label">Color de pelo</span>
+      <div class="edit-pelo-opts">
+        ${pelos.map(p=>`<div class="edit-pelo-opt${_editTmp.pelo===p.k?' on':''}" onclick="setEditVal('pelo','${p.k}',this)">
+          <div class="edit-pelo-swatch">${peloSVG(p.c1,p.c2,p.c3)}</div>
+          <span class="edit-pelo-lbl">${p.l}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function setEditVal(campo, valor, el){
+  _editTmp[campo] = valor;
+  const parent = el.closest('.edit-opts, .edit-piel-opts, .edit-pelo-opts');
+  parent.querySelectorAll('.edit-opt, .edit-piel-opt, .edit-pelo-opt').forEach(e=>e.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function guardarEdit(){
+  if(!perfil) return;
+  perfil.estilo = _editTmp.estilo;
+  perfil.piel   = _editTmp.piel;
+  perfil.pelo   = _editTmp.pelo;
+  // Recalcular paleta con nuevos datos
+  perfil.colores = calcPal(_editTmp.piel, _editTmp.pelo);
+  // Guardar
+  const ses = localStorage.getItem('sa_session');
+  if(ses) localStorage.setItem('sa_perf_'+ses, JSON.stringify(perfil));
+  cerrarEdit();
+  renderPrf();
+  // Confirmar visualmente
+  setTimeout(()=>{
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .3s';
+    toast.textContent = '✓ Perfil actualizado';
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.style.opacity='1',10);
+    setTimeout(()=>{toast.style.opacity='0';setTimeout(()=>toast.remove(),300);},2200);
+  },100);
+}
+
 </script>
 
 <!-- ══ ADMIN PANEL ══ -->
@@ -1659,6 +1793,17 @@ function admExport(){
       </div>
     </div>
     <div class="adm-body" id="admBody"></div>
+  </div>
+</div>
+
+<!-- ── EDITOR PERFIL ── -->
+<div class="edit-modal" id="editModal" onclick="if(event.target===this)cerrarEdit()">
+  <div class="edit-sheet">
+    <div class="edit-handle"></div>
+    <div class="edit-title">Editar perfil</div>
+    <div id="editBody"></div>
+    <button class="edit-save" onclick="guardarEdit()">Guardar cambios</button>
+    <button class="edit-cancel" onclick="cerrarEdit()">Cancelar</button>
   </div>
 </div>
 </body>
