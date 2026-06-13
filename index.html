@@ -1012,12 +1012,6 @@ function setClima(d){
   if(ap)ap.innerHTML=`${d.i} <strong style="color:var(--n)">${d.c} ${d.t}°C</strong>`;
   if(cn)cn.textContent=d.c;
   if(cc)cc.textContent=`${d.t}°C · ${d.cond}`;
-  // Si había mensaje pendiente de antes de elegir ciudad, procesarlo ahora
-  if(window._pendingMsg){
-    const pending=window._pendingMsg;
-    window._pendingMsg=null;
-    setTimeout(()=>proc(pending),300);
-  }
 }
 function detectarClima(){
   if(navigator.geolocation){
@@ -1456,106 +1450,131 @@ function fb(id,t){const r=document.getElementById(id);if(!r)return;if(t==='l'){i
 
 async function send(){if(busy)return;const ci=document.getElementById('ci');const txt=ci.value.trim();if(!txt)return;ci.value='';ci.style.height='auto';addMsg('u',txt);busy=true;document.getElementById('sndb').disabled=true;addTyping();await new Promise(r=>setTimeout(r,150));rmTyping();proc(txt);busy=false;document.getElementById('sndb').disabled=false;}
 function proc(txt){
-  const t=txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const normalizar = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const t = normalizar(txt);
 
-  // Temperatura mencionada
-  const tempMatch=txt.match(/(\d{1,2})\s*(?:°|º|grad[oa]s?|gradis|graus)/i)
-    ||txt.match(/(?:hace|estamos?\s+a|tenemos)\s+(\d{1,2})/i);
-  if(tempMatch && clima){
-    const tv=parseInt(tempMatch[1]||tempMatch[2]);
+  // ── 1. TEMPERATURA mencionada (actualiza sin interrumpir)
+  const tempM = txt.match(/(\d{1,2})\s*(?:°|º|grad[oa]s?|gradis|graus)/i)
+             || txt.match(/(?:hace|estamos?\s+a|tenemos)\s+(\d{1,2})/i);
+  if(tempM && clima){
+    const tv = parseInt(tempM[1]||tempM[2]);
     if(tv>=0&&tv<=50){
       clima={...clima,t:tv,cond:tv>=28?'caluroso':tv>=20?'templado':tv>=12?'fresco':'frio'};
       setClima(clima);
     }
   }
 
-  // Ciudad
+  // ── 2. SIN CIUDAD: guardar y pedir
   if(!clima){
-    const k=Object.keys(CIUDADES).find(c=>t.includes(c));
-    if(k){setClima(CIUDADES[k]);}
+    // Ver si el propio mensaje tiene ciudad
+    const k = Object.keys(CIUDADES).find(c=>t.includes(c));
+    if(k){ setClima(CIUDADES[k]); }
     else{
-      window._pendingMsg=txt;
+      window._pendingMsg = txt;
       addMsg('ai','¿Desde qué ciudad me escribes? Así ajusto el look al tiempo.');
       addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao','Otra ciudad']);
       return;
     }
   }
 
-  const msgFull=window._pendingMsg?window._pendingMsg+' '+txt:txt;
-  window._pendingMsg=null;
-  const tf=msgFull.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  // ── 3. Si hay pending (se eligió ciudad), combinarlo con el original
+  let msg = txt;
+  if(window._pendingMsg){
+    msg = window._pendingMsg + ' ' + txt;
+    window._pendingMsg = null;
+  }
+  const tf = normalizar(msg);
 
-  // Saludo simple
-  if(['hola','buenas','hey','ola'].some(k=>tf===k||tf.startsWith(k+' ')&&tf.length<12)){
-    const n=perfil?.nombre?` **${perfil.nombre}**`:'';
-    const m=`¡Hola${n}! En **${clima.c}** hay **${clima.t}°C**. ¿Cuál es tu plan?`;
-    addMsg('ai',m);hablar(limpiar(m));
+  // ── 4. Saludos simples
+  if(t.length < 10 && ['hola','buenas','hey','ola','hi'].some(k=>t.startsWith(k))){
+    const n = perfil?.nombre ? ` **${perfil.nombre}**` : '';
+    const m = `¡Hola${n}! En **${clima.c}** hay **${clima.t}°C**. ¿Cuál es tu plan?`;
+    addMsg('ai',m); hablar(limpiar(m));
     addSugs(['Trabajo o reunión','Ocio con amigas','Cena esta noche','Evento especial']);
     return;
   }
 
-  // Alternativa
-  if(['alternativ','otra opcion','diferente','cambia','otra vez'].some(k=>tf.includes(k))){
+  // ── 5. Confirmaciones / seguir / más detalles
+  if(['venga','dale','si','ok','vale','perfecto','genial','muestra','ver','enseña','quiero'].some(k=>t===k||t.startsWith(k+' ')&&t.length<15)){
+    // Si hay contexto de última ocasión, reutilizarlo
+    const ultimo = window._lastOc;
+    if(ultimo){
+      addMsg('ai','Aquí tienes.');
+      setTimeout(()=>mostrarOutfit(ultimo),150);
+    } else {
+      addMsg('ai','¿Para qué ocasión quieres el look?');
+      addSugs(['Trabajo o reunión','Ocio','Cena','Evento especial','Salida nocturna']);
+    }
+    return;
+  }
+
+  // ── 6. Alternativas
+  if(['alternativ','otra opcion','otra vez','diferente','cambia','otro look'].some(k=>tf.includes(k))){
+    const ultimo = window._lastOc||'casual';
     addMsg('ai','Aquí tienes otra propuesta.');
-    setTimeout(()=>mostrarOutfit(tf),150);return;
+    setTimeout(()=>mostrarOutfit(ultimo),150);
+    return;
   }
 
-  // ── DETECCIÓN DE OCASIÓN LOCAL (sin API externa) ─────────────────────
-  let oc=null;
+  // ── 7. DETECCIÓN DE OCASIÓN
+  let oc = null;
 
-  // Eventos sociales — siempre primero
-  if(['bautizo','bautis','comunion','primera comunion','boda','ceremony','ceremonia',
-      'graduacion','graduacion','gala','inauguracion','acto','evento','fiesta cumpleanos',
-      'aniversario','cena empresa','cena de empresa','cena gala'].some(k=>tf.includes(k))){
-    oc='evento';
+  if(['bautizo','bautis','comunion','primera comunion','boda','ceremonia',
+      'graduacion','gala','inauguracion','bienvenida','evento de empresa',
+      'fiesta cumpleanos','cena de empresa','cena gala'].some(k=>tf.includes(k))){
+    oc = 'evento';
   }
-  // Trabajo
-  else if(['trabajo','jefe','reunion','oficina','entrevista','cliente','presentacion',
-           'congreso','conferencia'].some(k=>tf.includes(k))){
-    oc='formal';
+  else if(['trabajo','jefe','reunion','oficina','entrevista','cliente',
+           'presentacion','congreso','conferencia','meeting'].some(k=>tf.includes(k))){
+    oc = 'formal';
   }
-  // Noche
-  else if(['noche','nocturna','discoteca','club','copas','after','bar de'].some(k=>tf.includes(k))){
-    oc='noche';
+  else if(['nocturna','discoteca','club','copas','after'].some(k=>tf.includes(k))
+       || (tf.includes('noche') && !tf.includes('cena'))){
+    oc = 'noche';
   }
-  // Cena
   else if(tf.includes('cena')||tf.includes('cenar')){
-    oc=['elegante','especial','romantica','aniversario','lujo','restaurante'].some(k=>tf.includes(k))
-      ?'cena_el':'cena_in';
+    oc = ['elegante','especial','romantica','aniversario','lujo','restaurante bon'].some(k=>tf.includes(k))
+      ? 'cena_el' : 'cena_in';
   }
-  // Deporte
-  else if(['gym','deporte','sport','yoga','running','entreno','pilates','natacion'].some(k=>tf.includes(k))){
-    oc='deporte';
+  else if(['gym','deporte','sport','yoga','running','entreno','pilates','natacion','ejercicio'].some(k=>tf.includes(k))){
+    oc = 'deporte';
   }
-  // Viaje
   else if(['viaje','viajar','avion','aeropuerto','escapada','vacaciones','hotel'].some(k=>tf.includes(k))){
-    oc='viaje';
+    oc = 'viaje';
   }
-  // Ocio / quedada casual
-  else if(['ocio','amigas','amigos','quedada','parque','compras','paseo','tarde','dia',
-           'domingo','sabado','fin de semana'].some(k=>tf.includes(k))){
-    oc='casual';
+  else if(['ocio','amigas','amigos','quedada','parque','compras','paseo','dia de',
+           'domingo','sabado','fin de semana','mañana','tarde libre'].some(k=>tf.includes(k))){
+    oc = 'casual';
+  }
+  // "evento" o "salida" genérico
+  else if(tf.includes('evento')||tf.includes('acto')){
+    oc = 'evento';
+  }
+  else if(tf.includes('salida')){
+    oc = 'noche';
   }
 
   if(oc){
-    const frases={
-      evento:'¡Un evento especial! Te propongo algo elegante.',
-      formal:'Para trabajo, aquí tienes un look profesional.',
-      noche:'Noche de salida — te propongo algo con estilo.',
-      cena_el:'Una cena elegante merece un look especial.',
-      cena_in:'Cena con amigos — algo chic pero cómodo.',
-      deporte:'Look sporty y cómodo para entrenar.',
-      viaje:'Lista para el viaje — look práctico y estiloso.',
-      casual:'Un look de día relajado y favorecedor.'
+    window._lastOc = oc; // guardar para si dice "venga" después
+    const frases = {
+      evento: '¡Un evento especial! Te propongo algo elegante.',
+      formal: 'Para trabajo, aquí tienes un look profesional.',
+      noche: 'Noche de salida — te propongo algo con estilo.',
+      cena_el: 'Una cena elegante merece un look especial.',
+      cena_in: 'Cena con amigos — algo chic pero cómodo.',
+      deporte: 'Look sporty y cómodo para entrenar.',
+      viaje: 'Lista para el viaje — look práctico y estiloso.',
+      casual: 'Un look de día relajado y favorecedor.'
     };
-    addMsg('ai',frases[oc]||'Aquí tienes mi propuesta.');
+    addMsg('ai', frases[oc]||'Aquí tienes mi propuesta.');
     hablar(limpiar(frases[oc]||''));
-    setTimeout(()=>mostrarOutfit(oc),200);
-  } else if(tempMatch){
-    // Solo temperatura, sin plan concreto
-    addMsg('ai',`Con ${clima.t}°C en ${clima.c}, ¿cuál es tu plan?`);
+    setTimeout(()=>mostrarOutfit(oc), 200);
+  }
+  else if(tempM){
+    addMsg('ai', `Con ${clima.t}°C en ${clima.c}, ¿cuál es tu plan?`);
     addSugs(['Trabajo o reunión','Ocio','Cena','Evento especial','Salida nocturna']);
-  } else {
+  }
+  else {
     addMsg('ai','¿Para qué ocasión quieres el look?');
     addSugs(['Trabajo o reunión','Ocio','Cena','Evento especial','Salida nocturna']);
   }
