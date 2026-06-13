@@ -1273,7 +1273,21 @@ function sugerirPantalon(est) {
   return est.pan;
 }
 
-function getOc(t){t=t.toLowerCase();if(['jefe','reunión','reunion','trabajo','oficina','entrevista','cliente','formal','boda','gala'].some(k=>t.includes(k)))return'formal';if(['noche','nocturna','discoteca','club','bar','fiesta','salida','copas'].some(k=>t.includes(k)))return'noche';if(t.includes('cena')||t.includes('cenar')){return['elegante','especial','romántica','aniversario','lujo'].some(k=>t.includes(k))?'cena_el':'cena_in';}if(['gym','deporte','sport','yoga','running'].some(k=>t.includes(k)))return'deporte';if(['viaje','viajar','avión','aeropuerto'].some(k=>t.includes(k)))return'viaje';return'casual';}
+function getOc(t){
+  // Si ya es un ID de ocasión válido (viene de Claude), devolverlo directamente
+  const IDS=['formal','casual','noche','cena_el','cena_in','viaje','deporte','evento'];
+  if(IDS.includes(t)) return t;
+  // Si no, detectar por palabras clave
+  t=t.toLowerCase();
+  if(['jefe','reunión','reunion','trabajo','oficina','entrevista','cliente','formal'].some(k=>t.includes(k)))return'formal';
+  if(['boda','bautizo','comunión','comunion','graduación','graduacion','ceremonia','gala','inauguración'].some(k=>t.includes(k)))return'evento';
+  if(['noche','nocturna','discoteca','club','bar','copas','after'].some(k=>t.includes(k)))return'noche';
+  if(['fiesta','cumpleaños','cumpleanos','celebración'].some(k=>t.includes(k)))return'evento';
+  if(t.includes('cena')||t.includes('cenar')){return['elegante','especial','romántica','aniversario','lujo'].some(k=>t.includes(k))?'cena_el':'cena_in';}
+  if(['gym','deporte','sport','yoga','running','entreno'].some(k=>t.includes(k)))return'deporte';
+  if(['viaje','viajar','avión','aeropuerto','escapada'].some(k=>t.includes(k)))return'viaje';
+  return'casual';
+}
 
 function outfitD(txt){
   const oc=getOc(txt),est=ESTILOS[perfil?.estilo||'sofisticada'];
@@ -1400,24 +1414,84 @@ function mostrarOutfit(txt){
 function fb(id,t){const r=document.getElementById(id);if(!r)return;if(t==='l'){if(perfil){perfil.liked.push(Date.now());const _ses=localStorage.getItem('sa_session');if(_ses){localStorage.setItem('sa_perf_'+_ses,JSON.stringify(perfil));}}r.innerHTML='<span style="font-size:11.5px;color:var(--v)">✓ Guardado en favoritos</span>';addMsg('ai','Me alegra. Lo anoto para la próxima.');}else{if(perfil){perfil.disliked.push(Date.now());const _ses=localStorage.getItem('sa_session');if(_ses){localStorage.setItem('sa_perf_'+_ses,JSON.stringify(perfil));}}r.innerHTML='<span style="font-size:11.5px;color:var(--t)">✓ Anotado</span>';setTimeout(()=>{addMsg('ai','¿Qué no te ha convencido?');addSugs(['Demasiado formal','No me gustan los colores','Ver alternativa']);},250);}}
 
 async function send(){if(busy)return;const ci=document.getElementById('ci');const txt=ci.value.trim();if(!txt)return;ci.value='';ci.style.height='auto';addMsg('u',txt);busy=true;document.getElementById('sndb').disabled=true;addTyping();await new Promise(r=>setTimeout(r,150));rmTyping();proc(txt);busy=false;document.getElementById('sndb').disabled=false;}
-function proc(txt){const t=txt.toLowerCase();if(!clima){const k=Object.keys(CIUDADES).find(k=>t.includes(k));if(k)setClima(CIUDADES[k]);else{addMsg('ai','¿Desde qué ciudad me escribes?');addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao']);return;}}if(['alternativ','otra opcion','otra opción'].some(k=>t.includes(k))){addMsg('ai','Aquí tienes otra opción.');setTimeout(()=>mostrarOutfit(txt),150);return;}if(['hola','buenas','hey'].some(k=>t.includes(k))){const n=perfil?.nombre?` **${perfil.nombre}**`:'';const m=`¡Hola${n}! En **${clima.c}** hay **${clima.t}°C**. ¿Tu plan?`;addMsg('ai',m);hablar(limpiar(m));addSugs(['🏢 Trabajo','☀️ Ocio','🍽️ Cena','🌙 Noche']);return;}if(['outfit','ponerse','vestir','ropa','look','trabajo','jefe','reunion','reunión','cena','ocio','noche','salida','evento','viaje','gym','deporte','formal','hoy','plan','pongo','llevar'].some(k=>t.includes(k))){
-  const od=outfitD(txt);
-  const n=perfil?.nombre?` **${perfil.nombre}**`:'';
-  const est=ESTILOS[perfil?.estilo||'sofisticada'];
-  // Mensaje personalizado basado en estilo e inspiración seleccionada
-  const inspoN = perfil?.inspoSels?.length||0;
-  const inspoMsg = inspoN>0 ? ` Basándome en los ${inspoN} looks que elegiste,` : '';
-  addMsg('ai',`${inspoMsg?inspoMsg+' Para':'Para'} **${od.OT}** con **${clima.t}°C** en ${clima.c} y tu estilo ${est.n}:`);
-  setTimeout(()=>mostrarOutfit(txt),150);
-  return;
-}const rs=[`¿Para qué plan? Con ${clima.t}°C en ${clima.c} te propongo algo perfecto.`,`Cuéntame adónde vas.`];addMsg('ai',rs[Math.floor(Math.random()*rs.length)]);addSugs(['Trabajo o reunión','Ocio','Cena','Salida nocturna','Evento especial']);}
+async function proc(txt){
+  const t=txt.toLowerCase();
 
-function limpiar(t){return t.replace(/[✨👗🎨🌤️🎯🔄⚠️☀️🌧️⛅☁️🏢🍽️🥂🎉✈️🌙🤍🖤👑🌿]/g,'').replace(/\*\*(.*?)\*\*/g,'$1').replace(/\n+/g,'. ').replace(/\s+/g,' ').trim();}
-function getVoz(){const vs=window.speechSynthesis?.getVoices()||[];const ps=[v=>v.name.includes('Mónica')&&v.lang.startsWith('es'),v=>v.name.includes('Monica')&&v.lang.startsWith('es'),v=>v.name.toLowerCase().includes('google')&&v.lang==='es-ES',v=>v.lang==='es-ES',v=>v.lang.startsWith('es')];for(const f of ps){const v=vs.find(f);if(v)return v;}return null;}
-function hablar(t){if(!('speechSynthesis'in window))return;window.speechSynthesis.cancel();const fs=(limpiar(t).match(/[^.!?]+[.!?]+/g)||[limpiar(t)]);let i=0;function nx(){if(i>=fs.length)return;const u=new SpeechSynthesisUtterance(fs[i].trim());const v=getVoz();if(v)u.voice=v;u.lang='es-ES';u.rate=0.88;u.volume=1;u.onend=()=>{i++;setTimeout(nx,70);};u.onerror=()=>{i++;nx();};window.speechSynthesis.speak(u);}nx();}
-function inicRec(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Usa Chrome para la voz.');return null;}const r=new SR();r.lang='es-ES';r.continuous=false;r.interimResults=true;r.onstart=()=>{oesc=true;document.getElementById('mic').classList.add('on');document.getElementById('mic').textContent='⏹️';document.getElementById('vs').textContent='🔴 Escuchándote...';document.getElementById('vs').classList.add('on');window.speechSynthesis.cancel();};r.onresult=(e)=>{const t=Array.from(e.results).map(r=>r[0].transcript).join('');document.getElementById('ci').value=t;if(e.results[e.results.length-1].isFinal){document.getElementById('vs').textContent=`✓ "${t}"`;setTimeout(send,400);}};r.onerror=()=>stopMic();r.onend=()=>stopMic();return r;}
-function toggleMic(){if(oesc){stopMic();return;}window.speechSynthesis.cancel();rec=inicRec();if(rec)rec.start();}
-function stopMic(){oesc=false;try{rec?.stop();}catch(e){}document.getElementById('mic').classList.remove('on');document.getElementById('mic').textContent='🎙️';setTimeout(()=>{document.getElementById('vs').textContent='';document.getElementById('vs').classList.remove('on');},1200);}
+  // Ciudad
+  if(!clima){
+    const k=Object.keys(CIUDADES).find(k=>t.includes(k));
+    if(k){setClima(CIUDADES[k]);}
+    else{addMsg('ai','¿Desde qué ciudad me escribes?');addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao']);return;}
+  }
+
+  // Saludos
+  if(['hola','buenas','hey','ola'].some(k=>t.includes(k))&&txt.length<15){
+    const n=perfil?.nombre?` **${perfil.nombre}**`:'';
+    const m=`¡Hola${n}! En **${clima.c}** hay **${clima.t}°C**. ¿Cuál es tu plan?`;
+    addMsg('ai',m);hablar(limpiar(m));
+    addSugs(['Trabajo o reunión','Ocio con amigas','Cena esta noche','Evento especial']);
+    return;
+  }
+
+  // Alternativa
+  if(['alternativ','otra opcion','otra opción','otra vez','diferente','cambia'].some(k=>t.includes(k))){
+    addMsg('ai','Aquí tienes otra opción.');
+    setTimeout(()=>mostrarOutfit(txt),150);return;
+  }
+
+  // Usar Claude para entender cualquier mensaje — temperatura, ocasión, contexto libre
+  addTyping();
+  try{
+    const ctx=`Eres el cerebro de StyleAI, una app de estilismo personal.
+El usuario ha escrito: "${txt}"
+Contexto: está en ${clima.c}, hace ${clima.t}°C, ${clima.cond}.
+Su estilo es: ${ESTILOS[perfil?.estilo||'sofisticada']?.n||'sofisticada'}.
+Su tono de piel: ${perfil?.piel||'clara'}. Pelo: ${perfil?.pelo||'castaño'}.
+
+Clasifica el mensaje en una de estas ocasiones:
+formal=trabajo/reunión/oficina
+casual=día a día/ocio/compras/parque
+noche=salida nocturna/discoteca/bar
+cena_el=cena elegante/restaurante/aniversario
+cena_in=cena informal/amigos/pizza
+viaje=viaje/aeropuerto/escapada
+deporte=gym/deporte/running/yoga
+evento=evento especial/boda/bautizo/comunión/graduación/fiesta/cumpleaños/inauguración
+
+Responde SOLO con JSON sin markdown:
+{"ocasion":"ID_OCASION","temperatura_ok":true,"respuesta":"frase corta natural de estilista (max 15 palabras)"}
+
+Si el mensaje no tiene nada que ver con ropa/planes, responde:
+{"ocasion":null,"temperatura_ok":true,"respuesta":"pregunta corta para saber el plan del día"}`;
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:200,messages:[{role:'user',content:ctx}]})
+    });
+    rmTyping();
+    const data=await res.json();
+    const raw=data?.content?.[0]?.text||'{}';
+    let parsed={};
+    try{parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch(e){}
+
+    if(parsed.ocasion){
+      // Tenemos ocasión clara — mostrar outfit
+      addMsg('ai',parsed.respuesta||'Aquí tienes mi propuesta.');
+      hablar(limpiar(parsed.respuesta||''));
+      setTimeout(()=>mostrarOutfit(parsed.ocasion),150);
+    } else {
+      // No hay ocasión — responder y pedir contexto
+      addMsg('ai',parsed.respuesta||'¿Para qué plan me escribes?');
+      addSugs(['Trabajo o reunión','Ocio','Cena esta noche','Evento especial','Salida nocturna']);
+    }
+  } catch(e){
+    rmTyping();
+    addMsg('ai','¿Para qué ocasión quieres el look?');
+    addSugs(['Trabajo o reunión','Ocio','Cena','Salida nocturna','Evento especial']);
+  }
+}
+
 
 async function procesarFoto(inp){const f=inp.files[0];if(!f)return;inp.value='';const ol=document.getElementById('aol'),card=document.getElementById('acard');const ps=['Detectando prendas...','Analizando colores...','Identificando estilo...','Casi lista...'];let pi=0;card.innerHTML=`<div class="spin"></div><div class="a-tit">Analizando tu foto</div><div class="a-pas" id="ap">${ps[0]}</div>`;ol.classList.add('on');const iv=setInterval(()=>{pi=(pi+1)%ps.length;const e=document.getElementById('ap');if(e)e.textContent=ps[pi];},650);const reader=new FileReader();reader.onload=async e=>{imgP=e.target.result;await new Promise(r=>setTimeout(r,2000));clearInterval(iv);const est=ESTILOS[perfil?.estilo||'sofisticada'];const tipos=['Blazer','Camisa','Blusa','Pantalón wide leg','Pantalón straight','Vaqueros','Falda midi','Vestido midi','Jersey','Abrigo','Chaqueta','Zapatos','Botas','Mules','Bolso'];const det={tipo:tipos[Math.floor(Math.random()*tipos.length)],color:(perfil?.colores||est.col)[Math.floor(Math.random()*4)]};card.innerHTML=`<div class="c-tit">¿Es esto correcto?</div><div class="c-pre"><img class="c-img" src="${imgP}" onerror="this.style.display='none'"><div class="c-fields"><div class="cf"><label>Tipo</label><select id="ct">${tipos.map(t=>`<option ${det.tipo===t?'selected':''}>${t}</option>`).join('')}</select></div><div class="cf"><label>Color</label><input id="cc" type="text" value="${det.color}"></div><div class="cf"><label>Estilo</label><select id="ce"><option>Casual</option><option>Formal</option><option>Elegante</option><option>Sport</option></select></div></div></div><div class="c-acts"><button class="c-btn no" onclick="cerrarAnal()">Cancelar</button><button class="c-btn ok" onclick="confirmar()">✓ Añadir</button></div>`;};reader.readAsDataURL(f);}
 function confirmar(){const tipo=document.getElementById('ct').value,color=document.getElementById('cc').value;const hm={'negro':'#1A1A1A','blanco roto':'#FAF8F5','beige':'#C9B99A','camel':'#C9A87C','azul marino':'#1B2A4A','burdeos':'#6B1E2D','verde botella':'#2D5A27','gris':'#808080','terracota':'#C4714A','blanco':'#FFFFFF','verde salvia':'#8FAF8F','verde oliva':'#808000','dorado':'#FFD700','amarillo mostaza':'#FFDB58','verde esmeralda':'#50C878','naranja':'#FF8C00','ocre':'#CC7722','marrón':'#8B4513'};armario.push({id:Date.now(),tipo,color,hex:hm[color]||'#888',estilo:document.getElementById('ce').value,imgData:imgP});const _ases=localStorage.getItem('sa_session');if(_ases)localStorage.setItem('sa_arm_'+_ases,JSON.stringify(armario));cerrarAnal();renderArm();tab('chat',document.querySelector('.a-tab'));setTimeout(()=>{addMsg('ai',`Añadida tu ${tipo} ${color} 👗 Ya tengo **${armario.length} prenda${armario.length>1?'s':''}** tuya${armario.length>1?'s':''}. ¡Sigue añadiendo!`);},250);}
