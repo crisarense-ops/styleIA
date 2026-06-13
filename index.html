@@ -1002,7 +1002,23 @@ function confirmarLogin(){
 }
 
 // CLIMA
-function setClima(d){clima=d;document.getElementById('lclima').textContent=`${d.i} ${d.c} · ${d.t}°C · ${d.cond}`;document.getElementById('apclima').innerHTML=`${d.i} <strong style="color:var(--n)">${d.c} ${d.t}°C</strong>`;document.getElementById('cnom').textContent=d.c;document.getElementById('ccl').textContent=`${d.t}°C · ${d.cond}`;}
+function setClima(d){
+  clima=d;
+  const lc=document.getElementById('lclima');
+  const ap=document.getElementById('apclima');
+  const cn=document.getElementById('cnom');
+  const cc=document.getElementById('ccl');
+  if(lc)lc.textContent=`${d.i} ${d.c} · ${d.t}°C · ${d.cond}`;
+  if(ap)ap.innerHTML=`${d.i} <strong style="color:var(--n)">${d.c} ${d.t}°C</strong>`;
+  if(cn)cn.textContent=d.c;
+  if(cc)cc.textContent=`${d.t}°C · ${d.cond}`;
+  // Si había mensaje pendiente de antes de elegir ciudad, procesarlo ahora
+  if(window._pendingMsg){
+    const pending=window._pendingMsg;
+    window._pendingMsg=null;
+    setTimeout(()=>proc(pending),300);
+  }
+}
 function detectarClima(){
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
@@ -1277,7 +1293,7 @@ function addTyping(){const c=document.getElementById('chat');const d=document.cr
 function rmTyping(){document.getElementById('ty')?.remove();}
 function addSugs(ops){const c=document.getElementById('chat');const d=document.createElement('div');d.className='msg ai';d.style.maxWidth='100%';const s=document.createElement('div');s.className='sugs';ops.forEach(o=>{const b=document.createElement('button');b.className='sug';b.textContent=o;b.onclick=()=>{document.getElementById('ci').value=o;send();};s.appendChild(b);});d.innerHTML=`<div class="av ai"></div>`;d.appendChild(s);c.appendChild(d);c.scrollTop=c.scrollHeight;}
 
-function initChat(){if(!clima){setTimeout(initChat,400);return;}const ll=clima.ll?` Hoy llueve — lo tendré muy en cuenta.`:'';const msg=`Hola${perfil?.nombre?' **'+perfil.nombre+'**':''}! Estás en **${clima.c}** — **${clima.t}°C**, ${clima.cond}.${ll} ¿Cuál es tu plan de hoy?`;addMsg('ai',msg);hablar(limpiar(msg));setTimeout(()=>addSugs(['Ocio con amigas','Trabajo o reunión','Cena esta noche','Salida nocturna','Evento especial','Viaje']),300);}
+function initChat(){if(document.getElementById('chat').children.length>0)return;if(!clima){setTimeout(initChat,400);return;}const ll=clima.ll?` Hoy llueve — lo tendré muy en cuenta.`:'';const msg=`Hola${perfil?.nombre?' **'+perfil.nombre+'**':''}! Estás en **${clima.c}** — **${clima.t}°C**, ${clima.cond}.${ll} ¿Cuál es tu plan de hoy?`;addMsg('ai',msg);hablar(limpiar(msg));setTimeout(()=>addSugs(['Ocio con amigas','Trabajo o reunión','Cena esta noche','Salida nocturna','Evento especial','Viaje']),300);}
 
 // Detecta si el usuario tiene una prenda tipo en su armario
 function tieneEnArmario(tipo) {
@@ -1442,24 +1458,38 @@ async function send(){if(busy)return;const ci=document.getElementById('ci');cons
 async function proc(txt){
   const t=txt.toLowerCase();
 
-  // Temperatura mencionada en el mensaje — actualizarla aunque ya haya clima
-  const tempMatch=txt.match(/(\d{1,2})\s*[°ºgrados]/i)||txt.match(/hace\s+(\d{1,2})/i)||txt.match(/estamos?\s+a\s+(\d{1,2})/i);
-  if(tempMatch){
-    const tempVal=parseInt(tempMatch[1]||tempMatch[2]);
-    if(tempVal>=0&&tempVal<=50&&clima){
-      clima={...clima,t:tempVal,cond:tempVal>=28?'caluroso':tempVal>=20?'templado':tempVal>=12?'fresco':'frío'};
+  // ── 1. TEMPERATURA mencionada — regex amplio que captura "gradis","grados","graus",°,º
+  const tempMatch=txt.match(/(\d{1,2})\s*(?:°|º|grad[oa]s?|gradis|graus)/i)
+    ||txt.match(/(?:hace|estamos?\s+a|tenemos)\s+(\d{1,2})/i);
+  if(tempMatch && clima){
+    const tv=parseInt(tempMatch[1]||tempMatch[2]);
+    if(tv>=0&&tv<=50){
+      clima={...clima,t:tv,cond:tv>=28?'caluroso':tv>=20?'templado':tv>=12?'fresco':'frío'};
       setClima(clima);
     }
   }
-  // Ciudad
+
+  // ── 2. CIUDAD — si no hay clima aún, detectar en el mensaje o preguntar
   if(!clima){
-    const k=Object.keys(CIUDADES).find(k=>t.includes(k));
-    if(k){setClima(CIUDADES[k]);}
-    else{addMsg('ai','¿Desde qué ciudad me escribes? Así ajusto el look al tiempo.');addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao','Otra ciudad']);return;}
+    const k=Object.keys(CIUDADES).find(c=>t.includes(c));
+    if(k){
+      setClima(CIUDADES[k]);
+      // No terminar aquí — seguir procesando el mensaje completo
+    } else {
+      // Guardar el mensaje para procesarlo después de que elija ciudad
+      window._pendingMsg=txt;
+      addMsg('ai','¿Desde qué ciudad me escribes? Así ajusto el look al tiempo.');
+      addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao','Otra ciudad']);
+      return;
+    }
   }
 
-  // Saludos
-  if(['hola','buenas','hey','ola'].some(k=>t.includes(k))&&txt.length<15){
+  // ── 3. Si había mensaje pendiente (escribió antes de elegir ciudad), procesarlo junto
+  const msgFull = window._pendingMsg ? window._pendingMsg+' '+txt : txt;
+  window._pendingMsg = null;
+
+  // ── 4. Saludos simples sin plan
+  if(['hola','buenas','hey','ola'].some(k=>t.includes(k))&&txt.length<12){
     const n=perfil?.nombre?` **${perfil.nombre}**`:'';
     const m=`¡Hola${n}! En **${clima.c}** hay **${clima.t}°C**. ¿Cuál es tu plan?`;
     addMsg('ai',m);hablar(limpiar(m));
@@ -1467,63 +1497,59 @@ async function proc(txt){
     return;
   }
 
-  // Alternativa
-  if(['alternativ','otra opcion','otra opción','otra vez','diferente','cambia'].some(k=>t.includes(k))){
-    addMsg('ai','Aquí tienes otra opción.');
+  // ── 5. Alternativa
+  if(['alternativ','otra opcion','otra opción','diferente','cambia','otra vez'].some(k=>t.includes(k))){
+    addMsg('ai','Aquí tienes otra propuesta.');
     setTimeout(()=>mostrarOutfit(txt),150);return;
   }
 
-  // Usar Claude para entender cualquier mensaje — temperatura, ocasión, contexto libre
+  // ── 6. CLAUDE entiende cualquier mensaje libre
   addTyping();
   try{
-    const tempInfo=tempMatch?`(el usuario dice que hace ${parseInt(tempMatch[1]||tempMatch[2])}°C)`:'';
-    const ctx=`Eres StyleAI, una estilista personal experta. El usuario te escribe en lenguaje natural.
+    const ctx=`Eres StyleAI, una estilista personal experta y cercana.
 
-MENSAJE DEL USUARIO: "${txt}" ${tempInfo}
-CONTEXTO: Ciudad ${clima.c}, ${clima.t}°C, ${clima.cond}.
+MENSAJE: "${msgFull}"
+TEMPERATURA ACTUAL: ${clima.t}°C en ${clima.c}, ${clima.cond}.
 PERFIL: estilo ${ESTILOS[perfil?.estilo||'sofisticada']?.n||'sofisticada'}, piel ${perfil?.piel||'clara'}, pelo ${perfil?.pelo||'castaño'}.
 
-Tu tarea: identificar la ocasión para proponer un outfit.
+Identifica la OCASIÓN del mensaje y responde con JSON.
 
-OCASIONES DISPONIBLES (elige la más adecuada):
-- formal → trabajo, reunión, oficina, entrevista, cliente, jefe
-- casual → día a día, ocio, compras, parque, quedada informal, paseo
-- noche → salida nocturna, discoteca, club, bar de copas, after
-- cena_el → cena elegante, restaurante, aniversario, cumpleaños romántico
-- cena_in → cena informal, casa de amigos, pizza, tapas
-- viaje → viaje, aeropuerto, escapada, vacaciones
-- deporte → gym, entreno, running, yoga, deporte
-- evento → CUALQUIER evento social con cierto nivel de formalidad: BODA, BAUTIZO, COMUNIÓN, GRADUACIÓN, CEREMONIA, FIESTA DE CUMPLEAÑOS, INAUGURACIÓN, EVENTO DE EMPRESA, GALA
+MAPA DE OCASIONES:
+- "formal" → trabajo, reunión, oficina, entrevista, cliente, jefe, presentación
+- "casual" → día a día, ocio, compras, parque, quedada, paseo, sin plan especial
+- "noche" → salida nocturna, discoteca, club, bar de copas, after, fiesta nocturna
+- "cena_el" → cena elegante, restaurante especial, aniversario, san valentín
+- "cena_in" → cena informal, casa de amigos, pizza, tapas, comida familiar relajada
+- "viaje" → viaje, aeropuerto, escapada, vacaciones, hotel
+- "deporte" → gym, entreno, running, yoga, pilates, deporte
+- "evento" → BAUTIZO, COMUNIÓN, BODA, CEREMONIA, GRADUACIÓN, FIESTA DE CUMPLEAÑOS, EVENTO DE EMPRESA, GALA, INAUGURACIÓN, PRIMERA COMUNIÓN — cualquier evento social con vestimenta cuidada
 
-IMPORTANTE: bautizo, comunión, boda y ceremonia SIEMPRE son "evento".
-Si mencionan temperatura ("30 grados", "hace calor"), tenlo en cuenta pero igualmente clasifica la ocasión.
+REGLA CRÍTICA: bautizo/comunión/boda/ceremonia/graduación = SIEMPRE "evento". Sin excepciones.
+Si mencionan temperatura ("30 grados", "gradis", "calor") sin especificar plan, inferir "casual" o pedir el plan.
 
-Responde ÚNICAMENTE con JSON válido, sin markdown ni explicaciones:
-{"ocasion":"ID","respuesta":"Frase natural y cálida de estilista, máx 12 palabras, sin emojis"}
-
-Si el mensaje es solo temperatura o no indica ningún plan, responde:
-{"ocasion":null,"respuesta":"Pregunta concisa para saber el plan"}`;
+Responde SOLO con este JSON (sin markdown):
+{"ocasion":"ID_O_null","respuesta":"frase natural de estilista max 10 palabras"}`;
 
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:200,messages:[{role:'user',content:ctx}]})
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:150,messages:[{role:'user',content:ctx}]})
     });
     rmTyping();
     const data=await res.json();
-    const raw=data?.content?.[0]?.text||'{}';
     let parsed={};
-    try{parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch(e){}
+    try{
+      const raw=(data?.content?.[0]?.text||'{}').replace(/```json|```/g,'').trim();
+      parsed=JSON.parse(raw);
+    }catch(e){}
 
     if(parsed.ocasion){
-      // Tenemos ocasión clara — mostrar outfit
       addMsg('ai',parsed.respuesta||'Aquí tienes mi propuesta.');
       hablar(limpiar(parsed.respuesta||''));
-      setTimeout(()=>mostrarOutfit(parsed.ocasion),150);
+      setTimeout(()=>mostrarOutfit(parsed.ocasion),200);
     } else {
-      // No hay ocasión — responder y pedir contexto
-      addMsg('ai',parsed.respuesta||'¿Para qué plan me escribes?');
-      addSugs(['Trabajo o reunión','Ocio','Cena esta noche','Evento especial','Salida nocturna']);
+      addMsg('ai',parsed.respuesta||'¿Para qué plan quieres el look?');
+      addSugs(['Trabajo o reunión','Ocio','Cena','Salida nocturna','Evento especial']);
     }
   } catch(e){
     rmTyping();
