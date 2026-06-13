@@ -1003,7 +1003,32 @@ function confirmarLogin(){
 
 // CLIMA
 function setClima(d){clima=d;document.getElementById('lclima').textContent=`${d.i} ${d.c} · ${d.t}°C · ${d.cond}`;document.getElementById('apclima').innerHTML=`${d.i} <strong style="color:var(--n)">${d.c} ${d.t}°C</strong>`;document.getElementById('cnom').textContent=d.c;document.getElementById('ccl').textContent=`${d.t}°C · ${d.cond}`;}
-function detectarClima(){if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{const{latitude:la,longitude:lo}=pos.coords;let k='madrid';if(la>41.2&&lo>1.8)k='barcelona';else if(la>43)k='bilbao';else if(la<37.5&&lo>-6)k='sevilla';else if(la>39.3&&lo>-1)k='valencia';else if(la<37.5&&lo>-5)k='malaga';setClima(CIUDADES[k]||CIUDADES.madrid);},()=>setClima(CIUDADES.madrid));}else setClima(CIUDADES.madrid);}
+function detectarClima(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos=>{
+        const{latitude:la,longitude:lo}=pos.coords;
+        let k='madrid';
+        if(la>41.2&&lo>-2.0&&lo<2.5)k='barcelona';
+        else if(la>43)k='bilbao';
+        else if(la<37.5&&lo>-6)k='sevilla';
+        else if(la>39.3&&lo>-1)k='valencia';
+        else if(la<37.5&&lo>-5)k='malaga';
+        else if(la>40.4&&la<40.5&&lo>-3.8&&lo<-3.6)k='madrid';
+        setClima(CIUDADES[k]||CIUDADES.madrid);
+      },
+      // Si la geo falla (trabajo, permisos bloqueados) → preguntar ciudad
+      (err)=>{
+        console.log('Geo bloqueada:',err.code);
+        abrirCiudad();
+      },
+      {timeout:5000,maximumAge:300000}
+    );
+  } else {
+    // Navegador sin geo → preguntar
+    abrirCiudad();
+  }
+}
 function buscarCiudad(){const v=document.getElementById('cinput').value.trim().toLowerCase();if(!v)return;const d=CIUDADES[v]||{c:v.charAt(0).toUpperCase()+v.slice(1),t:19,cond:'parcialmente nublado',i:'⛅',ll:false};setClima(d);document.getElementById('cinput').value='';}
 function confirmarCiudad(){cerrarCiudad();mostrar('sOb');renderPaso(0);}
 
@@ -1417,11 +1442,20 @@ async function send(){if(busy)return;const ci=document.getElementById('ci');cons
 async function proc(txt){
   const t=txt.toLowerCase();
 
+  // Temperatura mencionada en el mensaje — actualizarla aunque ya haya clima
+  const tempMatch=txt.match(/(\d{1,2})\s*[°ºgrados]/i)||txt.match(/hace\s+(\d{1,2})/i)||txt.match(/estamos?\s+a\s+(\d{1,2})/i);
+  if(tempMatch){
+    const tempVal=parseInt(tempMatch[1]||tempMatch[2]);
+    if(tempVal>=0&&tempVal<=50&&clima){
+      clima={...clima,t:tempVal,cond:tempVal>=28?'caluroso':tempVal>=20?'templado':tempVal>=12?'fresco':'frío'};
+      setClima(clima);
+    }
+  }
   // Ciudad
   if(!clima){
     const k=Object.keys(CIUDADES).find(k=>t.includes(k));
     if(k){setClima(CIUDADES[k]);}
-    else{addMsg('ai','¿Desde qué ciudad me escribes?');addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao']);return;}
+    else{addMsg('ai','¿Desde qué ciudad me escribes? Así ajusto el look al tiempo.');addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao','Otra ciudad']);return;}
   }
 
   // Saludos
@@ -1442,27 +1476,33 @@ async function proc(txt){
   // Usar Claude para entender cualquier mensaje — temperatura, ocasión, contexto libre
   addTyping();
   try{
-    const ctx=`Eres el cerebro de StyleAI, una app de estilismo personal.
-El usuario ha escrito: "${txt}"
-Contexto: está en ${clima.c}, hace ${clima.t}°C, ${clima.cond}.
-Su estilo es: ${ESTILOS[perfil?.estilo||'sofisticada']?.n||'sofisticada'}.
-Su tono de piel: ${perfil?.piel||'clara'}. Pelo: ${perfil?.pelo||'castaño'}.
+    const tempInfo=tempMatch?`(el usuario dice que hace ${parseInt(tempMatch[1]||tempMatch[2])}°C)`:'';
+    const ctx=`Eres StyleAI, una estilista personal experta. El usuario te escribe en lenguaje natural.
 
-Clasifica el mensaje en una de estas ocasiones:
-formal=trabajo/reunión/oficina
-casual=día a día/ocio/compras/parque
-noche=salida nocturna/discoteca/bar
-cena_el=cena elegante/restaurante/aniversario
-cena_in=cena informal/amigos/pizza
-viaje=viaje/aeropuerto/escapada
-deporte=gym/deporte/running/yoga
-evento=evento especial/boda/bautizo/comunión/graduación/fiesta/cumpleaños/inauguración
+MENSAJE DEL USUARIO: "${txt}" ${tempInfo}
+CONTEXTO: Ciudad ${clima.c}, ${clima.t}°C, ${clima.cond}.
+PERFIL: estilo ${ESTILOS[perfil?.estilo||'sofisticada']?.n||'sofisticada'}, piel ${perfil?.piel||'clara'}, pelo ${perfil?.pelo||'castaño'}.
 
-Responde SOLO con JSON sin markdown:
-{"ocasion":"ID_OCASION","temperatura_ok":true,"respuesta":"frase corta natural de estilista (max 15 palabras)"}
+Tu tarea: identificar la ocasión para proponer un outfit.
 
-Si el mensaje no tiene nada que ver con ropa/planes, responde:
-{"ocasion":null,"temperatura_ok":true,"respuesta":"pregunta corta para saber el plan del día"}`;
+OCASIONES DISPONIBLES (elige la más adecuada):
+- formal → trabajo, reunión, oficina, entrevista, cliente, jefe
+- casual → día a día, ocio, compras, parque, quedada informal, paseo
+- noche → salida nocturna, discoteca, club, bar de copas, after
+- cena_el → cena elegante, restaurante, aniversario, cumpleaños romántico
+- cena_in → cena informal, casa de amigos, pizza, tapas
+- viaje → viaje, aeropuerto, escapada, vacaciones
+- deporte → gym, entreno, running, yoga, deporte
+- evento → CUALQUIER evento social con cierto nivel de formalidad: BODA, BAUTIZO, COMUNIÓN, GRADUACIÓN, CEREMONIA, FIESTA DE CUMPLEAÑOS, INAUGURACIÓN, EVENTO DE EMPRESA, GALA
+
+IMPORTANTE: bautizo, comunión, boda y ceremonia SIEMPRE son "evento".
+Si mencionan temperatura ("30 grados", "hace calor"), tenlo en cuenta pero igualmente clasifica la ocasión.
+
+Responde ÚNICAMENTE con JSON válido, sin markdown ni explicaciones:
+{"ocasion":"ID","respuesta":"Frase natural y cálida de estilista, máx 12 palabras, sin emojis"}
+
+Si el mensaje es solo temperatura o no indica ningún plan, responde:
+{"ocasion":null,"respuesta":"Pregunta concisa para saber el plan"}`;
 
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
