@@ -1014,30 +1014,34 @@ function setClima(d){
   if(cc)cc.textContent=`${d.t}°C · ${d.cond}`;
 }
 function detectarClima(){
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(
-      pos=>{
-        const{latitude:la,longitude:lo}=pos.coords;
-        let k='madrid';
-        if(la>41.2&&lo>-2.0&&lo<2.5)k='barcelona';
-        else if(la>43)k='bilbao';
-        else if(la<37.5&&lo>-6)k='sevilla';
-        else if(la>39.3&&lo>-1)k='valencia';
-        else if(la<37.5&&lo>-5)k='malaga';
-        else if(la>40.4&&la<40.5&&lo>-3.8&&lo<-3.6)k='madrid';
-        setClima(CIUDADES[k]||CIUDADES.madrid);
-      },
-      // Si la geo falla (trabajo, permisos bloqueados) → preguntar ciudad
-      (err)=>{
-        console.log('Geo bloqueada:',err.code);
-        abrirCiudad();
-      },
-      {timeout:5000,maximumAge:300000}
-    );
-  } else {
-    // Navegador sin geo → preguntar
-    abrirCiudad();
+  // Timeout agresivo de 3s — si no responde, pedir ciudad
+  let done=false;
+  const fallback=setTimeout(()=>{
+    if(!done){done=true;abrirCiudad();}
+  },3000);
+
+  if(!navigator.geolocation){
+    clearTimeout(fallback);done=true;abrirCiudad();return;
   }
+
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      if(done)return;done=true;clearTimeout(fallback);
+      const{latitude:la,longitude:lo}=pos.coords;
+      let k='madrid';
+      if(la>41.2&&lo>1.8&&lo<2.5)k='barcelona';
+      else if(la>43.2&&lo>-3&&lo<-2.5)k='bilbao';
+      else if(la<37.5&&lo>-6.1&&lo<-5.8)k='sevilla';
+      else if(la>39.3&&lo>-0.5&&lo<0.5)k='valencia';
+      else if(la<36.9&&lo>-4.7&&lo<-4.3)k='malaga';
+      setClima(CIUDADES[k]||CIUDADES.madrid);
+    },
+    (err)=>{
+      if(done)return;done=true;clearTimeout(fallback);
+      abrirCiudad();
+    },
+    {timeout:2500,maximumAge:600000,enableHighAccuracy:false}
+  );
 }
 function buscarCiudad(){const v=document.getElementById('cinput').value.trim().toLowerCase();if(!v)return;const d=CIUDADES[v]||{c:v.charAt(0).toUpperCase()+v.slice(1),t:19,cond:'parcialmente nublado',i:'⛅',ll:false};setClima(d);document.getElementById('cinput').value='';}
 function confirmarCiudad(){cerrarCiudad();mostrar('sOb');renderPaso(0);}
@@ -1207,7 +1211,7 @@ function rInspo(b,btn){
     boho:['urbana_1.png','urbana_2.png','urbana_3.png','urbana_4.png','urbana_5.png','urbana_6.png']
   };
   const fotos=FOTOS[est]||FOTOS.urbana;
-  b.innerHTML=`<div class="ob-tit">¿Qué looks te inspiran?</div><div class="ig-count" id="igCount">Toca todos los que te gusten</div><div class="ig">${fotos.map((f,i)=>`<div class="ii" data-idx="${i}" onclick="toggleInspo(this)"><img src="${f}" alt="look ${i+1}" loading="eager" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s" onload="this.style.opacity=1" onerror="this.parentElement.style.background='#e8e4de';this.style.display='none'"><div class="ii-chk">✓</div></div>`).join('')}</div>`;
+  b.innerHTML=`<div class="ob-tit">¿Qué looks te inspiran?</div><div class="ig-count" id="igCount">Toca todos los que te gusten</div><div class="ig">${fotos.map((f,i)=>`<div class="ii" data-idx="${i}" onclick="toggleInspo(this)"><img src="${f}" alt="look ${i+1}" loading="eager" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s" onload="this.style.opacity=1" onerror="this.parentElement.style.background='#e8e4de';this.style.display='none'"><div class="ii-chk"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>`).join('')}</div>`;
 }
 function toggleInspo(el){
   el.classList.toggle('on');
@@ -1251,7 +1255,7 @@ function rPelo(b,btn){
 function selPelo(k){document.querySelectorAll('.pelo-op').forEach(c=>c.classList.remove('on'));event.currentTarget.classList.add('on');window._pelo=k;setTimeout(finOb,300);}
 
 
-function rNom(b,btn){b.innerHTML=`<div class="ob-tit">¡Hola${window._nom?' '+window._nom:''}! ✨</div><div class="ob-sub">Tu estilista personal. Cuéntame sobre ti.</div><input class="ob-input" type="text" id="inpN" placeholder="¿Cómo te llamas?" value="${window._nom||''}" autocomplete="given-name" oninput="chkN()" onkeydown="if(event.key==='Enter'&&this.value.trim().length>1)sigPaso()"><div style="font-size:11px;color:var(--g);margin-top:5px">Solo tu nombre</div>`;btn.style.display='block';if(window._nom)btn.classList.add('on');setTimeout(()=>document.getElementById('inpN')?.focus(),200);}
+function rNom(b,btn){b.innerHTML=`<div class="ob-tit">¡Hola${window._nom?' '+window._nom:''}!</div><div class="ob-sub">Tu estilista personal. Cuéntame sobre ti.</div><input class="ob-input" type="text" id="inpN" placeholder="¿Cómo te llamas?" value="${window._nom||''}" autocomplete="given-name" oninput="chkN()" onkeydown="if(event.key==='Enter'&&this.value.trim().length>1)sigPaso()"><div style="font-size:11px;color:var(--g);margin-top:5px">Solo tu nombre</div>`;btn.style.display='block';if(window._nom)btn.classList.add('on');setTimeout(()=>document.getElementById('inpN')?.focus(),200);}
 function chkN(){document.getElementById('bsig').classList.toggle('on',document.getElementById('inpN')?.value.trim().length>1);}
 function rEst(b,btn){
   btn.style.display='none';
