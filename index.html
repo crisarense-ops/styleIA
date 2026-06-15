@@ -1745,8 +1745,13 @@ function logout(){if(confirm('¿Cerrar sesión?')){
 
 window.addEventListener('load',()=>{
   if('speechSynthesis'in window){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();}
-  detectarClima();
-  if(perfil)irApp();
+  if(perfil){
+    // Sesión activa con perfil — ir directo a la app, detectar clima en segundo plano
+    irApp();
+    detectarClima(); // actualiza el clima sin bloquear
+  } else {
+    detectarClima();
+  }
   if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 });
 
