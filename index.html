@@ -1259,7 +1259,7 @@ function toggleInspo(el){
   document.getElementById('igCount').textContent=n>0?`✓ ${n} look${n>1?'s':''} guardado${n>1?'s':''} como inspiración`:'Toca todos los que te gusten';
 }
 
-function rPiel(b,btn){btn.style.display='none';const p=[{k:'muy_clara',c:'#FDDCB5',l:'Muy clara'},{k:'clara',c:'#F5C89A',l:'Clara'},{k:'media',c:'#D4956A',l:'Media'},{k:'morena',c:'#A0522D',l:'Morena'},{k:'muy_oscura',c:'#4A2410',l:'Muy oscura'}];b.innerHTML=`<div class="ob-tit">¿Tu tono de piel?</div><div class="ob-sub">Calculo los colores que más te favorecen.</div><div class="piel-g">${p.map(x=>`<div class="piel-op" onclick="selPiel('${x.k}')"><div class="piel-c" style="background:${x.c}"></div><div class="piel-l">${x.l}</div></div>`).join('')}</div>`;}
+function rPiel(b,btn){if(!window._piel)window._piel='clara';btn.style.display='block';btn.style.opacity='1';btn.style.pointerEvents='all';btn.classList.add('on');const p=[{k:'muy_clara',c:'#FDDCB5',l:'Muy clara'},{k:'clara',c:'#F5C89A',l:'Clara'},{k:'media',c:'#D4956A',l:'Media'},{k:'morena',c:'#A0522D',l:'Morena'},{k:'muy_oscura',c:'#4A2410',l:'Muy oscura'}];b.innerHTML=`<div class="ob-tit">¿Tu tono de piel?</div><div class="ob-sub">Calculo los colores que más te favorecen.</div><div class="piel-g">${p.map(x=>`<div class="piel-op" onclick="selPiel('${x.k}')"><div class="piel-c" style="background:${x.c}"></div><div class="piel-l">${x.l}</div></div>`).join('')}</div>`;}
 function selPiel(k){document.querySelectorAll('.piel-op').forEach(c=>c.classList.remove('on'));event.currentTarget.classList.add('on');window._piel=k;setTimeout(sigPaso,300);}
 
 function peloSVG(c1,c2,c3){
@@ -1282,7 +1282,12 @@ function peloSVG(c1,c2,c3){
   </svg>`;
 }
 function rPelo(b,btn){
-  btn.style.display='block';btn.classList.remove('on'); // visible pero desactivado hasta seleccionar
+  // Pelo por defecto castaño — botón siempre activo
+  if(!window._pelo) window._pelo='castaño';
+  btn.style.display='block';
+  btn.style.opacity='1';
+  btn.style.pointerEvents='all';
+  btn.classList.add('on');
   const p=[
     {k:'rubio',    l:'Rubio',    c1:'#8B6914',c2:'#C9A84C',c3:'#F0D060'},
     {k:'castaño',  l:'Castaño',  c1:'#3D1C02',c2:'#6B3A1F',c3:'#9B6040'},
@@ -1290,7 +1295,8 @@ function rPelo(b,btn){
     {k:'pelirrojo',l:'Pelirrojo',c1:'#7A2200',c2:'#B83A00',c3:'#D4622A'},
     {k:'canoso',   l:'Canoso',   c1:'#7A7A7A',c2:'#B0B0B0',c3:'#E0E0E0'}
   ];
-  b.innerHTML=`<div class="ob-tit">¿Color de pelo?</div><div class="ob-sub">Elige el más parecido al tuyo</div><div class="pelo-g">${p.map(x=>`<div class="pelo-op" onclick="selPelo('${x.k}',this)"><div class="pelo-swatch">${peloSVG(x.c1,x.c2,x.c3)}</div><div class="pelo-l">${x.l}</div></div>`).join('')}</div>`;
+  // Marcar el pelo actual si ya hay selección
+  b.innerHTML=`<div class="ob-tit">¿Color de pelo?</div><div class="ob-sub">Elige el más parecido al tuyo</div><div class="pelo-g">${p.map(x=>`<div class="pelo-op${window._pelo===x.k?' on':''}" onclick="selPelo('${x.k}',this)"><div class="pelo-swatch">${peloSVG(x.c1,x.c2,x.c3)}</div><div class="pelo-l">${x.l}</div></div>`).join('')}</div>`;
 }
 function selPelo(k,el){
   document.querySelectorAll('.pelo-op').forEach(c=>c.classList.remove('on'));
