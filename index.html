@@ -208,7 +208,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .ec.on .ec-chk{display:flex;}
 
 /* GRID INSPIRACIÓN — fotos fijas 3x3 */
-.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;max-height:calc(100dvh - 220px);overflow-y:auto;}
 .ii{
   border-radius:9px;overflow:hidden;cursor:pointer;
   position:relative;border:2.5px solid transparent;transition:all .2s;
@@ -405,7 +405,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 
   /* ── ONBOARDING ──────────────────────────────────── */
   #sOb{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
-  .ob-body{flex:1;overflow-y:auto;padding:16px 16px 8px;-webkit-overflow-scrolling:touch;}
+  .ob-body{flex:1;overflow-y:auto;padding:14px 14px 8px;-webkit-overflow-scrolling:touch;min-height:0;}
   .ob-foot{padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--bg2);background:var(--w);flex-shrink:0;}
   .ob-tit{font-size:22px;margin-bottom:6px;}
   .ob-sub{font-size:14px;margin-bottom:16px;}
@@ -417,8 +417,9 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   .ec-nom{font-size:13px;}
   .ec-mrc{font-size:11px;}
 
-  /* Inspiración — 3 cols */
+  /* Inspiración — 3 cols, imágenes cuadradas pequeñas */
   .ig{grid-template-columns:repeat(3,1fr);gap:4px;}
+  .ii{aspect-ratio:1;border-radius:7px;}
 
   /* Pelo — scroll horizontal si no caben */
   .pelo-g{grid-template-columns:repeat(5,1fr);gap:5px;}
@@ -1281,7 +1282,7 @@ function peloSVG(c1,c2,c3){
   </svg>`;
 }
 function rPelo(b,btn){
-  btn.style.display='none';
+  btn.style.display='block';btn.classList.remove('on'); // visible pero desactivado hasta seleccionar
   const p=[
     {k:'rubio',    l:'Rubio',    c1:'#8B6914',c2:'#C9A84C',c3:'#F0D060'},
     {k:'castaño',  l:'Castaño',  c1:'#3D1C02',c2:'#6B3A1F',c3:'#9B6040'},
@@ -1291,7 +1292,14 @@ function rPelo(b,btn){
   ];
   b.innerHTML=`<div class="ob-tit">¿Color de pelo?</div><div class="ob-sub">Elige el más parecido al tuyo</div><div class="pelo-g">${p.map(x=>`<div class="pelo-op" onclick="selPelo('${x.k}')"><div class="pelo-swatch">${peloSVG(x.c1,x.c2,x.c3)}</div><div class="pelo-l">${x.l}</div></div>`).join('')}</div>`;
 }
-function selPelo(k){document.querySelectorAll('.pelo-op').forEach(c=>c.classList.remove('on'));event.currentTarget.classList.add('on');window._pelo=k;setTimeout(finOb,300);}
+function selPelo(k){
+  document.querySelectorAll('.pelo-op').forEach(c=>c.classList.remove('on'));
+  event.currentTarget.classList.add('on');
+  window._pelo=k;
+  // Activar botón continuar en lugar de ir directo a finOb
+  const btn=document.getElementById('bsig');
+  if(btn){btn.classList.add('on');}
+}
 
 
 function rNom(b,btn){b.innerHTML=`<div class="ob-tit">¡Hola${window._nom?' '+window._nom:''}!</div><div class="ob-sub">Tu estilista personal. Cuéntame sobre ti.</div><input class="ob-input" type="text" id="inpN" placeholder="¿Cómo te llamas?" value="${window._nom||''}" autocomplete="given-name" oninput="chkN()" onkeydown="if(event.key==='Enter'&&this.value.trim().length>1)sigPaso()"><div style="font-size:11px;color:var(--g);margin-top:5px">Solo tu nombre</div>`;btn.style.display='block';if(window._nom)btn.classList.add('on');setTimeout(()=>document.getElementById('inpN')?.focus(),200);}
