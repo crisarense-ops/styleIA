@@ -1290,15 +1290,15 @@ function rPelo(b,btn){
     {k:'pelirrojo',l:'Pelirrojo',c1:'#7A2200',c2:'#B83A00',c3:'#D4622A'},
     {k:'canoso',   l:'Canoso',   c1:'#7A7A7A',c2:'#B0B0B0',c3:'#E0E0E0'}
   ];
-  b.innerHTML=`<div class="ob-tit">¿Color de pelo?</div><div class="ob-sub">Elige el más parecido al tuyo</div><div class="pelo-g">${p.map(x=>`<div class="pelo-op" onclick="selPelo('${x.k}')"><div class="pelo-swatch">${peloSVG(x.c1,x.c2,x.c3)}</div><div class="pelo-l">${x.l}</div></div>`).join('')}</div>`;
+  b.innerHTML=`<div class="ob-tit">¿Color de pelo?</div><div class="ob-sub">Elige el más parecido al tuyo</div><div class="pelo-g">${p.map(x=>`<div class="pelo-op" onclick="selPelo('${x.k}',this)"><div class="pelo-swatch">${peloSVG(x.c1,x.c2,x.c3)}</div><div class="pelo-l">${x.l}</div></div>`).join('')}</div>`;
 }
-function selPelo(k){
+function selPelo(k,el){
   document.querySelectorAll('.pelo-op').forEach(c=>c.classList.remove('on'));
-  event.currentTarget.classList.add('on');
+  if(el) el.classList.add('on');
+  else { try{event.currentTarget.classList.add('on');}catch(e){} }
   window._pelo=k;
-  // Activar botón continuar en lugar de ir directo a finOb
   const btn=document.getElementById('bsig');
-  if(btn){btn.classList.add('on');}
+  if(btn){btn.classList.add('on');btn.style.opacity='1';btn.style.pointerEvents='all';}
 }
 
 
