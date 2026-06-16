@@ -1303,8 +1303,7 @@ function selPelo(k,el){
   if(el) el.classList.add('on');
   else { try{event.currentTarget.classList.add('on');}catch(e){} }
   window._pelo=k;
-  const btn=document.getElementById('bsig');
-  if(btn){btn.classList.add('on');btn.style.opacity='1';btn.style.pointerEvents='all';}
+  setTimeout(sigPaso, 350);
 }
 
 
