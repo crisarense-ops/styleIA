@@ -1344,7 +1344,26 @@ function addTyping(){const c=document.getElementById('chat');const d=document.cr
 function rmTyping(){document.getElementById('ty')?.remove();}
 function addSugs(ops){const c=document.getElementById('chat');const d=document.createElement('div');d.className='msg ai';d.style.maxWidth='100%';const s=document.createElement('div');s.className='sugs';ops.forEach(o=>{const b=document.createElement('button');b.className='sug';b.textContent=o;b.onclick=()=>{document.getElementById('ci').value=o;send();};s.appendChild(b);});d.innerHTML=`<div class="av ai"></div>`;d.appendChild(s);c.appendChild(d);c.scrollTop=c.scrollHeight;}
 
-function initChat(){if(document.getElementById('chat').children.length>0)return;_chatHistory=[];window._lastOc=null;if(!clima){setTimeout(initChat,400);return;}const ll=clima.ll?` Hoy llueve — lo tendré muy en cuenta.`:'';const msg=`Hola${perfil?.nombre?' **'+perfil.nombre+'**':''}! Estás en **${clima.c}** — **${clima.t}°C**, ${clima.cond}.${ll} ¿Cuál es tu plan de hoy?`;addMsg('ai',msg);hablar(limpiar(msg));setTimeout(()=>addSugs(['Ocio con amigas','Trabajo o reunión','Cena esta noche','Salida nocturna','Evento especial','Viaje']),300);}
+function initChat(){
+  if(document.getElementById('chat').children.length>0)return;
+  _chatHistory=[];window._lastOc=null;
+  // Si no hay clima en 1.5s, arrancar igualmente con Madrid por defecto
+  if(!clima){
+    setTimeout(()=>{
+      if(!clima)setClima(CIUDADES.madrid);
+      initChat();
+    },1500);
+    return;
+  }
+  const nom=perfil?.nombre?perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase():'';
+  const saludo=nom?`¡Hola ${nom}! `:'¡Hola! ';
+  const tiempo=`En ${clima.c} hace ${clima.t}°C${clima.ll?' y llueve':''}.`;
+  const msg=`${saludo}${tiempo} ¿Cuál es tu plan hoy?`;
+  addMsg('ai',msg);
+  hablar(limpiar(msg));
+  _chatHistory.push({role:'assistant',content:msg});
+  setTimeout(()=>addSugs(['Ocio con amigas','Trabajo o reunión','Cena esta noche','Salida nocturna','Evento especial','Viaje']),300);
+}
 
 // Detecta si el usuario tiene una prenda tipo en su armario
 function tieneEnArmario(tipo) {
@@ -1511,41 +1530,41 @@ let _chatHistory = []; // historial de mensajes {role, content}
 let _isTyping = false;
 
 function buildSystem(){
-  const est = ESTILOS[perfil?.estilo||'sofisticada']?.n || 'sofisticada';
-  const piel = perfil?.piel || 'clara';
-  const pelo = perfil?.pelo || 'castaño';
-  const cols = (perfil?.colores||[]).join(', ') || 'neutros';
-  const ciudad = clima?.c || 'Madrid';
-  const temp = clima?.t || 20;
-  const cond = clima?.cond || 'templado';
+  const est=ESTILOS[perfil?.estilo||'sofisticada']?.n||'sofisticada';
+  const piel=perfil?.piel||'clara';
+  const pelo=perfil?.pelo||'castaño';
+  const cols=(perfil?.colores||[]).join(', ')||'neutros';
+  const nom=perfil?.nombre?perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase():'';
+  const ciudad=clima?.c||'Madrid';
+  const temp=clima?.t||20;
+  const cond=clima?.cond||'templado';
+  const ll=clima?.ll?' y está lloviendo':'';
 
-  return `Eres StyleAI, una estilista personal cercana, empática e inteligente. Hablas en español con un tono cálido y directo, como una amiga con mucho estilo.
+  return `Eres StyleAI, la estilista personal de ${nom||'la usuaria'}. Eres cercana, cálida y directa — como una amiga con mucho gusto que conoce bien a ${nom||'la usuaria'} y sabe exactamente qué le favorece.
 
-PERFIL DE LA USUARIA:
+PERFIL DE ${nom?.toUpperCase()||'LA USUARIA'}:
 - Estilo: ${est}
 - Tono de piel: ${piel}, pelo ${pelo}
-- Colores que le favorecen: ${cols}
-- Ciudad: ${ciudad}, ahora mismo ${temp}°C, ${cond}
+- Colores que le sientan bien: ${cols}
+- Está en ${ciudad}, ahora mismo ${temp}°C${ll}, ${cond}
 
-TU MISIÓN: Ayudar a la usuaria a encontrar el outfit perfecto para su plan del día. Conversa de forma natural para entender qué va a hacer y proponer el mejor look.
+CÓMO HABLAR:
+- Usa su nombre (${nom||'cariño'}) de vez en cuando, con naturalidad
+- Sé breve: 1-2 frases máximo antes de proponer el outfit
+- Tono amigable y seguro, como "Con este calor te propongo..." o "Para una fiesta así me encanta el look..."
+- Nunca suenes a robot ni a asistente corporativo
+- Si pregunta algo que no es de moda, redirige con humor: "Eso no lo sé, ¡pero sí sé lo que te pondrías!"
 
-CÓMO FUNCIONAR:
-1. Si no sabes el plan, pregunta de forma natural (máx 1 pregunta)
-2. Cuando tengas suficiente contexto (plan + temperatura ya la tienes), responde con un JSON al final de tu mensaje
-3. Sé breve y directa — máximo 2-3 frases antes del JSON
-4. Adapta siempre al tiempo: ${temp}°C ${cond}
+CUANDO TENGAS EL PLAN, incluye al final este JSON (sin markdown, sin espacios extra):
+{"ocasion":"ID","outfit":["prenda1","prenda2","prenda3"],"colores":"descripcion breve","tip":"un consejo personal"}
 
-CUANDO TENGAS EL PLAN, incluye al final de tu respuesta este JSON (sin markdown):
-{"ocasion":"ID","outfit":["prenda1","prenda2","prenda3"],"colores":"descripcion","tip":"consejo rapido"}
-
-IDs de ocasión disponibles: formal, casual, noche, cena_el, cena_in, viaje, deporte, evento
+IDs: formal, casual, noche, cena_el, cena_in, viaje, deporte, evento
 
 REGLAS:
-- Si pregunta algo que no es de moda, redirige amablemente
-- Si dice "venga", "dale", "muéstrame" → propón outfit directamente
-- Si pide alternativa → propón diferente con el mismo ID de ocasión
-- Nunca inventes datos del perfil, usa los que tienes
-- Si la temperatura o el plan cambian, adáptate`;
+- Si no tienes claro el plan, haz UNA sola pregunta concreta
+- "fiesta", "cumple", "bautizo", "boda" = siempre evento
+- Si dice "venga", "dale", "muéstrame" = propón outfit directo
+- Adapta siempre a ${temp}°C — si hace calor, nada de capas; si hace frío, abrígate`;
 }
 
 async function proc(txt){
