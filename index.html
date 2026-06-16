@@ -185,23 +185,22 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .ob-s.on{background:var(--v);}
 .ob-skip{font-size:11px;color:var(--g);cursor:pointer;background:none;border:none;font-family:"Inter",sans-serif;}
 .ob-body{flex:1;overflow-y:auto;padding:14px 18px;}
-.ob-tit{font-family:"Playfair Display",serif;font-size:20px;line-height:1.3;margin-bottom:2px;}
+.ob-tit{font-family:"Playfair Display",serif;font-size:19px;line-height:1.2;margin-bottom:2px;}
 .ob-sub{font-size:12.5px;color:var(--g);margin-bottom:16px;line-height:1.5;}
 .ob-input{width:100%;padding:14px 15px;border:1.5px solid var(--bg3);border-radius:11px;font-family:"Inter",sans-serif;font-size:16px;background:var(--w);outline:none;transition:border-color .2s;}
 .ob-input:focus{border-color:var(--v);}
 
 /* GRID ESTILOS — fotos fijas, carga instantánea */
-.eg{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:calc(100dvh - 180px);}
+.eg{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;height:calc(100dvh - 175px);}
 .ec{
   border-radius:12px;overflow:hidden;
   border:2.5px solid transparent;cursor:pointer;
   transition:all .2s;position:relative;
-  aspect-ratio:2/3;
   background:var(--bg2);
-  max-height:calc((100dvh - 200px)/2);
+  min-height:0;
 }
 .ec.on{border-color:var(--v);box-shadow:0 0 0 3px rgba(107,143,113,.18);}
-.ec img{width:100%;height:100%;object-fit:cover;object-position:center 20%;}
+.ec img{width:100%;height:100%;object-fit:cover;object-position:center 20%;display:block;}
 .ec-ov{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.72));padding:10px 9px 8px;color:#fff;}
 .ec-nom{font-size:12px;font-weight:600;font-family:"Playfair Display",serif;}
 .ec-mrc{font-size:9px;opacity:.8;margin-top:1px;}
@@ -209,12 +208,11 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .ec.on .ec-chk{display:flex;}
 
 /* GRID INSPIRACIÓN — fotos fijas 3x3 */
-.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;max-height:calc(100dvh - 180px);}
+.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;height:calc(100dvh - 175px);}
 .ii{
   border-radius:9px;overflow:hidden;cursor:pointer;
   position:relative;border:2.5px solid transparent;transition:all .2s;
-  aspect-ratio:2/3;
-  max-height:calc((100dvh - 200px)/2);
+  min-height:0;
 }
 .ii.on{border-color:var(--v);}
 .ii img{width:100%;height:100%;object-fit:cover;}
@@ -407,21 +405,21 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 
   /* ── ONBOARDING ──────────────────────────────────── */
   #sOb{display:flex;flex-direction:column;height:100dvh;}
-  .ob-body{flex:1;overflow-y:auto;padding:16px 16px 12px;-webkit-overflow-scrolling:touch;min-height:0;}
+  .ob-body{flex:1;overflow:hidden;padding:12px 14px 8px;min-height:0;display:flex;flex-direction:column;}
   .ob-foot{padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--bg2);background:var(--w);flex-shrink:0;}
   .ob-tit{font-size:22px;margin-bottom:6px;}
   .ob-sub{font-size:14px;margin-bottom:16px;}
   .ob-input{font-size:16px;padding:14px;} /* 16px evita zoom en iOS */
 
   /* Estilo grid — 2 cols en mobile */
-  .eg{grid-template-columns:1fr 1fr;gap:5px;max-height:calc(100dvh - 160px);}
-  .ec{aspect-ratio:2/3;border-radius:8px;max-height:calc((100dvh - 180px)/2);}
+  .eg{grid-template-columns:1fr 1fr;gap:5px;height:calc(100dvh - 155px);}
+  .ec{border-radius:8px;}
   .ec-nom{font-size:13px;}
   .ec-mrc{font-size:11px;}
 
   /* Inspiración — 3 cols con ratio vertical */
-  .ig{grid-template-columns:repeat(3,1fr);gap:4px;max-height:calc(100dvh - 160px);}
-  .ii{aspect-ratio:2/3;border-radius:7px;max-height:calc((100dvh - 180px)/2);}
+  .ig{grid-template-columns:repeat(3,1fr);gap:4px;height:calc(100dvh - 155px);}
+  .ii{border-radius:7px;}
 
   /* Pelo — scroll horizontal si no caben */
   .pelo-g{grid-template-columns:repeat(5,1fr);gap:5px;}
