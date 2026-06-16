@@ -894,31 +894,34 @@ const FOTOS_INSPO = {
 const CIUDADES={madrid:{c:'Madrid',t:22,cond:'despejado',i:'☀️',ll:false},barcelona:{c:'Barcelona',t:20,cond:'parcialmente nublado',i:'⛅',ll:false},sevilla:{c:'Sevilla',t:30,cond:'soleado',i:'☀️',ll:false},bilbao:{c:'Bilbao',t:15,cond:'lluvia ligera',i:'🌧️',ll:true},valencia:{c:'Valencia',t:25,cond:'soleado',i:'☀️',ll:false},malaga:{c:'Málaga',t:27,cond:'despejado',i:'☀️',ll:false},málaga:{c:'Málaga',t:27,cond:'despejado',i:'☀️',ll:false},zaragoza:{c:'Zaragoza',t:18,cond:'viento',i:'🌬️',ll:false},granada:{c:'Granada',t:22,cond:'despejado',i:'☀️',ll:false},alicante:{c:'Alicante',t:26,cond:'soleado',i:'☀️',ll:false},cordoba:{c:'Córdoba',t:29,cond:'caluroso',i:'☀️',ll:false},córdoba:{c:'Córdoba',t:29,cond:'caluroso',i:'☀️',ll:false},santander:{c:'Santander',t:16,cond:'nublado',i:'☁️',ll:false}};
 
 // Obtener temperatura real de OpenWeatherMap (gratis, sin key)
-async function fetchClima(ciudad, base, manana=false){
+async function fetchClima(ciudad, base, diaIdx=0){
+  // diaIdx: 0=hoy, 1=mañana, 2=pasado mañana, 3=aprox semana que viene (último disponible)
   try{
     const r = await fetch(`https://wttr.in/${encodeURIComponent(ciudad)}?format=j1`);
     if(!r.ok) return base;
     const d = await r.json();
-    let t, desc, ll;
-    if(manana && d.weather?.[1]){
-      // Previsión para mañana (índice 1 = día siguiente)
-      const w = d.weather[1];
-      const tMax = parseInt(w.maxtempC||w.AvgTempC||20);
-      const tMin = parseInt(w.mintempC||w.AvgTempC||15);
+    let t, desc='', ll=false;
+    if(diaIdx > 0 && d.weather?.[Math.min(diaIdx,2)]){
+      // wttr.in da previsión de 3 días (índices 0,1,2)
+      // Para "semana que viene" usamos el índice 2 como aproximación
+      const idx = Math.min(diaIdx, 2);
+      const w = d.weather[idx];
+      const tMax = parseInt(w.maxtempC||20);
+      const tMin = parseInt(w.mintempC||15);
       t = Math.round((tMax+tMin)/2);
-      desc = w.hourly?.[4]?.lang_es?.[0]?.value || w.hourly?.[4]?.weatherDesc?.[0]?.value || '';
+      desc = w.hourly?.[4]?.lang_es?.[0]?.value || '';
       ll = w.hourly?.some(hh=>parseInt(hh.chanceofrain||0)>40) || false;
-      console.log('Mañana en',base.c,': max',tMax,'min',tMin,'media',t,'lluvia',ll);
     } else {
       const cur = d.current_condition?.[0];
       if(!cur) return base;
       t = Math.round(parseInt(cur.temp_C));
       desc = cur.lang_es?.[0]?.value || cur.weatherDesc?.[0]?.value || '';
-      ll = desc.toLowerCase().includes('rain') || desc.toLowerCase().includes('lluvia');
+      ll = desc.toLowerCase().includes('rain')||desc.toLowerCase().includes('lluvia');
     }
     const cond = t>=28?'caluroso':t>=20?'templado':t>=12?'fresco':'frío';
     const i = ll?'🌧️':t>=28?'☀️':t>=18?'⛅':'☁️';
-    return {...base, t, cond, i, ll, esManana: manana};
+    const label = diaIdx===0?'hoy':diaIdx===1?'mañana':'próximamente';
+    return {...base, c:ciudad, t, cond, i, ll, cuando:label};
   }catch(e){ return base; }
 }
 const ESTILOS={
@@ -1579,7 +1582,7 @@ function buildSystem(){
   const temp=clima?.t||20;
   const cond=clima?.cond||'templado';
   const ll=clima?.ll?' y está lloviendo':'';
-  const cuando=(clima?.esManana)?'mañana':'hoy';
+  const cuando=clima?.cuando||'hoy';
 
   return `Eres StyleAI, la estilista personal de ${nom||'la usuaria'}. Hablas como una amiga con mucho estilo — cercana, directa y cálida. Conoces bien a ${nom||'la usuaria'} y sabes lo que le favorece.
 
@@ -1588,7 +1591,7 @@ PERFIL:
 - Estilo: ${est}
 - Piel: ${piel}, pelo ${pelo}
 - Colores que le favorecen: ${cols}
-- Ciudad: ${ciudad}, ${cuando==='mañana'?'MAÑANA habrá':'AHORA MISMO hay'} ${temp}°C${ll}, ${cond}${cuando==='mañana'?' (previsión para mañana)':''}
+- Ciudad: ${ciudad}. Tiempo ${cuando==='hoy'?'AHORA MISMO':'para '+cuando}: ${temp}°C${ll}, ${cond}
 
 CÓMO RESPONDER:
 - Menciona SIEMPRE la temperatura real (${temp}°C) en tu respuesta de forma natural
