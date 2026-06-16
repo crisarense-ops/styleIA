@@ -1347,18 +1347,26 @@ function addSugs(ops){const c=document.getElementById('chat');const d=document.c
 function initChat(){
   if(document.getElementById('chat').children.length>0)return;
   _chatHistory=[];window._lastOc=null;
-  // Si no hay clima en 1.5s, arrancar igualmente con Madrid por defecto
+
+  const nom=perfil?.nombre?perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase():'';
+
   if(!clima){
-    setTimeout(()=>{
-      if(!clima)setClima(CIUDADES.madrid);
-      initChat();
-    },1500);
+    // Sin geolocalización — preguntar ciudad y plan en un solo mensaje natural
+    const msg=nom
+      ?`¡Hola ${nom}! ¿En qué ciudad estás y qué plan tienes para hoy?`
+      :`¡Hola! ¿En qué ciudad estás y qué plan tienes para hoy?`;
+    addMsg('ai',msg);
+    hablar(limpiar(msg));
+    _chatHistory.push({role:'assistant',content:msg});
+    setTimeout(()=>addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao']),300);
     return;
   }
-  const nom=perfil?.nombre?perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase():'';
-  const saludo=nom?`¡Hola ${nom}! `:'¡Hola! ';
-  const tiempo=`En ${clima.c} hace ${clima.t}°C${clima.ll?' y llueve':''}.`;
-  const msg=`${saludo}${tiempo} ¿Cuál es tu plan hoy?`;
+
+  // Con geolocalización — saludo directo con el tiempo
+  const tiempo=`En ${clima.c} hace ${clima.t}°C${clima.ll?' y está lloviendo':''}`;
+  const msg=nom
+    ?`¡Hola ${nom}! ${tiempo}. ¿Cuál es tu plan hoy?`
+    :`¡Hola! ${tiempo}. ¿Cuál es tu plan hoy?`;
   addMsg('ai',msg);
   hablar(limpiar(msg));
   _chatHistory.push({role:'assistant',content:msg});
@@ -1570,22 +1578,20 @@ REGLAS:
 async function proc(txt){
   if(_isTyping) return;
 
-  // Ciudad pendiente — solo si NO hay clima
+  // Sin clima — detectar ciudad en el mensaje y continuar con el plan
   if(!clima){
     const t = txt.toLowerCase();
     const k = Object.keys(CIUDADES).find(c=>t.includes(c));
     if(k){
       setClima(CIUDADES[k]);
-      const pending = window._pendingMsg;
-      window._pendingMsg = null;
-      if(pending){
-        _chatHistory.push({role:'user', content: pending});
-        await _callAI(pending);
-      }
+      // Procesar el mensaje completo (puede tener ciudad + plan)
+      _chatHistory.push({role:'user', content: txt});
+      await _callAI(txt);
     } else {
-      window._pendingMsg = txt;
-      addMsg('ai','¿Desde qué ciudad me escribes? Así ajusto el look al tiempo.');
-      addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao','Otra ciudad']);
+      // No reconoce ciudad — igual intentar entender el plan con Madrid por defecto
+      setClima(CIUDADES.madrid);
+      _chatHistory.push({role:'user', content: txt});
+      await _callAI(txt);
     }
     return;
   }
