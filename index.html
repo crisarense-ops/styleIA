@@ -892,6 +892,23 @@ const FOTOS_INSPO = {
 };
 
 const CIUDADES={madrid:{c:'Madrid',t:22,cond:'despejado',i:'☀️',ll:false},barcelona:{c:'Barcelona',t:20,cond:'parcialmente nublado',i:'⛅',ll:false},sevilla:{c:'Sevilla',t:30,cond:'soleado',i:'☀️',ll:false},bilbao:{c:'Bilbao',t:15,cond:'lluvia ligera',i:'🌧️',ll:true},valencia:{c:'Valencia',t:25,cond:'soleado',i:'☀️',ll:false},malaga:{c:'Málaga',t:27,cond:'despejado',i:'☀️',ll:false},málaga:{c:'Málaga',t:27,cond:'despejado',i:'☀️',ll:false},zaragoza:{c:'Zaragoza',t:18,cond:'viento',i:'🌬️',ll:false},granada:{c:'Granada',t:22,cond:'despejado',i:'☀️',ll:false},alicante:{c:'Alicante',t:26,cond:'soleado',i:'☀️',ll:false},cordoba:{c:'Córdoba',t:29,cond:'caluroso',i:'☀️',ll:false},córdoba:{c:'Córdoba',t:29,cond:'caluroso',i:'☀️',ll:false},santander:{c:'Santander',t:16,cond:'nublado',i:'☁️',ll:false}};
+
+// Obtener temperatura real de OpenWeatherMap (gratis, sin key)
+async function fetchClima(ciudad, base){
+  try{
+    const r = await fetch(`https://wttr.in/${encodeURIComponent(ciudad)}?format=j1`);
+    if(!r.ok) return base;
+    const d = await r.json();
+    const cur = d.current_condition?.[0];
+    if(!cur) return base;
+    const t = Math.round(parseInt(cur.temp_C));
+    const desc = cur.lang_es?.[0]?.value || cur.weatherDesc?.[0]?.value || '';
+    const ll = desc.toLowerCase().includes('rain') || desc.toLowerCase().includes('lluvia');
+    const cond = t>=28?'caluroso':t>=20?'templado':t>=12?'fresco':'frío';
+    const i = ll?'🌧️':t>=28?'☀️':t>=18?'⛅':'☁️';
+    return {...base, t, cond, i, ll};
+  }catch(e){ return base; }
+}
 const ESTILOS={
   sofisticada:{
     n:'Parisian chic',e:'',m:'Sandro · Ba&sh · The Row',
@@ -1042,8 +1059,16 @@ function confirmarLogin(){
 }
 
 // CLIMA
-function setClima(d){
-  clima=d;
+async function setClima(d){
+  // Intentar obtener temperatura real
+  fetchClima(d.c, d).then(real=>{
+    clima=real;
+    _actualizarUIClima(real);
+  });
+  clima=d; // usar datos base mientras llega la real
+  _actualizarUIClima(d);
+}
+function _actualizarUIClima(d){
   const lc=document.getElementById('lclima');
   const ap=document.getElementById('apclima');
   const cn=document.getElementById('cnom');
@@ -1508,13 +1533,11 @@ function mostrarOutfit(txt){
     const sub = nPrendas>0
       ? 'Veré el look exacto con tus prendas'
       : 'Cuanto más subas, más personalizado';
-    visualHTML='<div class="o-imgbox o-empty" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])">'+
-      '<div class="o-empty-inner">'+
-        '<div class="o-cam-ring"><div class="o-cam-icon" style="color:var(--v)">'+camSVG+'</div></div>'+
-        '<div class="o-empty-title">'+msg+'</div>'+
-        '<div class="o-empty-sub">'+sub+'</div>'+
-        '<div class="o-add-btn">'+plusSVG+'<span>Añadir ropa</span></div>'+
-      '</div>'+
+    // Franja compacta — no ocupa toda la pantalla
+    visualHTML='<div style="background:var(--bg2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])">'+
+      '<div style="width:40px;height:40px;background:var(--w);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.08)">'+camSVG+'</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--n);margin-bottom:2px">'+msg+'</div><div style="font-size:12px;color:var(--g)">'+sub+'</div></div>'+
+      '<div style="background:var(--n);color:#fff;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;flex-shrink:0">Añadir</div>'+
     '</div>';
   }
 
