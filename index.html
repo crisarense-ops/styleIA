@@ -196,7 +196,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   border-radius:12px;overflow:hidden;
   border:2.5px solid transparent;cursor:pointer;
   transition:all .2s;position:relative;
-  aspect-ratio:4/3;
+  aspect-ratio:3/4;
   background:var(--bg2);
 }
 .ec.on{border-color:var(--v);box-shadow:0 0 0 3px rgba(107,143,113,.18);}
@@ -208,11 +208,11 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .ec.on .ec-chk{display:flex;}
 
 /* GRID INSPIRACIÓN — fotos fijas 3x3 */
-.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;max-height:calc(100dvh - 220px);overflow-y:auto;}
+.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
 .ii{
   border-radius:9px;overflow:hidden;cursor:pointer;
   position:relative;border:2.5px solid transparent;transition:all .2s;
-  aspect-ratio:1;
+  aspect-ratio:2/3;
 }
 .ii.on{border-color:var(--v);}
 .ii img{width:100%;height:100%;object-fit:cover;}
@@ -404,22 +404,22 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   .btn-planes{align-self:stretch;justify-content:center;}
 
   /* ── ONBOARDING ──────────────────────────────────── */
-  #sOb{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
-  .ob-body{flex:1;overflow-y:auto;padding:14px 14px 8px;-webkit-overflow-scrolling:touch;min-height:0;}
+  #sOb{display:flex;flex-direction:column;height:100dvh;}
+  .ob-body{flex:1;overflow-y:auto;padding:16px 16px 12px;-webkit-overflow-scrolling:touch;min-height:0;}
   .ob-foot{padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--bg2);background:var(--w);flex-shrink:0;}
   .ob-tit{font-size:22px;margin-bottom:6px;}
   .ob-sub{font-size:14px;margin-bottom:16px;}
   .ob-input{font-size:16px;padding:14px;} /* 16px evita zoom en iOS */
 
   /* Estilo grid — 2 cols en mobile */
-  .eg{grid-template-columns:1fr 1fr;gap:6px;}
-  .ec{aspect-ratio:3/4;}
+  .eg{grid-template-columns:1fr 1fr;gap:8px;}
+  .ec{aspect-ratio:3/4;border-radius:10px;}
   .ec-nom{font-size:13px;}
   .ec-mrc{font-size:11px;}
 
-  /* Inspiración — 3 cols, imágenes cuadradas pequeñas */
-  .ig{grid-template-columns:repeat(3,1fr);gap:4px;}
-  .ii{aspect-ratio:1;border-radius:7px;}
+  /* Inspiración — 3 cols con ratio vertical */
+  .ig{grid-template-columns:repeat(3,1fr);gap:5px;}
+  .ii{aspect-ratio:2/3;border-radius:7px;}
 
   /* Pelo — scroll horizontal si no caben */
   .pelo-g{grid-template-columns:repeat(5,1fr);gap:5px;}
