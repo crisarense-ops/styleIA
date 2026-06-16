@@ -1867,29 +1867,38 @@ function _detectarOcasion(txt){
 }
 
 function _fallbackLocal(txt){
-  const t = txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  let oc = _detectarOcasion(txt);
-
-  // Eventos sociales
-  // oc ya calculado por _detectarOcasion
+  const oc = _detectarOcasion(txt);
+  const nomRaw=(perfil?.nombre||window._nom||'').split(' ')[0];
+  const nom=nomRaw?nomRaw.charAt(0).toUpperCase()+nomRaw.slice(1).toLowerCase():'';
+  const t=clima?.t||20;
+  const ciudad=clima?.c||'tu ciudad';
+  const calor=t>=28;
+  const mucho=t>=32;
 
   if(oc){
-    window._lastOc = oc;
-    const frases={
-      evento:'Para el evento, aquí mi propuesta.',
-      formal:'Un look profesional para triunfar.',
-      noche:'Noche de salida — con mucho estilo.',
-      cena_in:'Cena con amigos — chic y cómoda.',
-      cena_el:'Una cena especial merece algo especial.',
-      deporte:'Look sporty y favorecedor.',
-      viaje:'Práctica y estilosa para el viaje.',
-      casual:'Un look relajado y favorecedor.'
+    window._lastOc=oc;
+    const f={
+      evento:`${mucho?'Con '+t+'°C, un look de evento fresco y elegante':'Un look especial para la ocasión'} — aquí mi propuesta${nom?' para ti '+nom:''}.`,
+      formal:`${calor?'Con '+t+'°C, look profesional y fresco — sin agobios':'Look profesional para triunfar'}${nom?' '+nom:''}.`,
+      noche:`${t}°C esta noche en ${ciudad} — ${calor?'perfecto para un look fresquito y con mucho estilo':'noche con estilo'}.`,
+      cena_in:`Con ${t}°C${calor?' esta noche en '+ciudad:''}, ${calor?'vestido fresquito y sandalias — lo tienes clarísimo':'algo chic y cómodo para cenar'}.`,
+      cena_el:`${t}°C en ${ciudad}${calor?' — noche perfecta para un vestido de tirantes elegante':''}. Una cena especial merece algo especial.`,
+      deporte:`Look sporty para entrenar${calor?' — con '+t+'°C, cuanto más fresco mejor':''}.`,
+      viaje:`Lista para el viaje${calor?' — ligero, fresco y con estilo':''}.`,
+      casual:`${t}°C en ${ciudad} — ${calor?'vestido, sandalias y lista':'un look relajado y favorecedor'}.`
     };
-    addMsg('ai', frases[oc]||'Aquí tienes mi propuesta.');
-    setTimeout(()=>mostrarOutfit(oc), 300);
+    addMsg('ai', f[oc]||'Aquí tienes mi propuesta.');
+    setTimeout(()=>mostrarOutfit(oc),350);
   } else {
-    addMsg('ai','¿Para qué plan quieres el look? Cuéntame.');
-    addSugs(['Trabajo o reunión','Ocio con amigas','Cena esta noche','Evento especial','Salida nocturna']);
+    // No detectado — preguntar con contexto
+    const tf=txt.toLowerCase();
+    if(['gusta','cita','romantico','especial','chico','chica'].some(k=>tf.includes(k))){
+      addMsg('ai',`¿Es una cena romántica o una salida de noche${nom?' '+nom:''}?`);
+      addSugs(['Cena romántica','Salida nocturna','Cena informal']);
+    } else {
+      addMsg('ai',`¿Para qué plan quieres el look${nom?' '+nom:''}?`);
+      addSugs(['Cena esta noche','Trabajo o reunión','Ocio','Evento especial','Salida nocturna']);
+    }
   }
 }
 
