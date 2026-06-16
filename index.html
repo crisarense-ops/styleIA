@@ -1060,13 +1060,13 @@ function confirmarLogin(){
 
 // CLIMA
 async function setClima(d){
-  // Intentar obtener temperatura real
+  clima=d;
+  _actualizarUIClima(d);
+  // Actualizar con temperatura real en segundo plano
   fetchClima(d.c, d).then(real=>{
     clima=real;
     _actualizarUIClima(real);
-  });
-  clima=d; // usar datos base mientras llega la real
-  _actualizarUIClima(d);
+  }).catch(()=>{});
 }
 function _actualizarUIClima(d){
   const lc=document.getElementById('lclima');
@@ -1372,7 +1372,7 @@ function initChat(){
   if(document.getElementById('chat').children.length>0)return;
   _chatHistory=[];window._lastOc=null;
 
-  const nom=perfil?.nombre?perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase():'';
+  const nom=(perfil?.nombre||window._nom||'').split(' ')[0];const nomCap=nom?nom.charAt(0).toUpperCase()+nom.slice(1).toLowerCase():'';
 
   if(!clima){
     // Sin geolocalización — preguntar ciudad y plan en un solo mensaje natural
@@ -1562,7 +1562,7 @@ function buildSystem(){
   const piel=perfil?.piel||'clara';
   const pelo=perfil?.pelo||'castaño';
   const cols=(perfil?.colores||[]).join(', ')||'neutros';
-  const nom=perfil?.nombre?perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase():'';
+  const nom=(perfil?.nombre||window._nom||'').split(' ')[0];const nomCap=nom?nom.charAt(0).toUpperCase()+nom.slice(1).toLowerCase():'';
   const ciudad=clima?.c||'Madrid';
   const temp=clima?.t||20;
   const cond=clima?.cond||'templado';
@@ -1611,16 +1611,19 @@ async function proc(txt){
     const t = txt.toLowerCase();
     const k = Object.keys(CIUDADES).find(c=>t.includes(c));
     if(k){
-      setClima(CIUDADES[k]);
-      // Procesar el mensaje completo (puede tener ciudad + plan)
-      _chatHistory.push({role:'user', content: txt});
-      await _callAI(txt);
+      await setClima(CIUDADES[k]);
+      // Usar el pending si existe (plan que escribió antes de la ciudad)
+      const msgParaAI = window._pendingMsg || txt;
+      window._pendingMsg = null;
+      // Añadir al historial de forma limpia
+      if(!_chatHistory.find(m=>m.content===msgParaAI))
+        _chatHistory.push({role:'user', content: msgParaAI});
+      await _callAI(msgParaAI);
     } else {
       // No reconoce ciudad — guardar plan y pedir ciudad
       window._pendingMsg = txt;
-      _chatHistory.push({role:'user', content: txt});
       const nom = perfil?.nombre ? perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase() : '';
-      addMsg('ai', `${nom ? nom+', ¿' : '¿'}desde qué ciudad me escribes? Así ajusto el look al tiempo.`);
+      addMsg('ai', `${nom ? nom+', ¿' : '¿'}en qué ciudad estás?`);
       addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao','Otra ciudad']);
     }
     return;
