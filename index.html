@@ -1533,11 +1533,11 @@ function mostrarOutfit(txt){
     const sub = nPrendas>0
       ? 'Veré el look exacto con tus prendas'
       : 'Cuanto más subas, más personalizado';
-    // Franja compacta — no ocupa toda la pantalla
-    visualHTML='<div style="background:var(--bg2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])">'+
-      '<div style="width:40px;height:40px;background:var(--w);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.08)">'+camSVG+'</div>'+
-      '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--n);margin-bottom:2px">'+msg+'</div><div style="font-size:12px;color:var(--g)">'+sub+'</div></div>'+
-      '<div style="background:var(--n);color:#fff;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;flex-shrink:0">Añadir</div>'+
+    // Franja llamativa con color de marca
+    visualHTML='<div style="background:var(--v);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer" onclick="tab(\'arm\',document.querySelectorAll(\'.a-tab\')[1])">'+
+      '<div style="width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:3px">'+msg+'</div><div style="font-size:12px;color:rgba(255,255,255,.8)">'+sub+'</div></div>'+
+      '<div style="background:#fff;color:var(--v);padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;flex-shrink:0">Añadir →</div>'+
     '</div>';
   }
 
@@ -1570,31 +1570,39 @@ function buildSystem(){
   const cond=clima?.cond||'templado';
   const ll=clima?.ll?' y está lloviendo':'';
 
-  return `Eres StyleAI, la estilista personal de ${nom||'la usuaria'}. Eres cercana, cálida y directa — como una amiga con mucho gusto que conoce bien a ${nom||'la usuaria'} y sabe exactamente qué le favorece.
+  return `Eres StyleAI, la estilista personal de ${nom||'la usuaria'}. Hablas como una amiga con mucho estilo — cercana, directa y cálida. Conoces bien a ${nom||'la usuaria'} y sabes lo que le favorece.
 
-PERFIL DE ${nom?.toUpperCase()||'LA USUARIA'}:
+PERFIL:
+- Nombre: ${nom||'la usuaria'}
 - Estilo: ${est}
-- Tono de piel: ${piel}, pelo ${pelo}
-- Colores que le sientan bien: ${cols}
-- Está en ${ciudad}, ahora mismo ${temp}°C${ll}, ${cond}
+- Piel: ${piel}, pelo ${pelo}
+- Colores que le favorecen: ${cols}
+- Ciudad: ${ciudad}, AHORA MISMO ${temp}°C${ll}, ${cond}
 
-CÓMO HABLAR:
-- Usa su nombre (${nom||'cariño'}) de vez en cuando, con naturalidad
-- Sé breve: 1-2 frases máximo antes de proponer el outfit
-- Tono amigable y seguro, como "Con este calor te propongo..." o "Para una fiesta así me encanta el look..."
-- Nunca suenes a robot ni a asistente corporativo
-- Si pregunta algo que no es de moda, redirige con humor: "Eso no lo sé, ¡pero sí sé lo que te pondrías!"
+CÓMO RESPONDER:
+- Menciona SIEMPRE la temperatura real (${temp}°C) en tu respuesta de forma natural
+- Ejemplo: "Con ${temp}°C en ${ciudad} lo tienes fácil..." o "Uf, ${temp}°C — vamos a algo ligero..."
+- Usa su nombre (${nom}) con naturalidad, no en cada frase
+- 1-2 frases máximas antes del JSON del outfit
+- Tono de amiga estilista, nunca corporativo
 
-CUANDO TENGAS EL PLAN, incluye al final este JSON (sin markdown, sin espacios extra):
-{"ocasion":"ID","outfit":["prenda1","prenda2","prenda3"],"colores":"descripcion breve","tip":"un consejo personal"}
+CLASIFICACIÓN DE PLANES (MUY IMPORTANTE):
+- formal = trabajo, reunión, oficina, jefe, cliente, comida de negocios, comida con el jefe
+- casual = ocio, paseo, compras, quedada informal
+- noche = discoteca, copas, after, salida nocturna
+- cena_el = cena elegante, restaurante especial, aniversario
+- cena_in = cena con amigos, cena informal, cena en casa
+- viaje = aeropuerto, escapada, vacaciones
+- deporte = gym, yoga, running, deporte
+- evento = boda, bautizo, comunión, fiesta, cumpleaños, graduación, gala
 
-IDs: formal, casual, noche, cena_el, cena_in, viaje, deporte, evento
+¡IMPORTANTE! "comida con el jefe", "comida de trabajo", "comida de negocios" = SIEMPRE formal
+"cena con amigas" = cena_in, NO formal
 
-REGLAS:
-- Si no tienes claro el plan, haz UNA sola pregunta concreta
-- "fiesta", "cumple", "bautizo", "boda" = siempre evento
-- Si dice "venga", "dale", "muéstrame" = propón outfit directo
-- Adapta siempre a ${temp}°C — si hace calor, nada de capas; si hace frío, abrígate`;
+CUANDO TENGAS EL PLAN incluye este JSON al final (sin markdown):
+{"ocasion":"ID","outfit":["prenda1","prenda2","prenda3"],"colores":"paleta breve","tip":"consejo personal para ${nom||'ella'}"}
+
+Si no entiendes el plan, haz UNA pregunta concreta y natural.`;
 }
 
 async function proc(txt){
