@@ -1465,45 +1465,126 @@ function outfitD(txt){
   let al='';
   if(c.ll)al=`Llueve en ${c.c} — evita telas delicadas y calzado abierto.`;
 
+  // Prendas adaptadas a temperatura real
+  // fr=frío(<12°C), fc=fresco(12-18°C), tm=templado(18-24°C), ca=caluroso(>24°C), mv=mucho calor(>28°C)
+  const tm = c.t>=18 && c.t<=24;
+  const mv = c.t > 28; // mucho calor
+
   const P={
-    formal:[
-      {n:`Blazer estructurado en ${colorTendencia}`,h:'#1B2A4A',r:'La pieza tendencia de OI 2025 — hombreras y silueta marcada'},
-      {n:`${sugerirPantalon(est)} en ${c1}`,h:'#C9B99A',r:'Corte que mejor te favorece según tu armario'},
+    formal: mv ? [
+      // +28°C: sin blazer, prendas ligeras de trabajo
+      {n:`Blusa estructurada en ${c1}`,h:'#FAF8F5',r:'Elegante y fresca — perfecta para el calor'},
+      {n:`Pantalón fluido de tela ligera en ${colorTendencia}`,h:'#C9B99A',r:'Tejido transpirable con caída perfecta'},
+      {n:`Sandalias de tacón bajo en nude`,h:'#C9A87C',r:'Profesional y cómodo con el calor'},
+    ] : ca ? [
+      // 24-28°C: blazer solo si hace falta, prendas ligeras
+      {n:`Blazer ligero en ${colorTendencia} — solo si hay AC`,h:'#1B2A4A',r:'Llévalo en el bolso por si acaso'},
+      {n:`Blusa de seda en blanco roto`,h:'#FAF8F5',r:'Base perfecta que potencia tu tono de piel'},
+      {n:`${sugerirPantalon(est)} en ${c1} de tela ligera`,h:'#C9B99A',r:'Favorecedor y transpirable'},
+      {n:est.cal,h:'#2C1810',r:'Tu calzado habitual'},
+    ] : fc ? [
+      // 12-18°C: capas
+      {n:`Blazer estructurado en ${colorTendencia}`,h:'#1B2A4A',r:'La pieza tendencia — hombreras y silueta marcada'},
+      {n:`${sugerirPantalon(est)} en ${c1}`,h:'#C9B99A',r:'Corte que mejor te favorece'},
       {n:'Blusa de seda en blanco roto',h:'#FAF8F5',r:'Base que potencia tu tono de piel'},
       {n:est.cal,h:'#2C1810',r:'Tu calzado habitual'},
+    ] : fr ? [
+      // <12°C: abrigo
+      {n:`Abrigo en ${colorTendencia}`,h:'#1B2A4A',r:'La prenda protagonista de esta temporada'},
+      {n:`${sugerirPantalon(est)} en ${c1}`,h:'#C9B99A',r:'Corte que mejor te favorece'},
+      {n:'Jersey de punto fino en blanco roto',h:'#FAF8F5',r:'Calor sin volumen'},
+      {n:est.cal,h:'#2C1810',r:'Cierra el look con clase'},
+    ] : [
+      // Templado 18-24°C
+      {n:`Blazer estructurado en ${colorTendencia}`,h:'#1B2A4A',r:'La pieza tendencia de temporada'},
+      {n:`${sugerirPantalon(est)} en ${c1}`,h:'#C9B99A',r:'Corte favorecedor'},
+      {n:'Blusa de seda en blanco roto',h:'#FAF8F5',r:'Base que potencia tu tono'},
+      {n:est.cal,h:'#2C1810',r:'Tu calzado habitual'},
     ],
-    casual:[
+
+    casual: mv ? [
+      // +28°C: vestidos, shorts, prendas mínimas
+      {n:`Vestido camisero en ${c1}`,h:'#C9B99A',r:'Fresquísimo y muy favorecedor con el calor'},
+      {n:`Sandalias planas en nude o ${c2}`,h:'#C9A87C',r:'Lo más cómodo con estas temperaturas'},
+      {n:`Bolso de rafia o lino`,h:'#D4A870',r:'El complemento veraniego que lo eleva todo'},
+    ] : ca ? [
+      // 24-28°C: ligero pero estiloso
       {n:prendaTend,h:'#C9B99A',r:'La prenda más buscada de esta temporada'},
-      {n:`${sugerirPantalon(est)} en ${c1}`,h:'#C9B99A',r:'Favorecedor y actual — adaptado a tu armario'},
-      ...(fc||fr?[{n:est.ext,h:'#C9B99A',r:`Con ${c.t}°C en ${c.c}`}]:[]),
+      {n:`Pantalón fluido en ${c1}`,h:'#C9B99A',r:'Ligero y muy favorecedor'},
+      {n:`Sandalias en ${c2}`,h:'#C9A87C',r:'El calzado perfecto para el calor'},
+    ] : [
+      // Fresquito o templado
+      {n:prendaTend,h:'#C9B99A',r:'La prenda más buscada de esta temporada'},
+      {n:`${sugerirPantalon(est)} en ${c1}`,h:'#C9B99A',r:'Favorecedor y actual'},
+      ...(fc||fr?[{n:est.ext,h:'#C9B99A',r:`Con ${c.t}°C`}]:[]),
       {n:est.cal,h:'#8B6914',r:'Tu calzado habitual'},
     ].filter(p=>p.n),
-    noche:[
-      {n:`${est.pan} fluido en ${c2}`,h:'#1A1A1A',r:'Wide leg de noche — lo más actual esta temporada'},
-      {n:`Top en ${colorTendencia} o dorado`,h:'#FAF8F5',r:'Color tendencia OI 2025'},
+
+    noche: mv ? [
+      // +28°C: vestido corto o top + falda
+      {n:`Vestido corto en ${colorTendencia}`,h:'#1A1A1A',r:'La opción más fresca y sexy para noche de verano'},
+      {n:`Sandalias de tacón en nude`,h:'#C9A87C',r:'Alargan la pierna y aguantan la noche'},
+      {n:`Clutch pequeño en ${c2}`,h:'#8B6914',r:'El toque que completa el look'},
+    ] : ca ? [
+      // 24-28°C: falda + top o vestido midi
+      {n:`Falda midi en ${colorTendencia}`,h:'#1A1A1A',r:'Elegante y fresca para la noche'},
+      {n:`Top en ${c1} o dorado`,h:'#FAF8F5',r:'Color que brilla de noche'},
+      {n:est.cal,h:'#C9A87C',r:'El calzado que transforma el look'},
+    ] : [
+      {n:`${est.pan} fluido en ${c2}`,h:'#1A1A1A',r:'Wide leg de noche — lo más actual'},
+      {n:`Top en ${colorTendencia} o dorado`,h:'#FAF8F5',r:'Color tendencia'},
       {n:est.cal,h:'#C9A87C',r:'El calzado que transforma el look'},
       ...(fr||fc?[{n:est.ext,h:'#1A1A1A',r:`Con ${c.t}°C de noche`}]:[]),
     ],
-    cena_el:[
+
+    cena_el: mv ? [
+      {n:`Vestido midi de tirantes en ${colorTendencia}`,h:'#1A1A1A',r:'Elegante y perfectamente fresco para la noche'},
+      {n:`Sandalias de tacón fino en nude`,h:'#C9A87C',r:'El zapato que alarga y eleva'},
+      {n:`Pendientes llamativos`,h:'#D4AF6A',r:'El accesorio protagonista cuando el look es simple'},
+    ] : ca ? [
       {n:`Vestido midi en ${colorTendencia}`,h:'#1A1A1A',r:'El color de temporada en su mejor versión'},
       {n:est.cal,h:'#C9A87C',r:'Eleva sin esfuerzo'},
-      {n:`Cinturón ancho — tendencia clave OI 2025`,h:'#8B6914',r:'La pieza que define la silueta este otoño'},
+      {n:`Bolso de mano pequeño`,h:'#8B6914',r:'El complemento que da el toque final'},
+    ] : [
+      {n:`Vestido midi en ${colorTendencia}`,h:'#1A1A1A',r:'El color de temporada en su mejor versión'},
+      {n:est.cal,h:'#C9A87C',r:'Eleva sin esfuerzo'},
+      {n:`Cinturón ancho en ${c2}`,h:'#8B6914',r:'Define la silueta'},
       ...(c.t<18?[{n:est.ext,h:'#1B2A4A',r:`Con ${c.t}°C`}]:[]),
     ],
-    cena_in:[
+
+    cena_in: mv ? [
+      {n:`Vestido casual de tirantes en ${c1}`,h:'#4A6EA8',r:'Fresco y muy favorecedor para cenar'},
+      {n:`Sandalias planas en nude`,h:'#C9A87C',r:'Cómodo y estiloso'},
+    ] : ca ? [
+      {n:`Vestido casual en ${c1}`,h:'#4A6EA8',r:'Smart casual con color de temporada'},
+      {n:est.cal,h:'#2C1810',r:'Define el nivel del look'},
+    ] : [
       {n:fc||fr?`${est.pan} en ${colorTendencia}`:`Vestido casual en ${c1}`,h:'#4A6EA8',r:'Smart casual con color de temporada'},
       ...(fc||fr?[{n:est.ext,h:'#1A1A1A',r:'Sube el nivel del look'}]:[]),
       {n:est.cal,h:'#2C1810',r:'Define el nivel del look'},
     ],
-    deporte:[
-      {n:'Leggings negros',h:'#1A1A1A',r:'Comodidad y movimiento'},
-      {n:'Camiseta técnica transpirable',h:'#8FAF8F',r:'Funcional y fresca'},
-      {n:'Zapatillas chunky',h:'#FFF',r:'La tendencia athleisure de 2025'},
+
+    evento: mv ? [
+      {n:`Vestido de fiesta en ${colorTendencia} — tejido ligero`,h:'#C8A2C8',r:'Elegante y fresco — ideal para eventos de verano'},
+      {n:`Sandalias de tacón en nude o dorado`,h:'#D4AF6A',r:'Combinan con todo y alargan'},
+      {n:`Bolso de mano en ${c2}`,h:'#8B6914',r:'El complemento que da el toque especial'},
+    ] : [
+      {n:`Vestido de fiesta en ${colorTendencia}`,h:'#C8A2C8',r:'Elegante y especial para la ocasión'},
+      {n:est.cal,h:'#D4AF6A',r:'El calzado que eleva el look de evento'},
+      ...(c.t<18?[{n:est.ext,h:'#1B2A4A',r:'Para el desplazamiento'}]:[]),
     ],
+
+    deporte:[
+      ...(mv?[{n:'Shorts deportivos en negro',h:'#1A1A1A',r:'Imprescindibles con este calor'}]
+           :[{n:'Leggings negros',h:'#1A1A1A',r:'Comodidad y movimiento'}]),
+      {n:mv?'Top deportivo o crop transpirable':'Camiseta técnica transpirable',h:'#8FAF8F',r:mv?'Fresco y funcional':'Funcional y fresca'},
+      {n:'Zapatillas cómodas',h:'#FFF',r:'La tendencia athleisure de 2025'},
+    ],
+
     viaje:[
-      {n:`${prendaTend} — cómodo y tendencia`,h:'#4A4A4A',r:'Sin arrugas en horas, con estilo'},
-      {n:'Camiseta básica en blanco roto',h:'#FFF',r:'Versátil para cualquier destino'},
-      {n:est.ext,h:'#C9B99A',r:'Aire acondicionado en transportes'},
+      {n:mv?`Vestido camisero en ${c1} — sin arrugas`:`${prendaTend} — cómodo y tendencia`,h:'#4A4A4A',r:'Viaja con estilo sin preocuparte'},
+      {n:mv?'Sandalias cómodas para caminar':'Zapatillas blancas',h:'#FFF',r:'Cómodas para explorar'},
+      {n:mv?`Sombrero de paja`:`${est.ext}`,h:'#C9B99A',r:mv?'Protección y estilo':'Imprescindible en el equipaje'},
     ],
   };
 
