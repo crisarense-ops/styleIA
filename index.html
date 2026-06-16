@@ -185,19 +185,20 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .ob-s.on{background:var(--v);}
 .ob-skip{font-size:11px;color:var(--g);cursor:pointer;background:none;border:none;font-family:"Inter",sans-serif;}
 .ob-body{flex:1;overflow-y:auto;padding:14px 18px;}
-.ob-tit{font-family:"Playfair Display",serif;font-size:22px;line-height:1.3;margin-bottom:4px;}
+.ob-tit{font-family:"Playfair Display",serif;font-size:20px;line-height:1.3;margin-bottom:2px;}
 .ob-sub{font-size:12.5px;color:var(--g);margin-bottom:16px;line-height:1.5;}
 .ob-input{width:100%;padding:14px 15px;border:1.5px solid var(--bg3);border-radius:11px;font-family:"Inter",sans-serif;font-size:16px;background:var(--w);outline:none;transition:border-color .2s;}
 .ob-input:focus{border-color:var(--v);}
 
 /* GRID ESTILOS — fotos fijas, carga instantánea */
-.eg{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.eg{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:calc(100dvh - 180px);}
 .ec{
   border-radius:12px;overflow:hidden;
   border:2.5px solid transparent;cursor:pointer;
   transition:all .2s;position:relative;
-  aspect-ratio:3/4;
+  aspect-ratio:2/3;
   background:var(--bg2);
+  max-height:calc((100dvh - 200px)/2);
 }
 .ec.on{border-color:var(--v);box-shadow:0 0 0 3px rgba(107,143,113,.18);}
 .ec img{width:100%;height:100%;object-fit:cover;object-position:center 20%;}
@@ -208,11 +209,12 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 .ec.on .ec-chk{display:flex;}
 
 /* GRID INSPIRACIÓN — fotos fijas 3x3 */
-.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;max-height:calc(100dvh - 180px);}
 .ii{
   border-radius:9px;overflow:hidden;cursor:pointer;
   position:relative;border:2.5px solid transparent;transition:all .2s;
   aspect-ratio:2/3;
+  max-height:calc((100dvh - 200px)/2);
 }
 .ii.on{border-color:var(--v);}
 .ii img{width:100%;height:100%;object-fit:cover;}
@@ -412,14 +414,14 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   .ob-input{font-size:16px;padding:14px;} /* 16px evita zoom en iOS */
 
   /* Estilo grid — 2 cols en mobile */
-  .eg{grid-template-columns:1fr 1fr;gap:8px;}
-  .ec{aspect-ratio:3/4;border-radius:10px;}
+  .eg{grid-template-columns:1fr 1fr;gap:5px;max-height:calc(100dvh - 160px);}
+  .ec{aspect-ratio:2/3;border-radius:8px;max-height:calc((100dvh - 180px)/2);}
   .ec-nom{font-size:13px;}
   .ec-mrc{font-size:11px;}
 
   /* Inspiración — 3 cols con ratio vertical */
-  .ig{grid-template-columns:repeat(3,1fr);gap:5px;}
-  .ii{aspect-ratio:2/3;border-radius:7px;}
+  .ig{grid-template-columns:repeat(3,1fr);gap:4px;max-height:calc(100dvh - 160px);}
+  .ii{aspect-ratio:2/3;border-radius:7px;max-height:calc((100dvh - 180px)/2);}
 
   /* Pelo — scroll horizontal si no caben */
   .pelo-g{grid-template-columns:repeat(5,1fr);gap:5px;}
