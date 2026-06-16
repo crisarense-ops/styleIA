@@ -901,11 +901,14 @@ async function fetchClima(ciudad, base, manana=false){
     const d = await r.json();
     let t, desc, ll;
     if(manana && d.weather?.[1]){
-      // Previsión para mañana
+      // Previsión para mañana (índice 1 = día siguiente)
       const w = d.weather[1];
-      t = Math.round((parseInt(w.maxtempC)+parseInt(w.mintempC))/2);
+      const tMax = parseInt(w.maxtempC||w.AvgTempC||20);
+      const tMin = parseInt(w.mintempC||w.AvgTempC||15);
+      t = Math.round((tMax+tMin)/2);
       desc = w.hourly?.[4]?.lang_es?.[0]?.value || w.hourly?.[4]?.weatherDesc?.[0]?.value || '';
-      ll = w.hourly?.some(h=>parseInt(h.chanceofrain)>50) || false;
+      ll = w.hourly?.some(hh=>parseInt(hh.chanceofrain||0)>40) || false;
+      console.log('Mañana en',base.c,': max',tMax,'min',tMin,'media',t,'lluvia',ll);
     } else {
       const cur = d.current_condition?.[0];
       if(!cur) return base;
@@ -1576,7 +1579,7 @@ function buildSystem(){
   const temp=clima?.t||20;
   const cond=clima?.cond||'templado';
   const ll=clima?.ll?' y está lloviendo':'';
-  const cuando=clima?.esManana?'mañana':'hoy';
+  const cuando=(clima?.esManana)?'mañana':'hoy';
 
   return `Eres StyleAI, la estilista personal de ${nom||'la usuaria'}. Hablas como una amiga con mucho estilo — cercana, directa y cálida. Conoces bien a ${nom||'la usuaria'} y sabes lo que le favorece.
 
@@ -1721,22 +1724,43 @@ async function _callAI(txt){
 
 function _detectarOcasion(txt){
   const t = txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  if(['bautizo','comunion','boda','ceremonia','graduacion','gala','fiesta','cumpleanos',
-      'inauguracion','evento','acto'].some(k=>t.includes(k))) return 'evento';
-  if(['comida con el jefe','comida de trabajo','comida de negocios','comida con mi jefe',
-      'comer con el jefe','comer con mi jefe','reunion','jefe','entrevista','presentacion',
-      'cliente','trabajo','oficina'].some(k=>t.includes(k))) return 'formal';
+
+  // Eventos sociales — primero
+  if(['bautizo','comunion','boda','ceremonia','graduacion','gala','inauguracion','acto'].some(k=>t.includes(k))) return 'evento';
+  if(t.includes('fiesta')&&!t.includes('fiesta de trabajo')&&!t.includes('fiesta de empresa')) return 'evento';
+  if(t.includes('cumpleanos')||t.includes('cumple')) return 'evento';
+
+  // Trabajo — ANTES que cena (porque "cena con mi jefe" es formal)
+  if(['reunion','entrevista','presentacion','oficina'].some(k=>t.includes(k))) return 'formal';
+  if(['jefe','cliente','trabajo','trabajo'].some(k=>t.includes(k))&&
+     !['ex jefe','ex-jefe'].some(k=>t.includes(k))) return 'formal';
+  if(['comida de trabajo','comida con el jefe','comida con mi jefe',
+      'cena con el jefe','cena con mi jefe','cena de trabajo','cena de negocios',
+      'comer con el jefe','cenar con el jefe'].some(k=>t.includes(k))) return 'formal';
+
+  // Noche
   if(['discoteca','club','copas','after','nocturna'].some(k=>t.includes(k))
      ||(t.includes('noche')&&!t.includes('cena')&&!t.includes('buenas'))) return 'noche';
+
+  // Cena — solo si no hay contexto de trabajo
   if(t.includes('cena')||t.includes('cenar')){
-    return ['elegante','especial','romantica','restaurante','aniversario','novio'].some(k=>t.includes(k))
+    return ['elegante','especial','romantica','restaurante','aniversario'].some(k=>t.includes(k))
       ?'cena_el':'cena_in';
   }
-  if(['gym','yoga','running','deporte','entreno','pilates','ejercicio'].some(k=>t.includes(k))) return 'deporte';
+
+  // Deporte
+  if(['gym','yoga','running','deporte','entreno','pilates','ejercicio','natacion'].some(k=>t.includes(k))) return 'deporte';
+
+  // Viaje
   if(['viaje','aeropuerto','escapada','vacaciones'].some(k=>t.includes(k))) return 'viaje';
+
+  // Confirmaciones
   if(['venga','dale','ok','vale','perfecto','muestra','enseña'].some(k=>t===k||(t.startsWith(k)&&t.length<12))) return window._lastOc||'casual';
+
+  // Casual
   if(['ocio','amig','paseo','compras','tarde','finde','quedada','parque','terraza','playa',
-      'novio','novia','pareja','familia'].some(k=>t.includes(k))) return 'casual';
+      'novio','novia','pareja','familia','casa'].some(k=>t.includes(k))) return 'casual';
+
   return null;
 }
 
