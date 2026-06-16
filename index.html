@@ -1788,6 +1788,9 @@ async function _callAI(txt){
       hablar(limpiar(cleanReply));
     }
 
+    // Guardar respuesta en historial
+    _chatHistory.push({role:'assistant', content: cleanReply || reply});
+
     // Si hay outfit JSON → mostrarlo
     if(jsonMatch){
       try{
@@ -1798,20 +1801,16 @@ async function _callAI(txt){
           setTimeout(()=>mostrarOutfit(outfitData.ocasion), cleanReply ? 600 : 100);
         }
       } catch(e){}
-    } else if(cleanReply){
-      // Claude respondió sin JSON — intentar detectar ocasión del texto
+    } else {
+      // Claude no devolvió JSON — detectar ocasión y mostrar outfit
       const oc = _detectarOcasion(txt + ' ' + cleanReply);
       if(oc){
         window._lastOc = oc;
-        setTimeout(()=>mostrarOutfit(oc), 600);
+        setTimeout(()=>mostrarOutfit(oc), cleanReply ? 800 : 100);
       } else {
-        // Claude preguntó algo — mostrar sugerencias
-        setTimeout(()=>addSugs(['Trabajo o reunión','Ocio con amigas','Cena esta noche','Evento especial','Salida nocturna']),300);
+        setTimeout(()=>addSugs(['Cena esta noche','Trabajo o reunión','Ocio con amigas','Evento especial','Salida nocturna']),400);
       }
     }
-
-    // Guardar respuesta en historial (sin el JSON)
-    _chatHistory.push({role:'assistant', content: cleanReply || reply});
 
   } catch(e){
     rmTyping();
@@ -1855,6 +1854,10 @@ function _detectarOcasion(txt){
 
   // Confirmaciones
   if(['venga','dale','ok','vale','perfecto','muestra','enseña'].some(k=>t===k||(t.startsWith(k)&&t.length<12))) return window._lastOc||'casual';
+
+  // Cita romántica
+  if(['chico','chica','gusta','cita','romantica','romantico','especial'].some(k=>t.includes(k))
+     &&(t.includes('cena')||t.includes('cenar')||t.includes('salida')||t.includes('quedar'))) return 'cena_el';
 
   // Casual
   if(['ocio','amig','paseo','compras','tarde','finde','quedada','parque','terraza','playa',
