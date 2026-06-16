@@ -1616,10 +1616,12 @@ async function proc(txt){
       _chatHistory.push({role:'user', content: txt});
       await _callAI(txt);
     } else {
-      // No reconoce ciudad — igual intentar entender el plan con Madrid por defecto
-      setClima(CIUDADES.madrid);
+      // No reconoce ciudad — guardar plan y pedir ciudad
+      window._pendingMsg = txt;
       _chatHistory.push({role:'user', content: txt});
-      await _callAI(txt);
+      const nom = perfil?.nombre ? perfil.nombre.charAt(0).toUpperCase()+perfil.nombre.slice(1).toLowerCase() : '';
+      addMsg('ai', `${nom ? nom+', ¿' : '¿'}desde qué ciudad me escribes? Así ajusto el look al tiempo.`);
+      addSugs(['Madrid','Barcelona','Sevilla','Valencia','Bilbao','Otra ciudad']);
     }
     return;
   }
