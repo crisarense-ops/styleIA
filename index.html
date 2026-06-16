@@ -1551,16 +1551,15 @@ REGLAS:
 async function proc(txt){
   if(_isTyping) return;
 
-  // Ciudad pendiente
+  // Ciudad pendiente — solo si NO hay clima
   if(!clima){
     const t = txt.toLowerCase();
     const k = Object.keys(CIUDADES).find(c=>t.includes(c));
     if(k){
       setClima(CIUDADES[k]);
-      // Continuar con el pending si existe
-      if(window._pendingMsg){
-        const pending = window._pendingMsg;
-        window._pendingMsg = null;
+      const pending = window._pendingMsg;
+      window._pendingMsg = null;
+      if(pending){
         _chatHistory.push({role:'user', content: pending});
         await _callAI(pending);
       }
@@ -1649,19 +1648,42 @@ function _fallbackLocal(txt){
   const t = txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   let oc = null;
 
-  if(['bautizo','comunion','boda','ceremonia','graduacion','gala'].some(k=>t.includes(k))) oc='evento';
-  else if(['trabajo','reunion','oficina','entrevista','jefe'].some(k=>t.includes(k))) oc='formal';
-  else if(['discoteca','club','copas','after','noche'].some(k=>t.includes(k))) oc='noche';
-  else if(t.includes('cena')||t.includes('cenar')) oc='cena_in';
-  else if(['gym','yoga','running','deporte','entreno'].some(k=>t.includes(k))) oc='deporte';
-  else if(['viaje','aeropuerto','escapada'].some(k=>t.includes(k))) oc='viaje';
-  else if(['venga','dale','muestra','si','ok','quiero'].some(k=>t===k||t.startsWith(k+' ')&&t.length<15)) oc=window._lastOc||'casual';
-  else if(['ocio','amig','paseo','compras','dia','tarde','finde'].some(k=>t.includes(k))) oc='casual';
+  // Eventos sociales
+  if(['bautizo','comunion','boda','ceremonia','graduacion','gala','fiesta','cumpleanos',
+      'inauguracion','evento','acto'].some(k=>t.includes(k))) oc='evento';
+  // Trabajo
+  else if(['trabajo','reunion','oficina','entrevista','jefe','presentacion','cliente'].some(k=>t.includes(k))) oc='formal';
+  // Noche
+  else if(['discoteca','club','copas','after','nocturna','boliche'].some(k=>t.includes(k))
+       || (t.includes('noche') && !t.includes('cena') && !t.includes('buenas'))) oc='noche';
+  // Cena
+  else if(t.includes('cena')||t.includes('cenar')){
+    oc=['elegante','especial','romantica','restaurante','aniversario'].some(k=>t.includes(k))
+      ?'cena_el':'cena_in';
+  }
+  // Deporte
+  else if(['gym','yoga','running','deporte','entreno','pilates','natacion','ejercicio'].some(k=>t.includes(k))) oc='deporte';
+  // Viaje
+  else if(['viaje','aeropuerto','escapada','vacaciones','hotel'].some(k=>t.includes(k))) oc='viaje';
+  // Confirmaciones — reusar última ocasión
+  else if(['venga','dale','si','ok','vale','perfecto','muestra','enseña'].some(k=>t===k||(t.startsWith(k)&&t.length<12))) oc=window._lastOc||'casual';
+  // Ocio / casual
+  else if(['ocio','amig','paseo','compras','tarde','finde','semana','domingo','sabado',
+           'quedada','parque','campo','playa','terraza'].some(k=>t.includes(k))) oc='casual';
 
   if(oc){
     window._lastOc = oc;
-    const f = {evento:'¡Un evento especial! Aquí mi propuesta.',formal:'Un look profesional para triunfar.',noche:'Noche de salida — con estilo.',cena_in:'Cena con amigos — chic y cómoda.',cena_el:'Una cena especial merece algo especial.',deporte:'Look sporty y favorecedor.',viaje:'Práctica y estilosa para el viaje.',casual:'Un look relajado y favorecedor.'};
-    addMsg('ai', f[oc]||'Aquí tienes mi propuesta.');
+    const frases={
+      evento:'Para el evento, aquí mi propuesta.',
+      formal:'Un look profesional para triunfar.',
+      noche:'Noche de salida — con mucho estilo.',
+      cena_in:'Cena con amigos — chic y cómoda.',
+      cena_el:'Una cena especial merece algo especial.',
+      deporte:'Look sporty y favorecedor.',
+      viaje:'Práctica y estilosa para el viaje.',
+      casual:'Un look relajado y favorecedor.'
+    };
+    addMsg('ai', frases[oc]||'Aquí tienes mi propuesta.');
     setTimeout(()=>mostrarOutfit(oc), 300);
   } else {
     addMsg('ai','¿Para qué plan quieres el look? Cuéntame.');
