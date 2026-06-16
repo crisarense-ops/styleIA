@@ -1679,13 +1679,20 @@ async function _callAI(txt){
         const outfitData = JSON.parse(jsonMatch[0]);
         if(outfitData.ocasion){
           window._lastOc = outfitData.ocasion;
-          // Pasar datos del outfit a mostrarOutfit si tiene prendas
-          if(outfitData.outfit){
-            window._aiOutfit = outfitData; // guardar para usar en outfitD
-          }
+          if(outfitData.outfit) window._aiOutfit = outfitData;
           setTimeout(()=>mostrarOutfit(outfitData.ocasion), cleanReply ? 600 : 100);
         }
       } catch(e){}
+    } else if(cleanReply){
+      // Claude respondió sin JSON — intentar detectar ocasión del texto
+      const oc = _detectarOcasion(txt + ' ' + cleanReply);
+      if(oc){
+        window._lastOc = oc;
+        setTimeout(()=>mostrarOutfit(oc), 600);
+      } else {
+        // Claude preguntó algo — mostrar sugerencias
+        setTimeout(()=>addSugs(['Trabajo o reunión','Ocio con amigas','Cena esta noche','Evento especial','Salida nocturna']),300);
+      }
     }
 
     // Guardar respuesta en historial (sin el JSON)
@@ -1699,32 +1706,33 @@ async function _callAI(txt){
   }
 }
 
-function _fallbackLocal(txt){
+function _detectarOcasion(txt){
   const t = txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  let oc = null;
-
-  // Eventos sociales
   if(['bautizo','comunion','boda','ceremonia','graduacion','gala','fiesta','cumpleanos',
-      'inauguracion','evento','acto'].some(k=>t.includes(k))) oc='evento';
-  // Trabajo
-  else if(['trabajo','reunion','oficina','entrevista','jefe','presentacion','cliente'].some(k=>t.includes(k))) oc='formal';
-  // Noche
-  else if(['discoteca','club','copas','after','nocturna','boliche'].some(k=>t.includes(k))
-       || (t.includes('noche') && !t.includes('cena') && !t.includes('buenas'))) oc='noche';
-  // Cena
-  else if(t.includes('cena')||t.includes('cenar')){
-    oc=['elegante','especial','romantica','restaurante','aniversario'].some(k=>t.includes(k))
+      'inauguracion','evento','acto'].some(k=>t.includes(k))) return 'evento';
+  if(['comida con el jefe','comida de trabajo','comida de negocios','comida con mi jefe',
+      'comer con el jefe','comer con mi jefe','reunion','jefe','entrevista','presentacion',
+      'cliente','trabajo','oficina'].some(k=>t.includes(k))) return 'formal';
+  if(['discoteca','club','copas','after','nocturna'].some(k=>t.includes(k))
+     ||(t.includes('noche')&&!t.includes('cena')&&!t.includes('buenas'))) return 'noche';
+  if(t.includes('cena')||t.includes('cenar')){
+    return ['elegante','especial','romantica','restaurante','aniversario','novio'].some(k=>t.includes(k))
       ?'cena_el':'cena_in';
   }
-  // Deporte
-  else if(['gym','yoga','running','deporte','entreno','pilates','natacion','ejercicio'].some(k=>t.includes(k))) oc='deporte';
-  // Viaje
-  else if(['viaje','aeropuerto','escapada','vacaciones','hotel'].some(k=>t.includes(k))) oc='viaje';
-  // Confirmaciones — reusar última ocasión
-  else if(['venga','dale','si','ok','vale','perfecto','muestra','enseña'].some(k=>t===k||(t.startsWith(k)&&t.length<12))) oc=window._lastOc||'casual';
-  // Ocio / casual
-  else if(['ocio','amig','paseo','compras','tarde','finde','semana','domingo','sabado',
-           'quedada','parque','campo','playa','terraza'].some(k=>t.includes(k))) oc='casual';
+  if(['gym','yoga','running','deporte','entreno','pilates','ejercicio'].some(k=>t.includes(k))) return 'deporte';
+  if(['viaje','aeropuerto','escapada','vacaciones'].some(k=>t.includes(k))) return 'viaje';
+  if(['venga','dale','ok','vale','perfecto','muestra','enseña'].some(k=>t===k||(t.startsWith(k)&&t.length<12))) return window._lastOc||'casual';
+  if(['ocio','amig','paseo','compras','tarde','finde','quedada','parque','terraza','playa',
+      'novio','novia','pareja','familia'].some(k=>t.includes(k))) return 'casual';
+  return null;
+}
+
+function _fallbackLocal(txt){
+  const t = txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  let oc = _detectarOcasion(txt);
+
+  // Eventos sociales
+  // oc ya calculado por _detectarOcasion
 
   if(oc){
     window._lastOc = oc;
