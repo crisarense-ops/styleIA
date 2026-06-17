@@ -1864,50 +1864,51 @@ async function _callAI(txt){
 }
 
 function _detectarOcasion(txt){
-  const t = txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  // Normalizar: quitar acentos, pasar a minúsculas, colapsar erratas simples
+  const t = txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/(.)(\1{1,})/g,'$1$2') // colapsar letras repetidas (trrabajar→trabaJar)
+    .replace(/rr/g,'r'); // trrabajar→trabaJar
 
-  // Eventos sociales — primero
-  if(['bautizo','comunion','boda','ceremonia','graduacion','gala','inauguracion','acto'].some(k=>t.includes(k))) return 'evento';
-  if(t.includes('fiesta')&&!t.includes('fiesta de trabajo')&&!t.includes('fiesta de empresa')) return 'evento';
-  if(t.includes('cumpleanos')||t.includes('cumple')) return 'evento';
+  // Eventos
+  if(['bautizo','bautis','comunion','boda','ceremonia','graduacion','gala','inauguracion','acto'].some(k=>t.includes(k))) return 'evento';
+  if(t.includes('fiesta')) return 'evento';
+  if(t.includes('cumple')) return 'evento';
 
-  // Trabajo — ANTES que cena (porque "cena/comida con mi jefe" es formal)
-  if(['reunion','entrevista','presentacion','oficina','corporativ'].some(k=>t.includes(k))) return 'formal';
-  // Cualquier plan con "jefe" o "cliente" es formal
-  if((t.includes('jefe')||t.includes('cliente')||t.includes('jefa'))&&
-     !['ex jefe','ex-jefe','ex jefa'].some(k=>t.includes(k))) return 'formal';
-  // Comida/cena de trabajo
-  if(['comida de trabajo','comida con el jefe','comida con mi jefe','como con mi jefe',
-      'como con el jefe','como con mi jefa','comer con mi jefe','comer con el jefe',
-      'cena con el jefe','cena con mi jefe','cena de trabajo','cena de negocios',
-      'cenar con el jefe','cenar con mi jefe','almuerzo de trabajo'].some(k=>t.includes(k))) return 'formal';
+  // Trabajo — muy amplio para capturar erratas
+  if(['trabaj','ofici','reuni','entrevist','presentaci','cliente','jef','compañer','coleg',
+      'meeting','work','labor','profession','negoci'].some(k=>t.includes(k))) return 'formal';
 
   // Noche
-  if(['discoteca','club','copas','after','nocturna'].some(k=>t.includes(k))
+  if(['discoteca','club','copas','after','nocturna','boliche'].some(k=>t.includes(k))
      ||(t.includes('noche')&&!t.includes('cena')&&!t.includes('buenas'))) return 'noche';
 
-  // Cena — solo si no hay contexto de trabajo
-  if(t.includes('cena')||t.includes('cenar')){
-    return ['elegante','especial','romantica','restaurante','aniversario'].some(k=>t.includes(k))
+  // Cena
+  if(t.includes('cen')||t.includes('restaur')){
+    return ['elegant','especial','romantica','aniversario'].some(k=>t.includes(k))
       ?'cena_el':'cena_in';
   }
 
+  // Comida informal
+  if(t.includes('comi')||t.includes('almuerz')||t.includes('como con')) return 'cena_in';
+
   // Deporte
-  if(['gym','yoga','running','deporte','entreno','pilates','ejercicio','natacion'].some(k=>t.includes(k))) return 'deporte';
+  if(['gym','yoga','runn','deport','entreno','pilates','ejercici','nataci','fitnes'].some(k=>t.includes(k))) return 'deporte';
 
   // Viaje
-  if(['viaje','aeropuerto','escapada','vacaciones'].some(k=>t.includes(k))) return 'viaje';
+  if(['viaj','aeropuerto','escapada','vacacion','hotel','maleta'].some(k=>t.includes(k))) return 'viaje';
 
   // Confirmaciones
-  if(['venga','dale','ok','vale','perfecto','muestra','enseña'].some(k=>t===k||(t.startsWith(k)&&t.length<12))) return window._lastOc||'casual';
+  if(['venga','dale','ok','vale','perfecto','muestra','enseña','si','claro','anda'].some(k=>t===k||(t.startsWith(k)&&t.length<12))) return window._lastOc||'casual';
 
   // Cita romántica
-  if(['chico','chica','gusta','cita','romantica','romantico','especial'].some(k=>t.includes(k))
-     &&(t.includes('cena')||t.includes('cenar')||t.includes('salida')||t.includes('quedar'))) return 'cena_el';
+  if(['chico','chica','gusta','cita','romantica','novio','novia'].some(k=>t.includes(k))) return 'cena_el';
 
   // Casual
   if(['ocio','amig','paseo','compras','tarde','finde','quedada','parque','terraza','playa',
-      'novio','novia','pareja','familia','casa'].some(k=>t.includes(k))) return 'casual';
+      'familia','casa','domingo','sabado','semana'].some(k=>t.includes(k))) return 'casual';
+
+  // Si menciona ir a algún sitio → casual por defecto
+  if(t.includes('ir a')||t.includes('salir')||t.includes('quedar')) return 'casual';
 
   return null;
 }
