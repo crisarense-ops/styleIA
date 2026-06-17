@@ -2225,6 +2225,19 @@ window.addEventListener('load',()=>{
 });
 
 
+// Text-to-speech — no-op si no hay soporte
+function hablar(txt){
+  if(!txt||typeof txt!=='string') return;
+  if(!window.speechSynthesis) return;
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(limpiar(txt).slice(0,150));
+    u.lang = 'es-ES';
+    u.rate = 1.1;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
 // ── ADMIN PANEL ─────────────────────────────────────────────
 const ADM_PASS = 'flair2025';
 const PREMIUM_PRICE = 5.99;
