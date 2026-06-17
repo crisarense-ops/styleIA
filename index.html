@@ -1781,15 +1781,26 @@ async function proc(txt){
     const k = Object.keys(CIUDADES).find(c=>t.includes(c));
     if(k){
       const base = CIUDADES[k];
-      const climaNuevo = await fetchClima(base.c, base, 0);
-      clima = {...climaNuevo, cuando:'hoy'};
-      _actualizarUIClima(clima);
       const msg = window._pendingMsg || txt;
       window._pendingMsg = null;
       window._lastTxt = msg;
+      
+      // Detectar si el mensaje pendiente menciona fecha futura
+      const msgEsManana = /\bma[ñn]ana\b/i.test(msg);
+      const msgEsPasado = /pasado\s*ma[ñn]ana/i.test(msg);
+      const msgEsSemana = /semana\s*(que\s*viene|proxima)/i.test(msg);
+      const msgDiaIdx = msgEsPasado||msgEsSemana ? 2 : msgEsManana ? 1 : 0;
+      
+      const climaNuevo = await fetchClima(base.c, base, msgDiaIdx);
+      const cuandoMsg = msgDiaIdx===0?'hoy': msgDiaIdx===1?'mañana':'próximamente';
+      clima = {...climaNuevo, cuando: cuandoMsg};
+      _actualizarUIClima(clima);
+      
       if(!_chatHistory.find(m=>m.content===msg))
         _chatHistory.push({role:'user', content: msg});
-      await _callAI(msg);
+      
+      const ctxMsg = {cuando: cuandoMsg, temp: clima.t, cond: clima.cond, ciudad: clima.c};
+      await _callAI(msg, ctxMsg);
     } else {
       window._pendingMsg = txt;
       const nomR=(perfil?.nombre||window._nom||'').split(' ')[0];
