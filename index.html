@@ -1772,6 +1772,7 @@ async function proc(txt){
     }
   }
 
+  window._lastTxt=txt;
   _chatHistory.push({role:'user', content: txt});
   await _callAI(txt);
 }
@@ -1848,13 +1849,16 @@ function _detectarOcasion(txt){
   if(t.includes('fiesta')&&!t.includes('fiesta de trabajo')&&!t.includes('fiesta de empresa')) return 'evento';
   if(t.includes('cumpleanos')||t.includes('cumple')) return 'evento';
 
-  // Trabajo — ANTES que cena (porque "cena con mi jefe" es formal)
-  if(['reunion','entrevista','presentacion','oficina'].some(k=>t.includes(k))) return 'formal';
-  if(['jefe','cliente','trabajo','trabajo'].some(k=>t.includes(k))&&
-     !['ex jefe','ex-jefe'].some(k=>t.includes(k))) return 'formal';
-  if(['comida de trabajo','comida con el jefe','comida con mi jefe',
+  // Trabajo — ANTES que cena (porque "cena/comida con mi jefe" es formal)
+  if(['reunion','entrevista','presentacion','oficina','corporativ'].some(k=>t.includes(k))) return 'formal';
+  // Cualquier plan con "jefe" o "cliente" es formal
+  if((t.includes('jefe')||t.includes('cliente')||t.includes('jefa'))&&
+     !['ex jefe','ex-jefe','ex jefa'].some(k=>t.includes(k))) return 'formal';
+  // Comida/cena de trabajo
+  if(['comida de trabajo','comida con el jefe','comida con mi jefe','como con mi jefe',
+      'como con el jefe','como con mi jefa','comer con mi jefe','comer con el jefe',
       'cena con el jefe','cena con mi jefe','cena de trabajo','cena de negocios',
-      'comer con el jefe','cenar con el jefe'].some(k=>t.includes(k))) return 'formal';
+      'cenar con el jefe','cenar con mi jefe','almuerzo de trabajo'].some(k=>t.includes(k))) return 'formal';
 
   // Noche
   if(['discoteca','club','copas','after','nocturna'].some(k=>t.includes(k))
