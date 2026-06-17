@@ -54,7 +54,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   display:flex;align-items:center;justify-content:space-between;
   padding:20px 0;flex-shrink:0;
 }
-.logo{font-family:"Playfair Display",serif;font-size:22px;letter-spacing:-.3px;}
+.logo{font-family:"Playfair Display",serif;font-size:28px;letter-spacing:-.5px;font-weight:700;}
 .logo span{color:var(--v);}
 .nav-btns{display:flex;gap:10px;}
 .btn-out{padding:9px 20px;border:1.5px solid rgba(0,0,0,.2);border-radius:30px;background:transparent;font-family:"Inter",sans-serif;font-size:13px;cursor:pointer;transition:all .2s;color:var(--n);}
@@ -103,7 +103,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 
 /* CTAs */
 .l-ctas{display:flex;gap:12px;flex-wrap:wrap;}
-.btn-cta-p{padding:14px 32px;border:none;border-radius:30px;background:var(--n);color:var(--w);font-family:"Inter",sans-serif;font-size:14.5px;font-weight:500;cursor:pointer;transition:all .25s;}
+.btn-cta-p{padding:16px 36px;border:none;border-radius:30px;background:var(--n);color:var(--w);font-family:"Inter",sans-serif;font-size:16px;font-weight:500;cursor:pointer;transition:all .25s;}
 .btn-cta-p:hover{background:var(--v);transform:translateY(-2px);box-shadow:0 8px 24px rgba(107,143,113,.3);}
 .btn-cta-s{padding:14px 28px;border:1.5px solid rgba(0,0,0,.2);border-radius:30px;background:transparent;color:var(--n);font-family:"Inter",sans-serif;font-size:14.5px;cursor:pointer;transition:all .25s;}
 .btn-cta-s:hover{border-color:var(--n);background:var(--n);color:var(--w);}
@@ -389,7 +389,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
   .l-foto::before{background:linear-gradient(180deg,rgba(250,248,245,.3) 0%,transparent 40%,transparent 65%,var(--bg) 100%);}
   .l-left{width:100%;padding:0;position:relative;}
   .l-nav{padding:12px 18px;position:absolute;top:0;left:0;right:0;background:transparent;z-index:10;}
-  .logo{color:var(--w);text-shadow:0 1px 4px rgba(0,0,0,.3);}
+  .logo{color:var(--w);text-shadow:0 1px 4px rgba(0,0,0,.3);font-size:32px;}
   .btn-out{border-color:rgba(255,255,255,.7);color:var(--w);}
   .btn-in{background:rgba(255,255,255,.9);color:var(--n);}
   .l-center{padding:20px 18px 16px;}
@@ -471,7 +471,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 }
 
 @media(max-width:380px){
-  .l-titulo{font-size:26px;}
+  .l-titulo{font-size:38px;letter-spacing:-1.5px;}
   .l-sub{font-size:13px;}
   .nav-btns .btn-out{display:none;}
   .l-pasos{gap:6px;}
@@ -564,7 +564,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 
   <div class="l-left">
     <nav class="l-nav">
-      <div class="logo" onclick="admTap()">Flai<span style="color:var(--v)">r</span></div>
+      <div style="display:flex;flex-direction:column;gap:1px"><div class="logo" onclick="admTap()">Flai<span style="color:var(--v)">r</span></div><div style="font-size:10px;color:var(--g);letter-spacing:.5px;font-weight:500;text-transform:uppercase;margin-left:2px">Personal stylist</div></div>
       <div class="nav-btns">
         <button class="btn-out" onclick="abrirLogin()">Iniciar sesión</button>
         <button class="btn-in" onclick="abrirRegistro()">Registrarme</button>
@@ -578,12 +578,11 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
       </div>
 
       <h1 class="l-titulo">
-        El outfit<br>perfecto,<br>
-        con <em>tu ropa</em><br>
-        y el tiempo<br>de hoy.
+        Vístete mejor.<br>
+        <em>Cada día.</em>
       </h1>
 
-      <p class="l-sub">Tu armario digital inteligente. Sube tus prendas, dinos tu plan y Flair propone el look ideal según el clima real de tu ciudad.</p>
+      <p class="l-sub">Tu estilista personal con IA. Sube tu ropa, cuéntanos tu plan y Flair propone el look perfecto con el tiempo real de tu ciudad.</p>
 
       <div class="l-pasos">
         <div class="l-paso"><div class="l-pn">1</div><div class="l-pt"><strong>Sube tus prendas</strong>Foto en espejo o prenda a prenda</div></div>
@@ -599,9 +598,9 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
 
     <div class="l-foot">
       <div class="l-stats">
-        <div><div class="st-n">0€</div><div class="st-l">Para empezar</div></div>
+        <div><div class="st-n">Free</div><div class="st-l">Para empezar</div></div>
         <div><div class="st-n">2 min</div><div class="st-l">Primer look</div></div>
-        <div><div class="st-n">24/7</div><div class="st-l">Tu estilista</div></div>
+        <div><div class="st-n">∞</div><div class="st-l">Outfits posibles</div></div>
       </div>
       <button class="btn-planes" onclick="abrirPlanes()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="margin-right:5px;vertical-align:-1px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Ver planes</button>
     </div>
