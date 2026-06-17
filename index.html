@@ -911,11 +911,30 @@ async function fetchClima(ciudad, base, diaIdx=0){
       desc = w.hourly?.[4]?.lang_es?.[0]?.value || '';
       ll = w.hourly?.some(hh=>parseInt(hh.chanceofrain||0)>40) || false;
     } else {
-      const cur = d.current_condition?.[0];
-      if(!cur) return base;
-      t = Math.round(parseInt(cur.temp_C));
-      desc = cur.lang_es?.[0]?.value || cur.weatherDesc?.[0]?.value || '';
-      ll = desc.toLowerCase().includes('rain')||desc.toLowerCase().includes('lluvia');
+      // Temperatura actual — pero si tenemos hora del plan, usar la previsión horaria
+      const ahora = new Date();
+      const horaActual = ahora.getHours();
+      // horaTarget: para comida ~14h, para cena ~21h, para noche ~23h
+      const weather0 = d.weather?.[0];
+      if(weather0?.hourly?.length > 0){
+        // wttr.in da hourly en slots de 3h: 0,3,6,9,12,15,18,21
+        const slots = weather0.hourly;
+        // Encontrar el slot más cercano a la hora actual
+        const slot = slots.reduce((prev, cur) => {
+          const ph = parseInt(prev.time)/100;
+          const ch = parseInt(cur.time)/100;
+          return Math.abs(ch - horaActual) < Math.abs(ph - horaActual) ? cur : prev;
+        });
+        t = Math.round(parseInt(slot.tempC || slot.temp_C || 20));
+        ll = parseInt(slot.chanceofrain||0) > 40;
+        desc = slot.lang_es?.[0]?.value || '';
+      } else {
+        const cur = d.current_condition?.[0];
+        if(!cur) return base;
+        t = Math.round(parseInt(cur.temp_C));
+        desc = cur.lang_es?.[0]?.value || cur.weatherDesc?.[0]?.value || '';
+        ll = desc.toLowerCase().includes('rain')||desc.toLowerCase().includes('lluvia');
+      }
     }
     const cond = t>=28?'caluroso':t>=20?'templado':t>=12?'fresco':'frío';
     const i = ll?'🌧️':t>=28?'☀️':t>=18?'⛅':'☁️';
@@ -1741,12 +1760,14 @@ async function proc(txt){
   }
 
   // Temperatura mencionada → actualizar
-  const tempM = txt.match(/(\d{1,2})\s*(?:°|º|grado|gradis)/i)
-             || txt.match(/(?:hace|estamos?\s+a|tenemos)\s+(\d{1,2})/i);
+  const tempM = txt.match(/(\d{1,2})\s*(?:°|º|grad[oa]s?|gradis|graus)/i)
+             || txt.match(/(?:hace|estamos?\s+a|tenemos|habrá|habra|van\s+a\s+ser|ser[aá]n?)\s+(\d{1,2})/i)
+             || txt.match(/(\d{1,2})\s*(?:grados|grad)/i);
   if(tempM){
-    const tv = parseInt(tempM[1]||tempM[2]);
-    if(tv>=0&&tv<=50){
-      clima={...clima,t:tv,cond:tv>=28?'caluroso':tv>=20?'templado':tv>=12?'fresco':'frío'};
+    const tv = parseInt(tempM[1]||tempM[2]||tempM[3]);
+    if(tv>=5&&tv<=50){
+      // El usuario nos dice la temperatura real — usarla siempre
+      clima={...clima,t:tv,cond:tv>=30?'muy caluroso':tv>=25?'caluroso':tv>=20?'templado':tv>=12?'fresco':'frío'};
       setClima(clima);
     }
   }
