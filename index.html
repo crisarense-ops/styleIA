@@ -1101,14 +1101,18 @@ function confirmarLogin(){
 }
 
 // CLIMA
-async function setClima(d){
+function setClima(d){
   clima=d;
   _actualizarUIClima(d);
-  // Actualizar con temperatura real en segundo plano
-  fetchClima(d.c, d).then(real=>{
-    clima=real;
-    _actualizarUIClima(real);
-  }).catch(()=>{});
+  // Solo actualizar en segundo plano si es para HOY (no sobreescribir mañana)
+  if(!d.cuando || d.cuando==='hoy'){
+    fetchClima(d.c, d, 0).then(real=>{
+      if(clima?.cuando==='hoy'||!clima?.cuando){
+        clima=real;
+        _actualizarUIClima(real);
+      }
+    }).catch(()=>{});
+  }
 }
 function _actualizarUIClima(d){
   const lc=document.getElementById('lclima');
@@ -1820,15 +1824,13 @@ async function proc(txt){
     const base=ciudadDestino?CIUDADES[ciudadDestino]:(clima||CIUDADES.madrid);
     try{
       const climaNuevo=await fetchClima(base.c,base,diaIdx);
-      clima=climaNuevo;
-      // Marcar explícitamente cuándo es el plan
-      clima.cuando=diaIdx===0?'hoy':diaIdx===1?'mañana':'próximamente';
-      await setClima(clima);
-    }catch(e){ console.log('fetchClima falló:', e); }
-  }
-
-  // Si es mañana y no pudimos obtener previsión, al menos marcarlo
-  if(esManana && clima && clima.cuando!=='mañana'){
+      clima={...climaNuevo, cuando:diaIdx===0?'hoy':diaIdx===1?'mañana':'próximamente'};
+      _actualizarUIClima(clima); // solo actualizar UI, no llamar setClima
+    }catch(e){
+      // Si falla, al menos marcar el cuándo
+      if(esManana) clima={...clima, cuando:'mañana'};
+    }
+  } else if(esManana && clima){
     clima={...clima, cuando:'mañana'};
   }
 
