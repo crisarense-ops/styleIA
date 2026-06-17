@@ -2018,6 +2018,21 @@ function _detectarOcasion(txt){
 }
 
 function _fallbackLocal(txt){
+  // Si es refinamiento, usar last ocasión con modificación
+  const esRef = /m[aá]s formal|m[aá]s c[oó]modo|m[aá]s casual|otra opci[oó]n|algo diferente|cambia/i.test(txt);
+  if(esRef && window._lastOc){
+    let oc = window._lastOc;
+    if(/m[aá]s formal/i.test(txt)){ if(oc==='casual')oc='formal'; else if(oc==='cena_in')oc='cena_el'; }
+    else if(/m[aá]s c[oó]modo|casual/i.test(txt)){ if(oc==='formal')oc='casual'; else if(oc==='cena_el')oc='cena_in'; }
+    window._lastOc = oc;
+    const nomRaw=(perfil?.nombre||window._nom||'').split(' ')[0];
+    const nom=nomRaw?nomRaw.charAt(0).toUpperCase()+nomRaw.slice(1).toLowerCase():'';
+    const t=clima?.t||20; const ciudad=clima?.c||'Madrid';
+    const msgs={formal:'Aquí una opción más formal.',casual:'Algo más cómodo y relajado.',cena_el:'Una versión más elegante.',cena_in:'Algo más informal para la cena.',noche:'Más salida de noche.',evento:'Para el evento, más arreglado.'};
+    addMsg('ai', msgs[oc]||'Aquí otra opción.');
+    setTimeout(()=>mostrarOutfit(oc, window._lastTxt), 300);
+    return;
+  }
   const oc = _detectarOcasion(txt);
   const nomRaw=(perfil?.nombre||window._nom||'').split(' ')[0];
   const nom=nomRaw?nomRaw.charAt(0).toUpperCase()+nomRaw.slice(1).toLowerCase():'';
