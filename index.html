@@ -2225,6 +2225,39 @@ window.addEventListener('load',()=>{
 });
 
 
+// Funciones de utilidad faltantes
+function limpiar(t){
+  if(!t) return '';
+  return t.replace(/[✨👗🎨🌤️🎯🔄⚠️☀️🌧️⛅☁️🏢🍽️🥂🎉✈️🌙🤍🖤👑🌿]/g,'')
+    .replace(/\*\*(.*?)\*\*/g,'$1')
+    .replace(/\n+/g,'. ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function toggleMic(){
+  // Text-to-speech toggle — funcionalidad opcional
+  if(window.speechSynthesis?.speaking){
+    window.speechSynthesis.cancel();
+  }
+}
+
+function selSug(txt){
+  // Seleccionar sugerencia — llamar a send con el texto
+  const inp = document.getElementById('ci');
+  if(inp){ inp.value = txt; send(); }
+}
+
+function selCiudad(ciudad){
+  // Seleccionar ciudad del modal
+  const ciudadKey = ciudad.toLowerCase();
+  if(CIUDADES[ciudadKey]){
+    setClima(CIUDADES[ciudadKey]);
+  }
+  cerrarCiudad();
+}
+
+
 // Text-to-speech — no-op si no hay soporte
 function hablar(txt){
   if(!txt||typeof txt!=='string') return;
