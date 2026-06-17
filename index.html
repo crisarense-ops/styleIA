@@ -1859,7 +1859,7 @@ async function proc(txt){
   else if(/merienda|por\s*la\s*tarde|tarde/i.test(txt)) horaDelPlan = 17;
   else if(/cen[ao]|cenar|por\s*la\s*noche/i.test(txt)) horaDelPlan = 21;
   else if(/noche|nocturna|discoteca|copas|after/i.test(txt)) horaDelPlan = 23;
-  else if(/trabajo|trabaj|oficina|reuni[oó]n|jefe/i.test(txt)) horaDelPlan = 10;
+  else if(/trabajo|trabaj|oficina|reuni[oó]n|jefe/i.test(txt)) horaDelPlan = null; // media del día
   // Si no se especifica, usar hora actual
   if(!horaDelPlan) horaDelPlan = new Date().getHours();
 
