@@ -1606,7 +1606,13 @@ function outfitD(txt, ctx){
     ],
   };
 
-  const OT={formal:'una reunión',casual:'ocio',noche:'una salida nocturna',cena_el:'una cena especial',cena_in:'una cena',deporte:'deporte',viaje:'un viaje'}[oc]||'tu plan';
+  const _ctx=ctx||window._lastTxt||txt||'';
+  const _tc=_ctx.toLowerCase();
+  const _esComida=/comida|comer|como con|almuerzo|mediod[ií]a/i.test(_ctx);
+  const _esJefe=/jef[ae]/i.test(_ctx);
+  const _esCenaJefe=/cena.*jef[ae]|jef[ae].*cena/i.test(_ctx);
+  const titFormal=_esComida?'una comida':_esJefe?'una comida con tu jefe':_esCenaJefe?'una cena de trabajo':'trabajo';
+  const OT={formal:titFormal,casual:'ocio',noche:'una salida nocturna',cena_el:'una cena especial',cena_in:'una cena',deporte:'deporte',viaje:'un viaje'}[oc]||'tu plan';
   
   // Mensaje de colores personalizado con tendencias
   const msgColores = `Tu paleta: ${c1} y ${c2}. Este otoño triunfa el ${colorTendencia} — perfecto para tu tono de piel.`;
