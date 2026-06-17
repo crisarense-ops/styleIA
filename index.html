@@ -909,59 +909,24 @@ const CIUDADES={
 
 // Obtener temperatura real de OpenWeatherMap (gratis, sin key)
 async function fetchClima(ciudad, base, diaIdx=0){
-  // Open-Meteo: gratuita, sin key, muy fiable, da previsión horaria real
   const lat = base.lat;
   const lon = base.lon;
-
-  // Si no tenemos coordenadas, usar wttr.in como fallback
   if(!lat||!lon) return fetchClimaWttr(ciudad, base, diaIdx);
 
+  // Usar proxy propio /api/weather (llama a Open-Meteo desde Vercel, sin CORS)
   try{
-    const hoy = new Date();
-    const fechaHoy = hoy.toISOString().split('T')[0];
-    // Calcular fecha objetivo
-    const fechaObj = new Date(hoy);
-    fechaObj.setDate(hoy.getDate() + diaIdx);
-    const fechaStr = fechaObj.toISOString().split('T')[0];
-
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation_probability,weathercode&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FMadrid&forecast_days=7`;
-
-    const r = await fetch(url);
-    if(!r.ok) throw new Error('open-meteo error');
+    const r = await fetch(`/api/weather?lat=${lat}&lon=${lon}&days=${diaIdx}`);
+    if(!r.ok) throw new Error('weather proxy error');
     const d = await r.json();
-
-    let t, ll=false;
-
-    if(diaIdx===0){
-      // Temperatura actual = hora más cercana
-      const ahora = hoy.getHours();
-      const horaIdx = d.hourly.time.findIndex(t=>new Date(t).getDate()===hoy.getDate() && new Date(t).getHours()>=ahora);
-      const idx = horaIdx>=0 ? horaIdx : 0;
-      t = Math.round(d.hourly.temperature_2m[idx]);
-      ll = (d.hourly.precipitation_probability[idx]||0) > 40;
-    } else {
-      // Día futuro: media entre max y min
-      const dayIdx = d.daily.time.findIndex(f=>f===fechaStr);
-      if(dayIdx>=0){
-        const tMax = d.daily.temperature_2m_max[dayIdx];
-        const tMin = d.daily.temperature_2m_min[dayIdx];
-        t = Math.round((tMax+tMin)/2);
-        ll = (d.daily.precipitation_probability_max[dayIdx]||0) > 40;
-      } else {
-        t = base.t;
-        ll = base.ll;
-      }
-    }
-
-    const cond = t>=30?'muy caluroso':t>=25?'caluroso':t>=20?'templado':t>=12?'fresco':'frío';
-    const i = ll?'🌧️':t>=28?'☀️':t>=18?'⛅':'☁️';
-    const cuando = diaIdx===0?'hoy':diaIdx===1?'mañana':'próximamente';
-    console.log(`[Flair clima] ${base.c} ${cuando}: ${t}°C, lluvia:${ll}`);
-    return {...base, t, cond, i, ll, cuando};
+    if(d.error) throw new Error(d.error);
+    const i = d.ll?'🌧️':d.t>=28?'☀️':d.t>=18?'⛅':'☁️';
+    console.log(`[Flair] ${base.c} ${d.cuando}: ${d.t}°C`);
+    return {...base, t:d.t, cond:d.cond, i, ll:d.ll, cuando:d.cuando};
   }catch(e){
-    console.log('[Flair clima] Open-Meteo falló, usando wttr.in:', e.message);
+    console.log('[Flair] proxy clima falló, usando wttr.in:', e.message);
     return fetchClimaWttr(ciudad, base, diaIdx);
   }
+
 }
 
 // Fallback: wttr.in
