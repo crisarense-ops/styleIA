@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>StyleAI · Admin</title>
+<title>Flair · Admin</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#0a0a0a;color:#e0e0e0;font-family:'Inter',-apple-system,sans-serif;min-height:100vh;}
@@ -80,7 +80,7 @@ tr:hover td{background:#0e0e0e;}
 <!-- LOGIN -->
 <div class="login-wrap" id="loginWrap">
   <div class="login-box">
-    <div class="login-logo">StyleAI</div>
+    <div class="login-logo">Flair</div>
     <div class="login-title">Panel de administración</div>
     <div class="login-sub">Acceso restringido</div>
     <input class="login-input" type="password" id="pwd" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
@@ -104,7 +104,7 @@ tr:hover td{background:#0e0e0e;}
 </div>
 
 <script>
-const PASS = 'styleai2025';
+const PASS = 'flair2025';
 const PRICE = 5.99;
 
 function doLogin(){
@@ -280,7 +280,7 @@ function exportCSV(){
   const csv = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
-  a.download='styleai_usuarios_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.download='flair_usuarios_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
 }
 </script>
