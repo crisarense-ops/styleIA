@@ -1771,18 +1771,22 @@ Respuesta: "29°C esta noche — ideal para un vestido fresquito. Te propongo:
 async function proc(txt){
   if(_isTyping) return;
 
-  // ── 1. SIN CLIMA — detectar ciudad o pedir ────────────────
+  const t = txt.toLowerCase();
+
+  // ── 1. SIN CLIMA — detectar ciudad en el mensaje o pedir ──
   if(!clima){
-    const t = txt.toLowerCase();
     const k = Object.keys(CIUDADES).find(c=>t.includes(c));
     if(k){
-      await setClima(CIUDADES[k]);
-      const msgParaAI = window._pendingMsg || txt;
+      const base = CIUDADES[k];
+      const climaNuevo = await fetchClima(base.c, base, 0);
+      clima = {...climaNuevo, cuando:'hoy'};
+      _actualizarUIClima(clima);
+      const msg = window._pendingMsg || txt;
       window._pendingMsg = null;
-      window._lastTxt = msgParaAI;
-      if(!_chatHistory.find(m=>m.content===msgParaAI))
-        _chatHistory.push({role:'user', content: msgParaAI});
-      await _callAI(msgParaAI);
+      window._lastTxt = msg;
+      if(!_chatHistory.find(m=>m.content===msg))
+        _chatHistory.push({role:'user', content: msg});
+      await _callAI(msg);
     } else {
       window._pendingMsg = txt;
       const nomR=(perfil?.nombre||window._nom||'').split(' ')[0];
@@ -1794,48 +1798,39 @@ async function proc(txt){
   }
 
   // ── 2. TEMPERATURA MENCIONADA → sobreescribir ─────────────
-  const tempM = txt.match(/(\d{1,2})\s*(?:°|º|grad[oa]s?|gradis|graus)/i)
-             || txt.match(/(?:hace|estamos?\s+a|tenemos|habra|habra|van a ser)\s+(\d{1,2})/i)
-             || txt.match(/(\d{1,2})\s*grados/i);
+  const tempM = txt.match(/(\d{1,2})\s*(?:°|º|grad[oa]s?|gradis)/i)
+             || txt.match(/(?:hace|estamos?\s+a|tenemos|van a ser)\s+(\d{1,2})/i);
   if(tempM){
-    const tv=parseInt(tempM[1]||tempM[2]||tempM[3]);
+    const tv = parseInt(tempM[1]||tempM[2]);
     if(tv>=5&&tv<=50){
-      clima={...clima,t:tv,cond:tv>=30?'muy caluroso':tv>=25?'caluroso':tv>=20?'templado':tv>=12?'fresco':'frío'};
-      setClima(clima);
+      clima = {...clima, t:tv, cond:tv>=30?'muy caluroso':tv>=25?'caluroso':tv>=20?'templado':tv>=12?'fresco':'frío'};
+      _actualizarUIClima(clima);
     }
   }
 
-  // ── 3. FECHA/HORA DEL PLAN ────────────────────────────────
-  let diaIdx=0;
+  // ── 3. DETECTAR CUÁNDO Y DÓNDE ────────────────────────────
   const esManana = /\bma[ñn]ana\b/i.test(txt);
   const esPasado = /pasado\s*ma[ñn]ana/i.test(txt);
   const esSemana = /semana\s*(que\s*viene|proxima|siguiente)|proxima\s*semana/i.test(txt);
-  if(esManana) diaIdx=1;
-  else if(esPasado) diaIdx=2;
-  else if(esSemana) diaIdx=2;
+  const diaIdx = esPasado||esSemana ? 2 : esManana ? 1 : 0;
 
-  // ── 4. CIUDAD DESTINO EN EL MENSAJE ──────────────────────
-  const ciudadesKeys=Object.keys(CIUDADES);
-  const ciudadDestino=ciudadesKeys.find(k=>
-    txt.toLowerCase().includes(k) && k!==(clima?.c||'').toLowerCase()
+  const ciudadDestino = Object.keys(CIUDADES).find(k=>
+    t.includes(k) && k !== (clima?.c||'').toLowerCase()
   );
 
-  if(ciudadDestino||diaIdx>0){
-    const base=ciudadDestino?CIUDADES[ciudadDestino]:(clima||CIUDADES.madrid);
+  // Si hay fecha futura o ciudad destino → obtener clima real
+  if(diaIdx>0 || ciudadDestino){
+    const base = ciudadDestino ? CIUDADES[ciudadDestino] : clima;
     try{
-      const climaNuevo=await fetchClima(base.c,base,diaIdx);
-      clima={...climaNuevo, cuando:diaIdx===0?'hoy':diaIdx===1?'mañana':'próximamente'};
-      _actualizarUIClima(clima); // solo actualizar UI, no llamar setClima
-    }catch(e){
-      // Si falla, al menos marcar el cuándo
-      if(esManana) clima={...clima, cuando:'mañana'};
-    }
-  } else if(esManana && clima){
-    clima={...clima, cuando:'mañana'};
+      const nuevo = await fetchClima(base.c, base, diaIdx);
+      const cuando = diaIdx===0?'hoy': diaIdx===1?'mañana':'próximamente';
+      clima = {...nuevo, cuando};
+      _actualizarUIClima(clima);
+    }catch(e){ if(esManana) clima={...clima,cuando:'mañana'}; }
   }
 
-  // ── 5. PROCESAR CON IA ────────────────────────────────────
-  window._lastTxt=txt;
+  // ── 4. PASAR TODO A CLAUDE ────────────────────────────────
+  window._lastTxt = txt;
   _chatHistory.push({role:'user', content: txt});
   await _callAI(txt);
 }
