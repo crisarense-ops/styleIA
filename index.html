@@ -603,7 +603,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
         <div><div class="st-n">2 min</div><div class="st-l">Primer look</div></div>
         <div><div class="st-n">24/7</div><div class="st-l">Tu estilista</div></div>
       </div>
-      <button class="btn-planes" onclick="abrirPlanes()">💎 Ver planes</button>
+      <button class="btn-planes" onclick="abrirPlanes()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="margin-right:5px;vertical-align:-1px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Ver planes</button>
     </div>
   </div>
 </div>
@@ -782,7 +782,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
     <div class="c-input">
       <div class="vs" id="vs"></div>
       <div class="i-row">
-        <button class="mic-btn" id="mic" onclick="toggleMic()">🎙️</button>
+        <button class="mic-btn" id="mic" onclick="toggleMic()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
         <div class="i-wrap">
           <textarea id="ci" placeholder="Cuéntame tu plan..." rows="1"
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"
@@ -798,7 +798,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
     <div class="ar-area">
       <div class="ar-hdr">
         <div class="ar-tit">Mi armario</div>
-        <button class="btn-add" onclick="document.getElementById('fi').click()">📸 Añadir</button>
+        <button class="btn-add" onclick="document.getElementById('fi').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:-2px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Añadir</button>
       </div>
       <input type="file" id="fi" accept="image/*" capture="environment" style="display:none" onchange="procesarFoto(this)">
       <div class="u-zone" onclick="document.getElementById('fi').click()">
