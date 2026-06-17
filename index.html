@@ -1707,11 +1707,11 @@ PERFIL DE ${nom||'LA USUARIA'}:
 
 CONTEXTO DE HOY:
 - Ciudad: ${ciudad}
-- Temperatura ${cuando==='hoy'?'ahora mismo':'para '+cuando}: ${temp}°C${ll}, ${cond}
+- El plan es para ${cuando}. Temperatura prevista ${cuando==='hoy'?'ahora':'para '+cuando}: ${temp}°C${ll}, ${cond}
 
 CÓMO HABLAR — MUY IMPORTANTE:
 - Menciona SIEMPRE la temperatura y ciudad de forma natural en tu respuesta
-- Adapta el tono al momento: si es para esta noche di "esta noche", si es mañana di "mañana"
+- Adapta el tono al momento: si cuando==='mañana' di SIEMPRE "mañana" y menciona la previsión de mañana (${temp}°C). Si es hoy di "hoy" o "esta noche".
 - Sé específica: "Con ${temp}°C esta noche en ${ciudad}..." o "Uf, ${temp} grados — esto pide..."
 - 1-2 frases máximo, luego el JSON. Nada de párrafos largos.
 - Tono de amiga, no de asistente: "te propongo", "me encanta para ti", "con este calor lo tienes claro"
@@ -1786,20 +1786,33 @@ async function proc(txt){
 
   // ── 3. FECHA/HORA DEL PLAN ────────────────────────────────
   let diaIdx=0;
-  if(/\bma[ñn]ana\b/i.test(txt)) diaIdx=1;
-  else if(/pasado\s*ma[ñn]ana/i.test(txt)) diaIdx=2;
-  else if(/semana\s*(que\s*viene|proxima|siguiente)|proxima\s*semana/i.test(txt)) diaIdx=2;
+  const esManana = /\bma[ñn]ana\b/i.test(txt);
+  const esPasado = /pasado\s*ma[ñn]ana/i.test(txt);
+  const esSemana = /semana\s*(que\s*viene|proxima|siguiente)|proxima\s*semana/i.test(txt);
+  if(esManana) diaIdx=1;
+  else if(esPasado) diaIdx=2;
+  else if(esSemana) diaIdx=2;
 
   // ── 4. CIUDAD DESTINO EN EL MENSAJE ──────────────────────
   const ciudadesKeys=Object.keys(CIUDADES);
   const ciudadDestino=ciudadesKeys.find(k=>
     txt.toLowerCase().includes(k) && k!==(clima?.c||'').toLowerCase()
   );
+
   if(ciudadDestino||diaIdx>0){
     const base=ciudadDestino?CIUDADES[ciudadDestino]:(clima||CIUDADES.madrid);
-    const climaNuevo=await fetchClima(base.c,base,diaIdx);
-    clima=climaNuevo;
-    setClima(clima);
+    try{
+      const climaNuevo=await fetchClima(base.c,base,diaIdx);
+      clima=climaNuevo;
+      // Marcar explícitamente cuándo es el plan
+      clima.cuando=diaIdx===0?'hoy':diaIdx===1?'mañana':'próximamente';
+      await setClima(clima);
+    }catch(e){ console.log('fetchClima falló:', e); }
+  }
+
+  // Si es mañana y no pudimos obtener previsión, al menos marcarlo
+  if(esManana && clima && clima.cuando!=='mañana'){
+    clima={...clima, cuando:'mañana'};
   }
 
   // ── 5. PROCESAR CON IA ────────────────────────────────────
