@@ -1698,18 +1698,21 @@ async function send(){if(busy)return;const ci=document.getElementById('ci');cons
 let _chatHistory = []; // historial de mensajes {role, content}
 let _isTyping = false;
 
-function buildSystem(){
+function buildSystem(ctxOverride={}){
   const est=ESTILOS[perfil?.estilo||'sofisticada']?.n||'sofisticada';
   const piel=perfil?.piel||'clara';
   const pelo=perfil?.pelo||'castaño';
   const cols=(perfil?.colores||[]).join(', ')||'neutros';
   const nomRaw=(perfil?.nombre||window._nom||'').split(' ')[0];
   const nom=nomRaw?nomRaw.charAt(0).toUpperCase()+nomRaw.slice(1).toLowerCase():'';
-  const ciudad=clima?.c||'Madrid';
-  const temp=clima?.t||20;
-  const cond=clima?.cond||'templado';
+  const ciudad=ciudadCtx;
+  const temp=tempCtx;
+  const cond=condCtx;
   const ll=clima?.ll?' y además llueve':'';
-  const cuando=clima?.cuando||'hoy';
+  const cuando=ctxOverride.cuando||clima?.cuando||'hoy';
+  const tempCtx=ctxOverride.temp||clima?.t||20;
+  const condCtx=ctxOverride.cond||clima?.cond||'templado';
+  const ciudadCtx=ctxOverride.ciudad||clima?.c||'Madrid';
 
   return `Eres Flair, la estilista personal de ${nom||'la usuaria'}. Hablas como una amiga íntima con mucho gusto — cercana, directa, divertida. Conoces su estilo y lo que le sienta bien.
 
@@ -1832,10 +1835,17 @@ async function proc(txt){
   // ── 4. PASAR TODO A CLAUDE ────────────────────────────────
   window._lastTxt = txt;
   _chatHistory.push({role:'user', content: txt});
-  await _callAI(txt);
+  // Pasar contexto actual explícitamente para que Claude tenga la temperatura correcta
+  const _ctxNow = {
+    cuando: clima?.cuando||'hoy',
+    temp: clima?.t||20,
+    cond: clima?.cond||'templado',
+    ciudad: clima?.c||'Madrid'
+  };
+  await _callAI(txt, _ctxNow);
 }
 
-async function _callAI(txt){
+async function _callAI(txt, ctxOverride={}){
   _isTyping = true;
   addTyping();
 
@@ -1844,7 +1854,7 @@ async function _callAI(txt){
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        system: buildSystem(),
+        system: buildSystem(ctxOverride),
         messages: _chatHistory.slice(-10) // últimos 10 mensajes para contexto
       })
     });
