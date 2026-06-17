@@ -1910,51 +1910,58 @@ async function _callAI(txt, ctxOverride={}){
 }
 
 function _detectarOcasion(txt){
-  // Normalizar: quitar acentos, pasar a minúsculas, colapsar erratas simples
-  const t = txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/(.)(\1{1,})/g,'$1$2') // colapsar letras repetidas (trrabajar→trabaJar)
-    .replace(/rr/g,'r'); // trrabajar→trabaJar
+  // Normalizar y limpiar erratas comunes
+  const t = txt.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/(.)(\1{2,})/g,'$1') // trrrr→tr
+    .replace(/([bcdfghjklmnpqrstvwxyz])([bcdfghjklmnpqrstvwxyz])\1/g,'$1$2'); // consonantes duplicadas
+
+  // Función de similitud aproximada — detecta erratas como "trbajar","trabajr","tbaajar"
+  const parecido = (texto, patron) => {
+    // Verificar si al menos el 70% de los caracteres del patrón están en el texto en orden
+    let pi=0, ti=0, matches=0;
+    while(pi<patron.length && ti<texto.length){
+      if(patron[pi]===texto[ti]){ matches++; pi++; }
+      ti++;
+    }
+    return matches >= Math.ceil(patron.length*0.7);
+  };
+
+  // Trabajo — con erratas (trbajar, trabajr, trabjar, etc)
+  if(['trabaj','ofici','reuni','entrevist','presentaci','negoci','meeting','jef'].some(k=>t.includes(k))) return 'formal';
+  if(parecido(t,'trabajar')||parecido(t,'trabajo')||parecido(t,'oficina')) return 'formal';
 
   // Eventos
-  if(['bautizo','bautis','comunion','boda','ceremonia','graduacion','gala','inauguracion','acto'].some(k=>t.includes(k))) return 'evento';
-  if(t.includes('fiesta')) return 'evento';
-  if(t.includes('cumple')) return 'evento';
-
-  // Trabajo — muy amplio para capturar erratas
-  if(['trabaj','ofici','reuni','entrevist','presentaci','cliente','jef','compañer','coleg',
-      'meeting','work','labor','profession','negoci'].some(k=>t.includes(k))) return 'formal';
+  if(['bautiz','comunion','boda','ceremonia','graduac','gala','inaugur'].some(k=>t.includes(k))) return 'evento';
+  if(t.includes('fiesta')||t.includes('cumple')) return 'evento';
 
   // Noche
-  if(['discoteca','club','copas','after','nocturna','boliche'].some(k=>t.includes(k))
+  if(['discoteca','club','copas','after','nocturna'].some(k=>t.includes(k))
      ||(t.includes('noche')&&!t.includes('cena')&&!t.includes('buenas'))) return 'noche';
 
   // Cena
-  if(t.includes('cen')||t.includes('restaur')){
+  if(t.includes('cen')||t.includes('cenar')||t.includes('restaur')){
     return ['elegant','especial','romantica','aniversario'].some(k=>t.includes(k))
       ?'cena_el':'cena_in';
   }
 
-  // Comida informal
-  if(t.includes('comi')||t.includes('almuerz')||t.includes('como con')) return 'cena_in';
+  // Comida
+  if(t.includes('comid')||t.includes('almuerz')||t.includes('como con')) return 'cena_in';
 
   // Deporte
-  if(['gym','yoga','runn','deport','entreno','pilates','ejercici','nataci','fitnes'].some(k=>t.includes(k))) return 'deporte';
+  if(['gym','yoga','runn','deport','entreno','pilates','ejercic','fitnes'].some(k=>t.includes(k))) return 'deporte';
 
   // Viaje
-  if(['viaj','aeropuerto','escapada','vacacion','hotel','maleta'].some(k=>t.includes(k))) return 'viaje';
+  if(['viaj','aeropuerto','escapad','vacacion','hotel','maleta'].some(k=>t.includes(k))) return 'viaje';
 
   // Confirmaciones
-  if(['venga','dale','ok','vale','perfecto','muestra','enseña','si','claro','anda'].some(k=>t===k||(t.startsWith(k)&&t.length<12))) return window._lastOc||'casual';
+  if(['venga','dale','vale','ok','perfecto','muestra'].some(k=>t===k||(t.startsWith(k)&&t.length<10))) return window._lastOc||'casual';
 
-  // Cita romántica
-  if(['chico','chica','gusta','cita','romantica','novio','novia'].some(k=>t.includes(k))) return 'cena_el';
+  // Cita/romance
+  if(['chico','chica','gusta','cita','novio','novia'].some(k=>t.includes(k))) return 'cena_el';
 
   // Casual
-  if(['ocio','amig','paseo','compras','tarde','finde','quedada','parque','terraza','playa',
-      'familia','casa','domingo','sabado','semana'].some(k=>t.includes(k))) return 'casual';
-
-  // Si menciona ir a algún sitio → casual por defecto
-  if(t.includes('ir a')||t.includes('salir')||t.includes('quedar')) return 'casual';
+  if(['ocio','amig','paseo','compras','finde','quedada','parque','terraza','playa','familia','casa'].some(k=>t.includes(k))) return 'casual';
 
   return null;
 }
@@ -1970,15 +1977,17 @@ function _fallbackLocal(txt){
 
   if(oc){
     window._lastOc=oc;
+    const cuando=clima?.cuando||'hoy';
+    const cuandoStr=cuando==='hoy'?'Hoy':cuando==='mañana'?'Mañana':'Próximamente';
     const f={
-      evento:`${mucho?'Con '+t+'°C, un look de evento fresco y elegante':'Un look especial para la ocasión'} — aquí mi propuesta${nom?' para ti '+nom:''}.`,
-      formal:`${calor?'Con '+t+'°C, look profesional y fresco — sin agobios':'Look profesional para triunfar'}${nom?' '+nom:''}.`,
-      noche:`${t}°C esta noche en ${ciudad} — ${calor?'perfecto para un look fresquito y con mucho estilo':'noche con estilo'}.`,
-      cena_in:`Con ${t}°C${calor?' esta noche en '+ciudad:''}, ${calor?'vestido fresquito y sandalias — lo tienes clarísimo':'algo chic y cómodo para cenar'}.`,
-      cena_el:`${t}°C en ${ciudad}${calor?' — noche perfecta para un vestido de tirantes elegante':''}. Una cena especial merece algo especial.`,
-      deporte:`Look sporty para entrenar${calor?' — con '+t+'°C, cuanto más fresco mejor':''}.`,
-      viaje:`Lista para el viaje${calor?' — ligero, fresco y con estilo':''}.`,
-      casual:`${t}°C en ${ciudad} — ${calor?'vestido, sandalias y lista':'un look relajado y favorecedor'}.`
+      evento:`${cuandoStr} en ${ciudad} con ${t}°C — ${mucho?'look de evento fresco y elegante':'un look especial para la ocasión'}.`,
+      formal:`${cuandoStr} en ${ciudad}, ${t}°C — ${calor?'look profesional y fresco, sin agobios':'look profesional para triunfar'}${nom?' '+nom:''}.`,
+      noche:`${cuandoStr} en ${ciudad}, ${t}°C — ${calor?'noche perfecta para un look fresquito y con estilo':'noche con mucho estilo'}.`,
+      cena_in:`${cuandoStr} en ${ciudad}, ${t}°C — ${calor?'vestido fresquito y sandalias, lo tienes clarísimo':'algo chic y cómodo para cenar'}.`,
+      cena_el:`${cuandoStr} en ${ciudad}, ${t}°C${calor?' — noche perfecta para un vestido de tirantes elegante':''}. Una cena especial merece algo especial.`,
+      deporte:`${cuandoStr} en ${ciudad}, ${t}°C — ${calor?'cuanto más fresco mejor para entrenar':'look sporty y favorecedor'}.`,
+      viaje:`${cuandoStr} — lista para el viaje${calor?' con algo ligero y fresco':''}.`,
+      casual:`${cuandoStr} en ${ciudad}, ${t}°C — ${calor?'vestido, sandalias y lista':'un look relajado y favorecedor'}.`
     };
     addMsg('ai', f[oc]||'Aquí tienes mi propuesta.');
     setTimeout(()=>mostrarOutfit(oc,txt),350);
