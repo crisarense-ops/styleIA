@@ -1,4 +1,4 @@
-const CACHE = 'styleai-v1';
+const CACHE = 'flair-v2';
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', e => {
@@ -14,14 +14,15 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Ignorar chrome-extension y otros esquemas no-http
+  if(!e.request.url.startsWith('http')) return;
   if(e.request.method !== 'GET') return;
+  // No cachear API calls
+  if(e.request.url.includes('/api/')) return;
+  
   e.respondWith(
-    fetch(e.request)
-      .then(r => {
-        const clone = r.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
-        return r;
-      })
-      .catch(() => caches.match(e.request))
+    caches.match(e.request).then(cached => {
+      return cached || fetch(e.request).catch(() => cached);
+    })
   );
 });
