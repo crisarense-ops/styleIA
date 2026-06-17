@@ -1764,6 +1764,29 @@ async function proc(txt){
 
   const t = txt.toLowerCase();
 
+  // ── 0. REFINAMIENTO DEL OUTFIT ANTERIOR ───────────────────
+  // Si el usuario pide variación del look anterior, usar contexto
+  const esRefinamiento = /m[aá]s formal|m[aá]s c[oó]modo|m[aá]s casual|otra opci[oó]n|algo diferente|no me convence|cambia/i.test(txt);
+  const esConfirmacion = /^(venga|dale|ok|vale|si|s[íi]|perfecto|genial|muestra|enseña|me gusta|ese)$/i.test(txt.trim());
+
+  if((esRefinamiento || esConfirmacion) && window._lastOc && clima){
+    // Modificar el contexto según el refinamiento
+    let ocMod = window._lastOc;
+    if(/m[aá]s formal/i.test(txt)){
+      if(ocMod==='casual') ocMod='formal';
+      else if(ocMod==='cena_in') ocMod='cena_el';
+    } else if(/m[aá]s c[oó]modo|m[aá]s casual/i.test(txt)){
+      if(ocMod==='formal') ocMod='casual';
+      else if(ocMod==='cena_el') ocMod='cena_in';
+    }
+    window._lastOc = ocMod;
+    window._lastTxt = txt;
+    _chatHistory.push({role:'user', content: txt});
+    const _ctx = {cuando:clima?.cuando||'hoy', temp:clima?.t||20, cond:clima?.cond||'templado', ciudad:clima?.c||'Madrid', horaDelPlan:clima?.horaDelPlan};
+    await _callAI(txt, _ctx);
+    return;
+  }
+
   // ── 1. SIN CLIMA — detectar ciudad en el mensaje o pedir ──
   if(!clima){
     const k = Object.keys(CIUDADES).find(c=>t.includes(c));
