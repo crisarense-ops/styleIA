@@ -1745,6 +1745,7 @@ async function proc(txt){
       // Usar el pending si existe (plan que escribió antes de la ciudad)
       const msgParaAI = window._pendingMsg || txt;
       window._pendingMsg = null;
+      window._lastTxt = msgParaAI; // guardar el mensaje REAL, no "madrid"
       // Añadir al historial de forma limpia
       if(!_chatHistory.find(m=>m.content===msgParaAI))
         _chatHistory.push({role:'user', content: msgParaAI});
