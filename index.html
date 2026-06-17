@@ -1540,7 +1540,7 @@ function outfitD(txt, ctx){
       {n:`Blazer estructurado en ${colorTendencia}`,h:'#1B2A4A',r:'La pieza tendencia de temporada'},
       {n:`${sugerirPantalon(est)} en ${c1}`,h:'#C9B99A',r:'Corte favorecedor'},
       {n:'Blusa de seda en blanco roto',h:'#FAF8F5',r:'Base que potencia tu tono'},
-      {n:est.cal,h:'#2C1810',r:'Tu calzado habitual'},
+      {n:calzadoTemp,h:'#2C1810',r:'Tu calzado habitual'},
     ],
 
     casual: mv ? [
@@ -1558,7 +1558,7 @@ function outfitD(txt, ctx){
       {n:prendaTend,h:'#C9B99A',r:'La prenda más buscada de esta temporada'},
       {n:`${sugerirPantalon(est)} en ${c1}`,h:'#C9B99A',r:'Favorecedor y actual'},
       ...(fc||fr?[{n:est.ext,h:'#C9B99A',r:`Con ${c.t}°C`}]:[]),
-      {n:est.cal,h:'#8B6914',r:'Tu calzado habitual'},
+      {n:calzadoTemp,h:'#8B6914',r:'Tu calzado habitual'},
     ].filter(p=>p.n),
 
     noche: mv ? [
@@ -1570,11 +1570,11 @@ function outfitD(txt, ctx){
       // 24-28°C: falda + top o vestido midi
       {n:`Falda midi en ${colorTendencia}`,h:'#1A1A1A',r:'Elegante y fresca para la noche'},
       {n:`Top en ${c1} o dorado`,h:'#FAF8F5',r:'Color que brilla de noche'},
-      {n:est.cal,h:'#C9A87C',r:'El calzado que transforma el look'},
+      {n:calzadoTemp,h:'#C9A87C',r:'El calzado que transforma el look'},
     ] : [
       {n:`${est.pan} fluido en ${c2}`,h:'#1A1A1A',r:'Wide leg de noche — lo más actual'},
       {n:`Top en ${colorTendencia} o dorado`,h:'#FAF8F5',r:'Color tendencia'},
-      {n:est.cal,h:'#C9A87C',r:'El calzado que transforma el look'},
+      {n:calzadoTemp,h:'#C9A87C',r:'El calzado que transforma el look'},
       ...(fr||fc?[{n:est.ext,h:'#1A1A1A',r:`Con ${c.t}°C de noche`}]:[]),
     ],
 
@@ -1584,11 +1584,11 @@ function outfitD(txt, ctx){
       {n:`Pendientes llamativos`,h:'#D4AF6A',r:'El accesorio protagonista cuando el look es simple'},
     ] : ca ? [
       {n:`Vestido midi en ${colorTendencia}`,h:'#1A1A1A',r:'El color de temporada en su mejor versión'},
-      {n:est.cal,h:'#C9A87C',r:'Eleva sin esfuerzo'},
+      {n:calzadoTemp,h:'#C9A87C',r:'Eleva sin esfuerzo'},
       {n:`Bolso de mano pequeño`,h:'#8B6914',r:'El complemento que da el toque final'},
     ] : [
       {n:`Vestido midi en ${colorTendencia}`,h:'#1A1A1A',r:'El color de temporada en su mejor versión'},
-      {n:est.cal,h:'#C9A87C',r:'Eleva sin esfuerzo'},
+      {n:calzadoTemp,h:'#C9A87C',r:'Eleva sin esfuerzo'},
       {n:`Cinturón ancho en ${c2}`,h:'#8B6914',r:'Define la silueta'},
       ...(c.t<18?[{n:est.ext,h:'#1B2A4A',r:`Con ${c.t}°C`}]:[]),
     ],
@@ -1598,7 +1598,7 @@ function outfitD(txt, ctx){
       {n:`Sandalias planas en nude`,h:'#C9A87C',r:'Cómodo y estiloso'},
     ] : ca ? [
       {n:`Vestido casual en ${c1}`,h:'#4A6EA8',r:'Smart casual con color de temporada'},
-      {n:est.cal,h:'#2C1810',r:'Define el nivel del look'},
+      {n:calzadoTemp,h:'#2C1810',r:'Define el nivel del look'},
     ] : [
       {n:fc||fr?`${est.pan} en ${colorTendencia}`:`Vestido casual en ${c1}`,h:'#4A6EA8',r:'Smart casual con color de temporada'},
       ...(fc||fr?[{n:est.ext,h:'#1A1A1A',r:'Sube el nivel del look'}]:[]),
@@ -1611,7 +1611,7 @@ function outfitD(txt, ctx){
       {n:`Bolso de mano en ${c2}`,h:'#8B6914',r:'El complemento que da el toque especial'},
     ] : [
       {n:`Vestido de fiesta en ${colorTendencia}`,h:'#C8A2C8',r:'Elegante y especial para la ocasión'},
-      {n:est.cal,h:'#D4AF6A',r:'El calzado que eleva el look de evento'},
+      {n:calzadoTemp,h:'#D4AF6A',r:'El calzado que eleva el look de evento'},
       ...(c.t<18?[{n:est.ext,h:'#1B2A4A',r:'Para el desplazamiento'}]:[]),
     ],
 
@@ -1715,72 +1715,47 @@ function buildSystem(ctxOverride={}){
   const cols=(perfil?.colores||[]).join(', ')||'neutros';
   const nomRaw=(perfil?.nombre||window._nom||'').split(' ')[0];
   const nom=nomRaw?nomRaw.charAt(0).toUpperCase()+nomRaw.slice(1).toLowerCase():'';
-  const ciudad=ciudadCtx;
-  const temp=tempCtx;
-  const cond=condCtx;
-  const hora=ctxOverride.horaDelPlan||clima?.horaDelPlan||null;
-  const horaStr=hora?`a las ${hora}h`:'';
-  const momentoStr=hora>=21?'de noche':hora>=18?'por la tarde-noche':hora>=14?'al mediodía':hora>=10?'por la mañana':'';
-  const ll=clima?.ll?' y además llueve':'';
   const cuando=ctxOverride.cuando||clima?.cuando||'hoy';
   const tempCtx=ctxOverride.temp||clima?.t||20;
   const condCtx=ctxOverride.cond||clima?.cond||'templado';
   const ciudadCtx=ctxOverride.ciudad||clima?.c||'Madrid';
+  const ciudad=ciudadCtx;
+  const temp=tempCtx;
+  const cond=condCtx;
+  const hora=ctxOverride.horaDelPlan||clima?.horaDelPlan||null;
+  const horaStr=hora?'a las '+hora+'h':'';
+  const momentoStr=hora>=21?'de noche':hora>=18?'por la tarde-noche':hora>=14?'al mediodía':hora>=10?'por la mañana':'';
+  const ll=clima?.ll?' y llueve':'';
 
-  return `Eres Flair, la estilista personal de ${nom||'la usuaria'}. Hablas como una amiga íntima con mucho gusto — cercana, directa, divertida. Conoces su estilo y lo que le sienta bien.
+  return `Eres Flair, la mejor amiga de ${nom||'la usuaria'} — y además tiene un gusto increíble para la moda. Hablas de forma natural, cálida, con humor. Como si le mandaras un WhatsApp a una amiga.
 
-PERFIL DE ${nom||'LA USUARIA'}:
-- Estilo: ${est}
-- Piel ${piel}, pelo ${pelo}
-- Colores que le favorecen: ${cols}
+SOBRE ${nom||'ELLA'}:
+Estilo ${est}, piel ${piel}, pelo ${pelo}. Le favorecen: ${cols}.
+Ahora mismo está en ${ciudad}. El plan es para ${cuando}${horaStr?' '+horaStr:''} ${momentoStr} — temperatura: ${temp}°C${ll}.
 
-CONTEXTO DE HOY:
-- Ciudad: ${ciudad}
-- El plan es para ${cuando} ${horaStr} ${momentoStr}. Temperatura a esa hora: ${temp}°C${ll}, ${cond}
+REGLA DE ORO DEL CALZADO — NUNCA LA ROMPAS:
+- Más de 25°C → SIEMPRE sandalias o zapato abierto. JAMÁS botas ni botines.
+- 18-25°C → zapato cerrado cómodo, mules, bailarinas. Sin botas gruesas.
+- Menos de 18°C → entonces sí, botines o botas.
+Con ${temp}°C, el calzado correcto es: ${temp>=25?'sandalias o zapato abierto':temp>=18?'zapato plano o mule':'botines o botas'}.
 
-CÓMO HABLAR — MUY IMPORTANTE:
-- Menciona SIEMPRE la temperatura y ciudad de forma natural en tu respuesta
-- Adapta el tono al momento: si cuando==='mañana' di SIEMPRE "mañana" y menciona la previsión de mañana (${temp}°C). Si es hoy di "hoy" o "esta noche".
-- Sé específica: "Con ${temp}°C esta noche en ${ciudad}..." o "Uf, ${temp} grados — esto pide..."
-- 1-2 frases máximo, luego el JSON. Nada de párrafos largos.
-- Tono de amiga, no de asistente: "te propongo", "me encanta para ti", "con este calor lo tienes claro"
-- Usa el nombre ${nom} con naturalidad, no en cada frase
+CÓMO RESPONDER:
+- Habla como en un WhatsApp: corto, directo, con personalidad. Nada de puntos con viñetas.
+- Menciona siempre la temperatura de forma natural: "Con ${temp}°C esta noche...", "Uf, ${temp} grados..."
+- Si el plan es para ${cuando==='mañana'?'MAÑANA':'hoy'}, dilo así de claro.
+- Si preguntan algo → responde como amiga. Si dan un plan → propón outfit.
+- Si falta info (destino de viaje, tipo de evento) → pregunta UNA cosa concreta.
 
-CÓMO RESPONDER — LEE ESTO BIEN:
+CUANDO PROPONGAS OUTFIT, incluye al final este JSON (sin markdown):
+{"ocasion":"ID","outfit":["prenda1","prenda2","prenda3"],"colores":"paleta","tip":"consejo corto y personal"}
 
-1. Si el usuario PREGUNTA algo (¿hace calor?, ¿qué temperatura hay?, ¿llueve?) → responde la pregunta de forma natural y directa, como una amiga. No propongas outfit a menos que también mencione un plan.
+Ocasiones: formal, casual, noche, cena_el, cena_in, viaje, deporte, evento
 
-2. Si el usuario dice su PLAN (ceno, voy a trabajar, tengo boda) → propón el outfit directamente con el JSON.
-
-3. Si mezcla pregunta + plan → responde la pregunta Y propón el outfit.
-
-FORMATO cuando propones outfit:
-[frase natural 1-2 líneas]
-{"ocasion":"ID","outfit":["prenda1","prenda2","prenda3"],"colores":"paleta","tip":"consejo"}
-
-IDs: formal, casual, noche, cena_el, cena_in, viaje, deporte, evento
-
-CLASIFICACIÓN:
-- formal: trabajo, reunión, jefe, cliente, comida/cena de trabajo
-- cena_in: cena informal con amigos, familia, pareja
-- cena_el: cena elegante, restaurante especial, aniversario
-- noche: discoteca, copas, after, salida nocturna
-- evento: boda, bautizo, comunión, fiesta, cumpleaños, graduación, gala
-- casual: ocio, paseo, compras, quedada, día normal
-- deporte: gym, yoga, running, entreno
-- viaje: aeropuerto, escapada, viaje
-
-EJEMPLOS:
-Usuario: "esta noche estamos a 29º?"
-Respuesta: "Sí Cris, esta noche en Madrid estarán sobre 29°C — una noche de verano perfecta. ¿Tienes algún plan?"
-
-Usuario: "ceno con amigos"
-Respuesta: "Con 29°C esta noche, perfecto para algo fresquito. Te propongo:
-{"ocasion":"cena_in","outfit":["Vestido de tirantes en terracota","Sandalias planas en nude"],"colores":"terracota y nude","tip":"Unos pendientes grandes y lista"}"
-
-Usuario: "esta noche estamos a 29º y ceno con amigas"
-Respuesta: "29°C esta noche — ideal para un vestido fresquito. Te propongo:
-{"ocasion":"cena_in","outfit":["Vestido camisero en beige","Sandalias planas doradas"],"colores":"beige y dorado","tip":"Con el calor que hace, cuanto más ligero mejor"}"`;
+EJEMPLOS DE CÓMO HABLAR (imita este tono):
+- "Uf, ${temp}°C esta noche — vestido y sandalias, sin pensarlo más 😎"
+- "Para trabajar con ${temp}°C mañana en ${ciudad}, te propongo algo profesional pero fresquito"
+- "¿Un bautizo? Genial! Con ${temp}°C necesitas algo especial pero cómodo"
+- "Para el gym nada de complicaciones — leggings, top y zapatillas"`
 }
 
 
