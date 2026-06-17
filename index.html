@@ -1608,10 +1608,9 @@ function outfitD(txt, ctx){
 
   const _ctx=ctx||window._lastTxt||txt||'';
   const _tc=_ctx.toLowerCase();
-  const _esJefe=/jef[ae]/i.test(_ctx);
-  const _esCena=/cena|cenar/i.test(_ctx);
-  const _esComida=/comida|comer|como con|almuerzo|mediod[ií]a/i.test(_ctx);
-  const titFormal=_esJefe&&_esCena?'una cena con tu jefe':_esJefe&&_esComida?'una comida con tu jefe':_esCena?'una cena':_esComida?'una comida':_esJefe?'una comida con tu jefe':'trabajo';
+  // Título = lo que el usuario dijo, simplificado
+  const _ctx_clean = _ctx.replace(/\b(tengo|voy a|me voy a|esta noche|mañana|hoy|un|una|con mis?|en|para|que|el|la|lo|y)\b/gi,'').replace(/\s+/g,' ').trim();
+  const titFormal = _ctx_clean.length>3 && _ctx_clean.length<40 ? _ctx_clean : 'trabajo';
   const OT={formal:titFormal,casual:'ocio',noche:'una salida nocturna',cena_el:'una cena especial',cena_in:'una cena',deporte:'deporte',viaje:'un viaje'}[oc]||'tu plan';
   
   // Mensaje de colores personalizado con tendencias
