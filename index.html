@@ -1483,6 +1483,16 @@ function outfitD(txt, ctx){
   const cf=perfil?.colores||est.col;
   const c=clima||{c:'tu ciudad',t:20,cond:'templado',ll:false};
   const fr=c.t<12,fc=c.t>=12&&c.t<18,ca=c.t>24;
+  // Calzado adaptado a temperatura — nunca botas con calor
+  // Temperatura nocturna estimada y calzado para cenas/noche
+  const tNoche = Math.max(c.t - 5, 10);
+  const calNoche = tNoche>=22 ? 'Sandalias de tacón en nude'
+    : tNoche>=15 ? 'Zapatos de tacón bajo en nude'
+    : 'Botines o tacón cerrado';
+  const calzadoTemp = c.t>=25 ? 'Sandalias de tacón bajo en nude'
+    : c.t>=18 ? 'Zapatos planos o tacón bajo en nude'
+    : c.t>=12 ? 'Botines o zapatos cerrados'
+    : 'Botas o botines';
   
   // Colores de tendencia + paleta personal mezclados
   const coloresTend = est.tendencia2025.colores;
@@ -1512,19 +1522,19 @@ function outfitD(txt, ctx){
       {n:`Blazer ligero en ${colorTendencia} — solo si hay AC`,h:'#1B2A4A',r:'Llévalo en el bolso por si acaso'},
       {n:`Blusa de seda en blanco roto`,h:'#FAF8F5',r:'Base perfecta que potencia tu tono de piel'},
       {n:`${sugerirPantalon(est)} en ${c1} de tela ligera`,h:'#C9B99A',r:'Favorecedor y transpirable'},
-      {n:est.cal,h:'#2C1810',r:'Tu calzado habitual'},
+      {n:calzadoTemp,h:'#C9A87C',r:c.t>=25?'Fresco y profesional con el calor':'Tu calzado habitual'},
     ] : fc ? [
       // 12-18°C: capas
       {n:`Blazer estructurado en ${colorTendencia}`,h:'#1B2A4A',r:'La pieza tendencia — hombreras y silueta marcada'},
       {n:`${sugerirPantalon(est)} en ${c1}`,h:'#C9B99A',r:'Corte que mejor te favorece'},
       {n:'Blusa de seda en blanco roto',h:'#FAF8F5',r:'Base que potencia tu tono de piel'},
-      {n:est.cal,h:'#2C1810',r:'Tu calzado habitual'},
+      {n:calzadoTemp,h:'#C9A87C',r:'Calzado adaptado a la temperatura'},
     ] : fr ? [
       // <12°C: abrigo
       {n:`Abrigo en ${colorTendencia}`,h:'#1B2A4A',r:'La prenda protagonista de esta temporada'},
       {n:`${sugerirPantalon(est)} en ${c1}`,h:'#C9B99A',r:'Corte que mejor te favorece'},
       {n:'Jersey de punto fino en blanco roto',h:'#FAF8F5',r:'Calor sin volumen'},
-      {n:est.cal,h:'#2C1810',r:'Cierra el look con clase'},
+      {n:calzadoTemp,h:'#C9A87C',r:'Cierra el look con clase'},
     ] : [
       // Templado 18-24°C
       {n:`Blazer estructurado en ${colorTendencia}`,h:'#1B2A4A',r:'La pieza tendencia de temporada'},
@@ -1592,7 +1602,7 @@ function outfitD(txt, ctx){
     ] : [
       {n:fc||fr?`${est.pan} en ${colorTendencia}`:`Vestido casual en ${c1}`,h:'#4A6EA8',r:'Smart casual con color de temporada'},
       ...(fc||fr?[{n:est.ext,h:'#1A1A1A',r:'Sube el nivel del look'}]:[]),
-      {n:est.cal,h:'#2C1810',r:'Define el nivel del look'},
+      {n:calNoche,h:'#C9A87C',r:'Calzado perfecto para la noche'},
     ],
 
     evento: mv ? [
@@ -1799,6 +1809,17 @@ async function proc(txt){
       if(!_chatHistory.find(m=>m.content===msg))
         _chatHistory.push({role:'user', content: msg});
       
+      // Para cenas/noche del pending, obtener temperatura nocturna
+      const msgEsCena = /cen[ao]|cenar|noche/i.test(msg);
+      if(msgEsCena && msgDiaIdx <= 1){
+        try{
+          const noche = await fetch(`/api/weather?lat=${base.lat}&lon=${base.lon}&days=${msgDiaIdx}&hour=21`);
+          if(noche.ok){
+            const nd = await noche.json();
+            if(nd.t) clima = {...clima, t: nd.t, cond: nd.cond};
+          }
+        }catch(e){}
+      }
       const ctxMsg = {cuando: cuandoMsg, temp: clima.t, cond: clima.cond, ciudad: clima.c};
       await _callAI(msg, ctxMsg);
     } else {
