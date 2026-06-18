@@ -1766,7 +1766,7 @@ async function proc(txt){
 
   // ── 0. REFINAMIENTO DEL OUTFIT ANTERIOR ───────────────────
   // Si el usuario pide variación del look anterior, usar contexto
-  const esRefinamiento = /m[aá]s formal|m[aá]s c[oó]modo|m[aá]s casual|otra opci[oó]n|algo diferente|no me convence|cambia/i.test(txt);
+  const esRefinamiento = /m[aá]s formal|m[aá]s c[oó]modo|m[aá]s casual|otra opci[oó]n|algo diferente|no me convence|cambia|bota|calor|fr[ií]o|pesan|pesado|corto|largo|no me gusta/i.test(txt);
   const esConfirmacion = /^(venga|dale|ok|vale|si|s[íi]|perfecto|genial|muestra|enseña|me gusta|ese)$/i.test(txt.trim());
 
   if((esRefinamiento || esConfirmacion) && window._lastOc && clima){
