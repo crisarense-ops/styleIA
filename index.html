@@ -1767,7 +1767,8 @@ async function proc(txt){
   // ── 0. REFINAMIENTO DEL OUTFIT ANTERIOR ───────────────────
   // Si el usuario pide variación del look anterior, usar contexto
   const esRefinamiento = /m[aá]s formal|m[aá]s c[oó]modo|m[aá]s casual|otra opci[oó]n|algo diferente|no me convence|cambia|bota|calor|fr[ií]o|pesan|pesado|corto|largo|no me gusta/i.test(txt);
-  const esConfirmacion = /^(venga|dale|ok|vale|si|s[íi]|perfecto|genial|muestra|enseña|me gusta|ese)$/i.test(txt.trim());
+  const esConfirmacion = /^(venga|dale|ok|vale|si|s[íi]|perfecto|genial|muestra|enseña|me gusta|ese)$/i.test(txt.trim())
+    || /ya te lo dije|ya te lo he dicho|te lo dije|como te dije|lo mismo|igual que antes/i.test(txt);
 
   if((esRefinamiento || esConfirmacion) && window._lastOc && clima){
     // Modificar el contexto según el refinamiento
@@ -1983,8 +1984,8 @@ function _detectarOcasion(txt){
   if(parecido(t,'trabajar')||parecido(t,'trabajo')||parecido(t,'oficina')) return 'formal';
 
   // Eventos
-  if(['bautiz','comunion','boda','ceremonia','graduac','gala','inaugur'].some(k=>t.includes(k))) return 'evento';
-  if(t.includes('fiesta')||t.includes('cumple')) return 'evento';
+  if(['bautiz','comunion','boda','ceremonia','graduac','gala','inaugur','festival','concierto','verbena','feria','rave','evento','acto'].some(k=>t.includes(k))) return 'evento';
+  if(t.includes('fiesta')||t.includes('cumple')||t.includes('sabado')||t.includes('domingo')) return 'evento';
 
   // Noche
   if(['discoteca','club','copas','after','nocturna'].some(k=>t.includes(k))
