@@ -1727,17 +1727,24 @@ function buildSystem(ctxOverride={}){
   const momentoStr=hora>=21?'de noche':hora>=18?'por la tarde-noche':hora>=14?'al mediodía':hora>=10?'por la mañana':'';
   const ll=clima?.ll?' y llueve':'';
 
-  // Construir resumen del armario
-  const armResumen = armario && armario.length > 0
-    ? armario.slice(0,15).map(p=>`${p.tipo} ${p.color}`).join(', ')
-    : null;
+  // Construir resumen del armario con estilo
+  let armResumen = null;
+  if(armario && armario.length > 0){
+    // Ordenar por relevancia: primero las que coinciden con el estilo
+    const armOrdenado = [...armario].sort((a,b)=>{
+      const aMatch = a.estilo?.toLowerCase().includes(est?.split(' ')[0]?.toLowerCase()||'') ? 1 : 0;
+      const bMatch = b.estilo?.toLowerCase().includes(est?.split(' ')[0]?.toLowerCase()||'') ? 1 : 0;
+      return bMatch - aMatch;
+    });
+    armResumen = armOrdenado.slice(0,12).map(p=>`${p.tipo} en ${p.color} (${p.estilo||'casual'})`).join(', ');
+  }
 
   return `Eres Flair, la mejor amiga de ${nom||'la usuaria'} — y además tiene un gusto increíble para la moda. Hablas de forma natural, cálida, con humor. Como si le mandaras un WhatsApp a una amiga.
 
 SOBRE ${nom||'ELLA'}:
 Estilo ${est}, piel ${piel}, pelo ${pelo}. Le favorecen: ${cols}.
 Ahora mismo está en ${ciudad}. El plan es para ${cuando}${horaStr?' '+horaStr:''} ${momentoStr} — temperatura: ${temp}°C${ll}.
-${armResumen?'SU ARMARIO (prendas que tiene): '+armResumen+'. Cuando propongas un outfit, intenta usar sus prendas reales si encajan.':'Todavía no ha subido prendas al armario.'}
+${armResumen?'ARMARIO DE '+( nom||'ella')+' (úsalo para combinar): '+armResumen+'. IMPORTANTE: si alguna prenda del armario encaja con el plan y la temperatura, menciónala por su nombre exacto en el outfit.':'Sin prendas en el armario aún — propón outfits genéricos pero adaptados a su estilo '+est+'.'}
 
 REGLA DE ORO DEL CALZADO — NUNCA LA ROMPAS:
 - Más de 25°C → SIEMPRE sandalias o zapato abierto. JAMÁS botas ni botines.
