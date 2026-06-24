@@ -1374,7 +1374,11 @@ function selPelo(k,el){
   if(el) el.classList.add('on');
   else { try{event.currentTarget.classList.add('on');}catch(e){} }
   window._pelo=k;
-  setTimeout(sigPaso, 350);
+  // Pelo es el último paso — llamar finOb directamente
+  setTimeout(()=>{
+    try{ finOb(); }
+    catch(e){ console.error('finOb error:',e); sigPaso(); }
+  }, 350);
 }
 
 
