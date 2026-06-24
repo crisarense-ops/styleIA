@@ -756,7 +756,7 @@ html,body{height:100%;font-family:"Inter",sans-serif;background:var(--bg);color:
     <button class="ob-skip" onclick="irApp()">Saltar</button>
   </div>
   <div class="ob-body" id="obbody"></div>
-  <div class="ob-foot"><button class="btn-back" id="bback" onclick="volverPaso()" style="display:none">← Volver</button><button class="btn-sig" id="bsig" onclick="sigPaso()">Continuar →</button></div>
+  <div class="ob-foot"><button class="btn-back" id="bback" onclick="volverPaso()" style="display:none">← Volver</button><button class="btn-sig" id="bsig" onclick="sigPaso()" ontouchend="event.preventDefault();sigPaso()">Continuar →</button></div>
 </div>
 
 <!-- ══ APP ══ -->
@@ -1385,12 +1385,19 @@ function rEst(b,btn){
   btn.style.display='none';
   b.innerHTML=`<div class="ob-tit">¿Tu estilo?</div><div class="ob-sub">Toca el que más te represente.</div><div class="eg">${Object.entries(ESTILOS).map(([k,e])=>`<div class="ec" onclick="selEst('${k}')"><img src="${FOTOS_ESTILO[k]}" alt="${e.n}" loading="eager"><div class="ec-ov"><div class="ec-nom">${e.n}</div><div class="ec-mrc">${e.m}</div></div><div class="ec-chk">✓</div></div>`).join('')}</div>`;
 }
-function renderPaso(n){obP=n;const body=document.getElementById('obbody'),btn=document.getElementById('bsig'),bback=document.getElementById('bback');btn.classList.remove('on');if(bback)bback.style.display=n>0?'block':'none';for(let i=0;i<4;i++)document.getElementById('os'+i)?.classList.toggle('on',i<=n);[rNom,rEst,rInspo,rPiel,rPelo][n]?.call(null,body,btn);}
+function renderPaso(n){obP=n;const body=document.getElementById('obbody'),btn=document.getElementById('bsig'),bback=document.getElementById('bback');if(bback)bback.style.display=n>0?'block':'none';for(let i=0;i<4;i++)document.getElementById('os'+i)?.classList.toggle('on',i<=n);[rNom,rEst,rInspo,rPiel,rPelo][n]?.call(null,body,btn);}
 function volverPaso(){if(obP>0)renderPaso(obP-1);}
 function sigPaso(){
-  if(obP===0){const n=document.getElementById('inpN')?.value.trim();if(!n||n.length<2)return;const raw=n.split(' ')[0];window._nom=raw.charAt(0).toUpperCase()+raw.slice(1).toLowerCase();}
+  if(obP===0){
+    const n=document.getElementById('inpN')?.value.trim();
+    if(!n||n.length<2){document.getElementById('inpN')?.focus();return;}
+    const raw=n.split(' ')[0];
+    window._nom=raw.charAt(0).toUpperCase()+raw.slice(1).toLowerCase();
+  }
   const maxP=4;
-  obP<maxP?renderPaso(obP+1):finOb();
+  console.log('sigPaso obP='+obP+' maxP='+maxP);
+  if(obP>=maxP) finOb();
+  else renderPaso(obP+1);
 }
 function finOb(){
   const pal=calcPal(window._piel||'clara',window._pelo||'castaño');
